@@ -1,3 +1,5 @@
+#define NANOSVG_IMPLEMENTATION
+#include "nanosvg/nanosvg.h"
 #include "libslic3r/GCode.hpp"
 #include "libslic3r/Preset.hpp"
 #include "libslic3r/Config.hpp"
