@@ -372,6 +372,10 @@ public:
     // The operation may merge split triangles if they are being assigned the same color.
     void seed_fill_apply_on_triangles(EnforcerBlockerType new_state);
 
+    // Shift all non-NONE leaf triangle states >= threshold by delta.
+    // Used to renumber painted filament IDs after a filament slot is inserted or removed.
+    void shift_states_above(EnforcerBlockerType threshold, int delta);
+
 protected:
     // Triangle and info about how it's split.
     class Triangle {
