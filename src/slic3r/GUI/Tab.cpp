@@ -4366,14 +4366,7 @@ void TabFilament::toggle_options()
         toggle_line("pellet_flow_coefficient", is_pellet_printer);
         toggle_line("filament_diameter", !is_pellet_printer);
 
-        bool support_chamber_temp_control = printer_cfg.opt_bool("support_chamber_temp_control");
-        toggle_line("activate_chamber_temp_control", support_chamber_temp_control);
-        toggle_line("chamber_temperature", support_chamber_temp_control);
-
-        if (support_chamber_temp_control) {
-            bool activate_chamber_temp_control = m_config->opt_bool("activate_chamber_temp_control", 0);
-            toggle_option("chamber_temperature", activate_chamber_temp_control);
-        }
+        toggle_line("activate_chamber_temp_control", printer_cfg.opt_bool("support_chamber_temp_control"));
 
         std::string volumetric_speed_cos = m_config->opt_string("volumetric_speed_coefficients", 0u);
         bool enable_fit = volumetric_speed_cos != "0 0 0 0 0 0";
@@ -6914,10 +6907,10 @@ wxSizer* Tab::compatible_widget_create(wxWindow* parent, PresetDependencies &dep
         // Collect and set indices of depending_presets marked as compatible.
         wxArrayInt selections;
         auto *compatible_printers = dynamic_cast<const ConfigOptionStrings*>(m_config->option(deps.key_list));
-        if (compatible_printers != nullptr || !compatible_printers->values.empty())
+        if (compatible_printers != nullptr && !compatible_printers->values.empty())
             for (auto preset_name : compatible_printers->values)
                 for (size_t idx = 0; idx < presets.GetCount(); ++idx)
-                    if (presets[idx] == preset_name) {
+                    if (presets[idx] == from_u8(preset_name)) {
                         selections.Add(idx);
                         break;
                     }
