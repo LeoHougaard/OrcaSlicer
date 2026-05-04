@@ -1,12 +1,16 @@
 {
 	"type": "filament",
-	"name": "Generic PLA @Z-Bolt",
-	"inherits": "fdm_filament_pla",
-	"renamed_from": "Z-Bolt PLA",
+	"name": "Generic ABS HT @Z-Bolt Base",
+	"inherits": "Generic ABS @Z-Bolt Base",
+	"renamed_from": "Z-Bolt ABS HT",
 	"from": "system",
-	"setting_id": "GFSL100",
-	"filament_id": "GFL100",
-	"instantiation": "true",
+	"setting_id": "GFSL500",
+	"filament_id": "GFL500",
+	"instantiation": "false",
+	"description": "Use this filament profile to print big ABS models with chamber heating",
+	"chamber_temperatures": [
+		"60"
+	],
 	"compatible_printers": [
 		"Z-Bolt S300 0.4 nozzle",
 		"Z-Bolt S300 Dual 0.4 nozzle",
@@ -35,32 +39,5 @@
 		"Z-Bolt S800 Dual 0.8 nozzle",
 		"Z-Bolt S1000 0.8 nozzle",
 		"Z-Bolt S1000 Dual 0.8 nozzle"
-	],
-	"filament_max_volumetric_speed": [
-		"20"
-	],
-	"fan_min_speed": [
-		"100"
-	],
-	"full_fan_speed_layer": [
-		"4"
-	],
-	"hot_plate_temp": [
-		"60"
-	],
-	"hot_plate_temp_initial_layer": [
-		"60"
-	],
-	"nozzle_temperature": [
-		"225"
-	],
-	"nozzle_temperature_initial_layer": [
-		"225"
-	],
-	"textured_plate_temp": [
-		"60"
-	],
-	"textured_plate_temp_initial_layer": [
-		"60"
 	]
 }
