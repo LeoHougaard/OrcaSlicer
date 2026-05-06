@@ -277,7 +277,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
             // Spiral Vase forces different kind of slicing than the normal model:
             // In Spiral Vase mode, holes are closed and only the largest area contour is kept at each layer.
             // Therefore toggling the Spiral Vase on / off requires complete reslicing.
-            || opt_key == "spiral_mode") {
+            || opt_key == "spiral_mode"
+            || opt_key == "continuous_filament_mode") {
             osteps.emplace_back(posSlice);
         } else if (
                opt_key == "print_sequence"
@@ -1267,6 +1268,42 @@ StringObjectException Print::validate(StringObjectException *warning, Polygons* 
             warningtemp.is_warning = true;
             *warning               = warningtemp;
         }
+    }
+
+    if (m_config.continuous_filament_mode) {
+        if (m_config.spiral_mode)
+            return {L("Continuous filament mode cannot be combined with spiral vase mode."), nullptr, "continuous_filament_mode"};
+        if (m_objects.size() != 1 || m_objects.front()->instances().size() != 1)
+            return {L("Continuous filament mode supports exactly one object with one instance."), nullptr, "continuous_filament_mode"};
+        if (m_config.print_sequence == PrintSequence::ByObject)
+            return {L("Continuous filament mode does not support by-object print sequence."), nullptr, "print_sequence"};
+        if (!m_config.use_relative_e_distances)
+            return {L("Continuous filament mode requires relative extruder addressing."), nullptr, "use_relative_e_distances"};
+        if (std::any_of(m_config.z_hop.values.begin(), m_config.z_hop.values.end(), [](double hop) { return hop > EPSILON; }))
+            return {L("Continuous filament mode does not support Z-hop."), nullptr, "z_hop"};
+        if (std::any_of(m_config.retract_when_changing_layer.values.begin(), m_config.retract_when_changing_layer.values.end(), [](bool enabled) { return enabled; }))
+            return {L("Continuous filament mode does not support retraction on layer change."), nullptr, "retract_when_changing_layer"};
+        if (m_config.enable_prime_tower || this->has_wipe_tower())
+            return {L("Continuous filament mode does not support prime/wipe tower."), nullptr, "enable_prime_tower"};
+        if (m_config.timelapse_type == TimelapseType::tlSmooth || !m_config.time_lapse_gcode.value.empty())
+            return {L("Continuous filament mode does not support timelapse moves."), nullptr, "timelapse_type"};
+        if (m_config.manual_filament_change)
+            return {L("Continuous filament mode does not support manual filament changes."), nullptr, "manual_filament_change"};
+        if (this->extruders().size() > 1)
+            return {L("Continuous filament mode supports one used extruder only."), nullptr, "continuous_filament_mode"};
+        if (default_region_config().sparse_infill_density.value > 0 && default_region_config().sparse_infill_pattern.value != InfillPattern::ipZigZag)
+            return {L("Continuous filament mode V1 requires zig-zag sparse infill."), nullptr, "sparse_infill_pattern"};
+        if (default_region_config().top_surface_pattern.value != InfillPattern::ipRectilinear ||
+            default_region_config().bottom_surface_pattern.value != InfillPattern::ipRectilinear ||
+            default_region_config().internal_solid_infill_pattern.value != InfillPattern::ipRectilinear)
+            return {L("Continuous filament mode V1 requires rectilinear top, bottom, and internal solid infill."), nullptr, "top_surface_pattern"};
+
+        const PrintObject *object = m_objects.front();
+        if (object->config().enable_support || object->has_support_material())
+            return {L("Continuous filament mode does not support supports."), object->model_object(), "enable_support"};
+        const auto all_regions = object->all_regions();
+        if (all_regions.size() > 1)
+            return {L("Continuous filament mode supports one material/print region only."), object->model_object(), "continuous_filament_mode"};
     }
 
     if (m_config.spiral_mode) {

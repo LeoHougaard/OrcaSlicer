@@ -924,6 +924,10 @@ std::vector<SurfaceFill> group_fills(const Layer &layer, LockRegionParam &lock_p
                     params.angle = calculate_infill_rotation_angle(layer.object(), layer.id(), region_config.infill_direction.value,
                                                                    region_config.sparse_infill_rotate_template.value);
                     params.fixed_angle = !region_config.sparse_infill_rotate_template.value.empty();
+                    if (layer.object()->print()->config().continuous_filament_mode) {
+                        params.angle = Geometry::deg2rad(region_config.infill_direction.value + (layer.id() % 2 == 0 ? 0.0 : 90.0));
+                        params.fixed_angle = true;
+                    }
                 } else {
                     params.angle = calculate_infill_rotation_angle(layer.object(), layer.id(), region_config.solid_infill_direction.value,
                                                                    region_config.solid_infill_rotate_template.value);

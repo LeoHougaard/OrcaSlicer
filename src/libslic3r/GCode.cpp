@@ -2481,6 +2481,8 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
 
     if (print.config().spiral_mode.value)
         m_spiral_vase = make_unique<SpiralVase>(print.config());
+    if (print.config().continuous_filament_mode.value)
+        m_continuous_filament = make_unique<ContinuousFilament>(print.config());
 
     if (print.config().max_volumetric_extrusion_rate_slope.value > 0){
     		m_pressure_equalizer = make_unique<PressureEqualizer>(print.config());
@@ -3585,13 +3587,19 @@ void GCode::process_layers(
         this->m_spiral_vase->set_max_xy_smoothing(max_xy_smoothing);
     }
     const auto spiral_mode = tbb::make_filter<LayerResult, LayerResult>(slic3r_tbb_filtermode::serial_in_order,
-        [&spiral_mode = *this->m_spiral_vase.get(), &layers_to_print](LayerResult in) -> LayerResult {
+        [spiral_mode = this->m_spiral_vase.get(), &layers_to_print](LayerResult in) -> LayerResult {
         	if (in.nop_layer_result)
                 return in;
                 
-            spiral_mode.enable(in.spiral_vase_enable);
+            spiral_mode->enable(in.spiral_vase_enable);
             bool last_layer = in.layer_id == layers_to_print.size() - 1;
-            return { spiral_mode.process_layer(std::move(in.gcode), last_layer), in.layer_id, in.spiral_vase_enable, in.cooling_buffer_flush};
+            return { spiral_mode->process_layer(std::move(in.gcode), last_layer), in.layer_id, in.spiral_vase_enable, in.cooling_buffer_flush};
+        });
+    const auto continuous_filament = tbb::make_filter<LayerResult, LayerResult>(slic3r_tbb_filtermode::serial_in_order,
+        [continuous_filament = this->m_continuous_filament.get()](LayerResult in) -> LayerResult {
+            if (in.nop_layer_result)
+                return in;
+            return { continuous_filament->process_layer(std::move(in.gcode)), in.layer_id, in.spiral_vase_enable, in.cooling_buffer_flush };
         });
     const auto pressure_equalizer = tbb::make_filter<LayerResult, LayerResult>(slic3r_tbb_filtermode::serial_in_order,
         [pressure_equalizer = this->m_pressure_equalizer.get()](LayerResult in) -> LayerResult {
@@ -3634,7 +3642,11 @@ void GCode::process_layers(
     });
 
     // The pipeline elements are joined using const references, thus no copying is performed.
-    if (m_spiral_vase && m_pressure_equalizer)
+    if (m_continuous_filament && m_pressure_equalizer)
+        tbb::parallel_pipeline(12, generator & continuous_filament & pressure_equalizer & cooling & fan_mover & output);
+    else if (m_continuous_filament)
+        tbb::parallel_pipeline(12, generator & continuous_filament & cooling & fan_mover & output);
+    else if (m_spiral_vase && m_pressure_equalizer)
         tbb::parallel_pipeline(12, generator & spiral_mode & pressure_equalizer & cooling & fan_mover & output);
     else if (m_spiral_vase)
     	tbb::parallel_pipeline(12, generator & spiral_mode & cooling & fan_mover & output);
@@ -3686,12 +3698,18 @@ void GCode::process_layers(
         this->m_spiral_vase->set_max_xy_smoothing(max_xy_smoothing);
     }
     const auto spiral_mode = tbb::make_filter<LayerResult, LayerResult>(slic3r_tbb_filtermode::serial_in_order,
-        [&spiral_mode = *this->m_spiral_vase.get(), &layers_to_print](LayerResult in)->LayerResult {
+        [spiral_mode = this->m_spiral_vase.get(), &layers_to_print](LayerResult in)->LayerResult {
             if (in.nop_layer_result)
                 return in;
-            spiral_mode.enable(in.spiral_vase_enable);
+            spiral_mode->enable(in.spiral_vase_enable);
             bool last_layer = in.layer_id == layers_to_print.size() - 1;
-            return { spiral_mode.process_layer(std::move(in.gcode), last_layer), in.layer_id, in.spiral_vase_enable, in.cooling_buffer_flush };
+            return { spiral_mode->process_layer(std::move(in.gcode), last_layer), in.layer_id, in.spiral_vase_enable, in.cooling_buffer_flush };
+        });
+    const auto continuous_filament = tbb::make_filter<LayerResult, LayerResult>(slic3r_tbb_filtermode::serial_in_order,
+        [continuous_filament = this->m_continuous_filament.get()](LayerResult in) -> LayerResult {
+            if (in.nop_layer_result)
+                return in;
+            return { continuous_filament->process_layer(std::move(in.gcode)), in.layer_id, in.spiral_vase_enable, in.cooling_buffer_flush };
         });
     const auto pressure_equalizer = tbb::make_filter<LayerResult, LayerResult>(slic3r_tbb_filtermode::serial_in_order,
         [pressure_equalizer = this->m_pressure_equalizer.get()](LayerResult in) -> LayerResult {
@@ -3732,7 +3750,11 @@ void GCode::process_layers(
     });
 
     // The pipeline elements are joined using const references, thus no copying is performed.
-    if (m_spiral_vase && m_pressure_equalizer)
+    if (m_continuous_filament && m_pressure_equalizer)
+        tbb::parallel_pipeline(12, generator & continuous_filament & pressure_equalizer & cooling & fan_mover & output);
+    else if (m_continuous_filament)
+        tbb::parallel_pipeline(12, generator & continuous_filament & cooling & fan_mover & output);
+    else if (m_spiral_vase && m_pressure_equalizer)
         tbb::parallel_pipeline(12, generator & spiral_mode & pressure_equalizer & cooling & fan_mover & output);
     else if (m_spiral_vase)
     	tbb::parallel_pipeline(12, generator & spiral_mode & cooling & fan_mover & output);
@@ -4409,6 +4431,13 @@ LayerResult GCode::process_layer(
         // If we're going to apply spiralvase to this layer, disable loop clipping.
         m_enable_loop_clipping = !enable;
     }
+    if (m_continuous_filament) {
+        if (layers.size() != 1 || support_layer != nullptr)
+            throw Slic3r::SlicingError(_(L("Continuous filament mode cannot print supports or multiple layer groups.")), layer.object()->id().id);
+        if (layer.lslices.size() != 1)
+            throw Slic3r::SlicingError(_(L("Continuous filament mode cannot print layers with separate islands.")), layer.object()->id().id);
+        m_enable_loop_clipping = false;
+    }
 
     std::string gcode;
     assert(is_decimal_separator_point()); // for the sprintfs
@@ -4447,7 +4476,7 @@ LayerResult GCode::process_layer(
 
     bool need_insert_timelapse_gcode_for_traditional = false;
     if ((!m_wipe_tower || !m_wipe_tower->enable_timelapse_print()) && (is_BBL_Printer() || !m_config.time_lapse_gcode.value.empty())) {
-        need_insert_timelapse_gcode_for_traditional = ((is_i3_printer && !m_spiral_vase) || is_multi_extruder);
+        need_insert_timelapse_gcode_for_traditional = ((is_i3_printer && !m_spiral_vase && !m_continuous_filament) || is_multi_extruder);
     }
 
     bool has_insert_timelapse_gcode = false;
@@ -5619,7 +5648,7 @@ std::string GCode::extrude_loop(const ExtrusionLoop&        loop_ref,
 
     bool is_hole = (loop.loop_role() & elrHole) == elrHole;
 
-    if (m_config.spiral_mode && !is_hole) {
+    if ((m_config.spiral_mode || m_config.continuous_filament_mode) && !is_hole) {
         // if spiral vase, we have to ensure that all contour are in the same orientation.
         if (m_config.wall_direction == WallDirection::CounterClockwise)
             loop.make_counter_clockwise();
@@ -5634,7 +5663,7 @@ std::string GCode::extrude_loop(const ExtrusionLoop&        loop_ref,
     // or, if `start_point` is specified, start the loop at point closest to it
     Point last_pos = start_point ? *start_point : this->last_pos();
     float seam_overhang = std::numeric_limits<float>::lowest();
-    if (!m_config.spiral_mode && description == "perimeter") {
+    if (!m_config.spiral_mode && !m_config.continuous_filament_mode && description == "perimeter") {
         assert(m_layer != nullptr);
         m_seam_placer.place_seam(m_layer, loop, last_pos, seam_overhang);
     } else
@@ -5643,6 +5672,7 @@ std::string GCode::extrude_loop(const ExtrusionLoop&        loop_ref,
     const auto seam_scarf_type = m_config.seam_slope_type.value;
     bool enable_seam_slope = ((seam_scarf_type == SeamScarfType::External && !is_hole) || seam_scarf_type == SeamScarfType::All) &&
         !m_config.spiral_mode &&
+        !m_config.continuous_filament_mode &&
         (loop.role() == erExternalPerimeter || (loop.role() == erPerimeter && m_config.seam_slope_inner_walls)) &&
         layer_id() > 0;
     const auto nozzle_diameter = EXTRUDER_CONFIG(nozzle_diameter);
@@ -6843,8 +6873,8 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                 apply_role_based_fan_speed();
             }
             // BBS: use G1 if not enable arc fitting or has no arc fitting result or in spiral_mode mode or we are doing sloped extrusion
-            // Attention: G2 and G3 is not supported in spiral_mode mode
-            if (!m_config.enable_arc_fitting || path.polyline.fitting_result.empty() || m_config.spiral_mode || sloped != nullptr || path.z_contoured) {
+            // Attention: G2 and G3 is not supported in spiral/continuous filament modes
+            if (!m_config.enable_arc_fitting || path.polyline.fitting_result.empty() || m_config.spiral_mode || m_config.continuous_filament_mode || sloped != nullptr || path.z_contoured) {
                 double path_length = 0.;
                 double total_length = sloped == nullptr ? 0. : path.polyline.length() * SCALING_FACTOR;
                 double saved_z      = m_writer.get_position().z();
@@ -7556,7 +7586,7 @@ std::string GCode::retract(bool toolchange, bool is_last_retraction, LiftType li
         if (apply_instantly)
             gcode += m_writer.eager_lift(lift_type);
         else
-            gcode += m_writer.lazy_lift(lift_type, m_spiral_vase != nullptr);
+            gcode += m_writer.lazy_lift(lift_type, m_spiral_vase != nullptr || m_continuous_filament != nullptr);
     }
 
     return gcode;

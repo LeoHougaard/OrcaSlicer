@@ -67,6 +67,8 @@
 	"skirt_distance": "2",
 	"skirt_height": "1",
 	"spiral_mode": "0",
+	"continuous_filament_mode": "0",
+	"continuous_filament_connector_flow_ratio": "0.25",
 	"standby_temperature_delta": "-5",
 	"support_filament": "0",
 	"support_line_width": "0.42",

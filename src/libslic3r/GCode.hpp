@@ -13,6 +13,7 @@
 #include "GCode/FanMover.hpp"
 #include "GCode/RetractWhenCrossingPerimeters.hpp"
 #include "GCode/SpiralVase.hpp"
+#include "GCode/ContinuousFilament.hpp"
 #include "GCode/ToolOrdering.hpp"
 #include "GCode/WipeTower.hpp"
 #include "GCode/SeamPlacer.hpp"
@@ -600,6 +601,7 @@ private:
 
     std::unique_ptr<CoolingBuffer>      m_cooling_buffer;
     std::unique_ptr<SpiralVase>         m_spiral_vase;
+    std::unique_ptr<ContinuousFilament> m_continuous_filament;
 
     std::unique_ptr<PressureEqualizer>  m_pressure_equalizer;
     

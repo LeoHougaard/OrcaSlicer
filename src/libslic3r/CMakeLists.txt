@@ -230,6 +230,8 @@ set(lisbslic3r_sources
     GCode/PressureEqualizer.hpp
     GCode/PrintExtents.cpp
     GCode/PrintExtents.hpp
+    GCode/ContinuousFilament.cpp
+    GCode/ContinuousFilament.hpp
     GCodeReader.cpp
     GCodeReader.hpp
     GCode/RetractWhenCrossingPerimeters.cpp

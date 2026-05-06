@@ -5471,6 +5471,22 @@ void PrintConfigDef::init_fff_params()
     def->mode = comSimple;
     def->set_default_value(new ConfigOptionBool(false));
 
+    def = this->add("continuous_filament_mode", coBool);
+    def->label = L("Continuous filament");
+    def->tooltip = L("Prints the model body as one uninterrupted extrusion path. "
+                     "This specialty mode is intended for models designed for continuous printing and does not support "
+                     "separate islands, supports, material changes, wipe tower, or timelapse moves.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("continuous_filament_connector_flow_ratio", coFloat);
+    def->label = L("Continuous filament connector flow");
+    def->tooltip = L("Flow ratio used when continuous filament mode converts internal travel moves into low-flow connector extrusions.");
+    def->min = 0;
+    def->max = 1;
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionFloat(0.25));
+
     def = this->add("spiral_mode_smooth", coBool);
     def->label = L("Smooth Spiral");
     def->tooltip = L("Smooth Spiral smooths out X and Y moves as well, "
@@ -9919,6 +9935,25 @@ std::map<std::string, std::string> validate(const FullPrintConfig &cfg, bool und
             error_message.emplace("enforce_support_layers", L("Invalid value when spiral vase mode is enabled: ") + std::to_string(cfg.enforce_support_layers));
             //return "Spiral vase mode is not compatible with support";
         }
+    }
+
+    if (cfg.continuous_filament_mode && under_cli) {
+        if (cfg.spiral_mode)
+            error_message.emplace("spiral_mode", L("Invalid value when continuous filament mode is enabled"));
+        if (!cfg.use_relative_e_distances)
+            error_message.emplace("use_relative_e_distances", L("Continuous filament mode requires relative extruder addressing"));
+        if (std::any_of(cfg.z_hop.values.begin(), cfg.z_hop.values.end(), [](double hop) { return hop > EPSILON; }))
+            error_message.emplace("z_hop", L("Continuous filament mode does not support Z-hop"));
+        if (std::any_of(cfg.retract_when_changing_layer.values.begin(), cfg.retract_when_changing_layer.values.end(), [](bool enabled) { return enabled; }))
+            error_message.emplace("retract_when_changing_layer", L("Continuous filament mode does not support retraction on layer change"));
+        if (cfg.enable_support)
+            error_message.emplace("enable_support", L("Continuous filament mode does not support supports"));
+        if (cfg.enable_prime_tower)
+            error_message.emplace("enable_prime_tower", L("Continuous filament mode does not support prime/wipe tower"));
+        if (cfg.timelapse_type == TimelapseType::tlSmooth || !cfg.time_lapse_gcode.value.empty())
+            error_message.emplace("timelapse_type", L("Continuous filament mode does not support timelapse moves"));
+        if (cfg.manual_filament_change)
+            error_message.emplace("manual_filament_change", L("Continuous filament mode does not support filament changes"));
     }
 
     // extrusion widths
