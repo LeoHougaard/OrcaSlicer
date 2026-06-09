@@ -7,12 +7,9 @@ param(
     [string]$Generator = "Visual Studio 17 2022",
     [string]$Platform = "x64",
     [string]$OrcaExe = "",
+    [string]$DataDir = "",
     [string]$Python = "python",
-    [string[]]$Inputs = @(
-        "tests\data\20mm_cube.obj",
-        "tests\data\cube_with_hole.obj",
-        "tests\data\two_hollow_squares.obj"
-    ),
+    [string[]]$Inputs = @(),
     [switch]$Loop,
     [int]$MaxIterations = 1,
     [int]$SleepSeconds = 20,
@@ -163,20 +160,59 @@ function Run-Build {
     }
 }
 
+function Find-TestExe {
+    $candidates = @(
+        (Join-Path $BuildDir "tests\fff_print\$Config\fff_print_tests.exe"),
+        (Join-Path $BuildDir "tests\fff_print\fff_print_tests.exe"),
+        (Join-Path $BuildDir "$Config\fff_print_tests.exe"),
+        (Join-Path $BuildDir "fff_print_tests.exe")
+    )
+    foreach ($candidate in $candidates) {
+        if (Test-Path $candidate) {
+            return (Resolve-Path $candidate).Path
+        }
+    }
+    return ""
+}
+
 function Run-Tests {
     if ($SkipTests) {
         Add-Status "SKIP tests"
         return
     }
-    & ctest --test-dir $BuildDir -C $Config -R "^fff_print" --output-on-failure
-    if ($LASTEXITCODE -ne 0) {
-        throw "fff_print ctest failed with exit code $LASTEXITCODE"
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $ctestOutput = & ctest --test-dir $BuildDir -C $Config -R "^fff_print" --output-on-failure 2>&1
+        $ctestExit = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+    $ctestOutput | ForEach-Object { Add-Status "ctest: $_" }
+    if ($ctestExit -ne 0) {
+        throw "fff_print ctest failed with exit code $ctestExit"
+    }
+    if (($ctestOutput -join "`n") -notmatch "(?m)^\s*Start\s+\d+:") {
+        $testExe = Find-TestExe
+        if ([string]::IsNullOrWhiteSpace($testExe)) {
+            throw "ctest found no fff_print tests and fff_print_tests.exe was not found"
+        }
+        Add-Status "ctest found no fff_print tests; running $testExe directly"
+        & $testExe
+        if ($LASTEXITCODE -ne 0) {
+            throw "fff_print_tests.exe failed with exit code $LASTEXITCODE"
+        }
     }
 }
-
 function Run-SliceAndAnalyze([string]$RunDir) {
     if ($SkipSlice) {
         Add-Status "SKIP slice"
+        return
+    }
+    if ($Inputs.Count -eq 0) {
+        Add-Status "SKIP slice: no .3mf inputs supplied. Pass -Inputs C:\path\to\project.3mf for end-to-end validation."
         return
     }
     $exe = Find-OrcaExe
@@ -195,7 +231,12 @@ function Run-SliceAndAnalyze([string]$RunDir) {
         New-Item -ItemType Directory -Force $inputRunDir | Out-Null
 
         Add-Status "Slice $inputFile"
-        & $exe --slice 1 --outputdir $inputRunDir $inputPath
+        $sliceArgs = @("--slice", "1", "--outputdir", $inputRunDir)
+        if (![string]::IsNullOrWhiteSpace($DataDir)) {
+            $sliceArgs += @("--datadir", $DataDir)
+        }
+        $sliceArgs += $inputPath
+        & $exe @sliceArgs
         if ($LASTEXITCODE -ne 0) {
             throw "slice failed for $inputFile with exit code $LASTEXITCODE"
         }

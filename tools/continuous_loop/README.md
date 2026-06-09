@@ -57,3 +57,14 @@ The analyzer writes:
 Use the Fermat spiral paper for slicer-mode design direction: continuity, fewer starts/stops, low curvature, and systematic connection of sub-regions.
 
 Use the MDPI G-code accuracy paper only for verification: G-code-derived geometry and quantitative output checks.
+
+## Lean Voron Runtime Datadir
+
+The source tree should stay complete for builds, but loop runs can use a smaller runtime datadir focused on Voron profiles:
+
+```powershell
+.\tools\continuous_loop\create_lean_datadir.ps1 -Force
+.\tools\continuous_loop\run_continuous_loop.ps1 -SkipDepsBuild -DataDir .\artifacts\continuous-loop\lean-datadir -Inputs C:\path\to\continuous-mode-project.3mf
+```
+
+This copies shared runtime essentials plus `resources/profiles/Voron` and generic/custom filament sources into `artifacts/continuous-loop/lean-datadir`. It is meant to reduce CLI startup/profile loading noise, not replace the full source tree or dependency build.
