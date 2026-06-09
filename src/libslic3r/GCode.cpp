@@ -3370,8 +3370,9 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
         }
     }
     //BBS: the last retraction
-    // Write end commands to file.
-    file.write(this->retract(false, true));
+    // Continuous filament mode keeps the model-body path flowing through the final extrusion.
+    if (!m_config.continuous_filament_mode)
+        file.write(this->retract(false, true));
 
     // if needed, write the gcode_label_objects_end
     {
