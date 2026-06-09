@@ -4435,8 +4435,6 @@ LayerResult GCode::process_layer(
     if (m_continuous_filament) {
         if (layers.size() != 1 || support_layer != nullptr)
             throw Slic3r::SlicingError(_(L("Continuous filament mode cannot print supports or multiple layer groups.")), layer.object()->id().id);
-        if (layer.lslices.size() != 1)
-            throw Slic3r::SlicingError(_(L("Continuous filament mode cannot print layers with separate islands.")), layer.object()->id().id);
         m_enable_loop_clipping = false;
     }
 
