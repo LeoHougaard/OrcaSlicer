@@ -123,12 +123,26 @@ function Run-Configure {
         Add-Status "SKIP configure"
         return
     }
-    if (Test-Path (Join-Path $BuildDir "CMakeCache.txt")) {
+    $cachePath = Join-Path $BuildDir "CMakeCache.txt"
+    if (Test-Path $cachePath) {
+        $cacheText = Get-Content $cachePath -Raw
+        if ($cacheText -match '\$DepBuildDir') {
+            Add-Status "REMOVE stale configure cache with literal `$DepBuildDir"
+            Remove-Item -LiteralPath $cachePath -Force
+        }
+    }
+    if (Test-Path $cachePath) {
         Add-Status "SKIP configure: CMakeCache.txt already exists"
         return
     }
     New-Item -ItemType Directory -Force $BuildDir | Out-Null
-    & cmake -S $SourceRoot -B $BuildDir -G $Generator -A $Platform -DORCA_TOOLS=ON -DBUILD_TESTS=ON -DDEP_BUILD_DIR=$DepBuildDir -DCMAKE_BUILD_TYPE=$Config
+    $depPrefix = Join-Path $DepBuildDir "OrcaSlicer_dep\usr\local"
+    & cmake -S $SourceRoot -B $BuildDir -G $Generator -A $Platform `
+        "-DORCA_TOOLS=ON" `
+        "-DBUILD_TESTS=ON" `
+        "-DDEP_BUILD_DIR=$DepBuildDir" `
+        "-DCMAKE_PREFIX_PATH=$depPrefix" `
+        "-DCMAKE_BUILD_TYPE=$Config"
     if ($LASTEXITCODE -ne 0) {
         throw "cmake configure failed with exit code $LASTEXITCODE"
     }
