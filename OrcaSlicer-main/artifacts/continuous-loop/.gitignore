@@ -1,0 +1,4 @@
+runs/
+latest-metrics.json
+*.log
+manual-analysis/
