@@ -76,7 +76,7 @@ Prepare a user-exported `.orca_printer` bundle for continuous-mode CLI slicing:
 ```powershell
 .\tools\continuous_loop\prepare_continuous_voron_profile.ps1 -ProfileBundle "C:\Users\Leo\OneDrive\Projects\Voron 0.2 0.4 nozzle.orca_printer" -Force
 .\tools\continuous_loop\run_continuous_loop.ps1 -SkipDepsBuild -SkipConfigure -SkipBuild `
-  -LoadSettings ".\artifacts\continuous-loop\voron-profile\continuous\printer\Voron 0.2 0.4 nozzle.json", ".\artifacts\continuous-loop\voron-profile\continuous\process\0.20mm Standard 0.2.json" `
+  -LoadSettings ".\artifacts\continuous-loop\voron-profile\continuous\printer\Voron 0.2 0.4 nozzle.json;.\artifacts\continuous-loop\voron-profile\continuous\process\0.20mm Standard 0.2.json" `
   -LoadFilaments ".\artifacts\continuous-loop\voron-profile\continuous\filament\Voron Bambu PLA.json" `
   -Inputs ".\tests\data\20mm_cube.obj"
 ```
