@@ -28,6 +28,11 @@ static std::string format_g1_move(float x, float y, float z, float e, float f)
     return out.str();
 }
 
+static float connector_e_value(const GCodeReader &reader, float e_delta)
+{
+    return reader.get_config().use_relative_e_distances ? e_delta : reader.e() + e_delta;
+}
+
 std::string ContinuousFilament::process_layer(const std::string &gcode)
 {
     float layer_height = 0.f;
@@ -113,7 +118,7 @@ std::string ContinuousFilament::process_layer(const std::string &gcode)
         if (m_started && has_xy && dist_xy > EPSILON && !line.has_e()) {
             len += dist_xy;
             const float new_z = z + len / total_xy_len * layer_height;
-            const float e = connector_e_per_mm * dist_xy;
+            const float e = connector_e_value(reader, connector_e_per_mm * dist_xy);
             if (line.cmd_is("G0")) {
                 out += format_g1_move(line.new_X(reader), line.new_Y(reader), new_z, e, line.new_F(reader)) + '\n';
             } else {
