@@ -41,3 +41,40 @@ TEST_CASE("Continuous filament connectors use delta E in relative mode", "[Conti
 
     REQUIRE_THAT(processed, Catch::Matchers::ContainsSubstring("G1 X20.000 Y0.000 Z0.133 E0.25000 F9000"));
 }
+
+TEST_CASE("Continuous filament removes retract-only moves and preserves comments", "[ContinuousFilament]")
+{
+    ContinuousFilament continuous(continuous_filament_config(true));
+    const std::string gcode =
+        ";TYPE:Inner wall\n"
+        "G1 Z0.2\n"
+        "G1 X10 E1\n"
+        "G1 E-0.8 F1800\n"
+        "G1 E0.8 F1800\n"
+        "M204 S1000\n"
+        "G1 X20 E1\n";
+
+    const std::string processed = continuous.process_layer(gcode);
+
+    REQUIRE_THAT(processed, Catch::Matchers::ContainsSubstring(";TYPE:Inner wall\n"));
+    REQUIRE_THAT(processed, Catch::Matchers::ContainsSubstring("M204 S1000\n"));
+    REQUIRE_THAT(processed, !Catch::Matchers::ContainsSubstring("G1 E-0.8"));
+    REQUIRE_THAT(processed, !Catch::Matchers::ContainsSubstring("G1 E0.8"));
+}
+
+TEST_CASE("Continuous filament ramps Z across extrusion and connector distance", "[ContinuousFilament]")
+{
+    ContinuousFilament continuous(continuous_filament_config(true));
+    const std::string gcode =
+        "G1 Z0.2\n"
+        "G1 X10 E1\n"
+        "G0 X20 F9000\n"
+        "G1 X30 E1\n";
+
+    const std::string processed = continuous.process_layer(gcode);
+
+    REQUIRE_THAT(processed, Catch::Matchers::ContainsSubstring("G1 Z0.000"));
+    REQUIRE_THAT(processed, Catch::Matchers::ContainsSubstring("G1 Z0.067 X10 E1"));
+    REQUIRE_THAT(processed, Catch::Matchers::ContainsSubstring("G1 X20.000 Y0.000 Z0.133 E0.25000 F9000"));
+    REQUIRE_THAT(processed, Catch::Matchers::ContainsSubstring("G1 Z0.200 X30 E1"));
+}
