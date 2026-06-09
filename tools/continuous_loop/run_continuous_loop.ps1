@@ -10,6 +10,9 @@ param(
     [string]$DataDir = "",
     [string]$Python = "python",
     [string[]]$Inputs = @(),
+    [string[]]$LoadSettings = @(),
+    [string[]]$LoadFilaments = @(),
+    [string[]]$ExtraSliceArgs = @(),
     [switch]$Loop,
     [int]$MaxIterations = 1,
     [int]$SleepSeconds = 20,
@@ -235,6 +238,15 @@ function Run-SliceAndAnalyze([string]$RunDir) {
         if (![string]::IsNullOrWhiteSpace($DataDir)) {
             $sliceArgs += @("--datadir", $DataDir)
         }
+        if ($LoadSettings.Count -gt 0) {
+            $sliceArgs += @("--load-settings", ($LoadSettings -join ";"))
+        }
+        if ($LoadFilaments.Count -gt 0) {
+            $sliceArgs += @("--load-filaments", ($LoadFilaments -join ";"))
+        }
+        if ($ExtraSliceArgs.Count -gt 0) {
+            $sliceArgs += $ExtraSliceArgs
+        }
         $sliceArgs += $inputPath
         & $exe @sliceArgs
         if ($LASTEXITCODE -ne 0) {
@@ -242,11 +254,16 @@ function Run-SliceAndAnalyze([string]$RunDir) {
         }
 
         $gcode = Join-Path $inputRunDir "plate_1.gcode"
-        if (!(Test-Path $gcode)) {
-            $found = Get-ChildItem -Path $inputRunDir -Recurse -Filter "*.gcode" | Select-Object -First 1
+        for ($attempt = 0; $attempt -lt 20; $attempt++) {
+            if (Test-Path $gcode) {
+                break
+            }
+            $found = Get-ChildItem -Path $inputRunDir -Recurse -Filter "*.gcode" -ErrorAction SilentlyContinue | Select-Object -First 1
             if ($found) {
                 $gcode = $found.FullName
+                break
             }
+            Start-Sleep -Milliseconds 250
         }
         if (!(Test-Path $gcode)) {
             throw "slice completed but no G-code was found in $inputRunDir"

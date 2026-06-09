@@ -68,3 +68,17 @@ The source tree should stay complete for builds, but loop runs can use a smaller
 ```
 
 This copies shared runtime essentials plus `resources/profiles/Voron` and generic/custom filament sources into `artifacts/continuous-loop/lean-datadir`. It is meant to reduce CLI startup/profile loading noise, not replace the full source tree or dependency build.
+
+## Voron Continuous Fixture
+
+Prepare a user-exported `.orca_printer` bundle for continuous-mode CLI slicing:
+
+```powershell
+.\tools\continuous_loop\prepare_continuous_voron_profile.ps1 -ProfileBundle "C:\Users\Leo\OneDrive\Projects\Voron 0.2 0.4 nozzle.orca_printer" -Force
+.\tools\continuous_loop\run_continuous_loop.ps1 -SkipDepsBuild -SkipConfigure -SkipBuild `
+  -LoadSettings ".\artifacts\continuous-loop\voron-profile\continuous\printer\Voron 0.2 0.4 nozzle.json", ".\artifacts\continuous-loop\voron-profile\continuous\process\0.20mm Standard 0.2.json" `
+  -LoadFilaments ".\artifacts\continuous-loop\voron-profile\continuous\filament\Voron Bambu PLA.json" `
+  -Inputs ".\tests\data\20mm_cube.obj"
+```
+
+The helper keeps the user printer/process/filament baseline, then injects `continuous_filament_mode` and required V1 safety settings into the ignored test copy.

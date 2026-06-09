@@ -3,3 +3,4 @@ latest-metrics.json
 *.log
 manual-analysis/
 lean-datadir/
+voron-profile/

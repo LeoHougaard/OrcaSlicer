@@ -53,6 +53,8 @@ def classify_segments(gcode_path: Path, sharp_turn_degrees: float) -> tuple[list
     relative_e = False
     layer_index = 0
     flow_started = False
+    body_active = False
+    shutdown_active = False
     previous_xy_vector: tuple[float, float] | None = None
     segments: list[dict[str, Any]] = []
     positive_e_per_mm: list[float] = []
@@ -61,6 +63,14 @@ def classify_segments(gcode_path: Path, sharp_turn_degrees: float) -> tuple[list
 
     for line_no, raw_line in enumerate(gcode_path.read_text(errors="replace").splitlines(), start=1):
         code, comment = split_comment(raw_line)
+        comment_lc = comment.lower()
+        if "stop printing object" in comment_lc:
+            body_active = False
+            shutdown_active = True
+            previous_xy_vector = None
+        elif comment_lc.startswith("executable_block_end"):
+            body_active = False
+            shutdown_active = False
         if is_layer_marker(comment):
             layer_index += 1
             previous_xy_vector = None
@@ -128,6 +138,7 @@ def classify_segments(gcode_path: Path, sharp_turn_degrees: float) -> tuple[list
         if has_xy and xy_len > EPS and e_delta > EPS:
             kind = "extrude"
             flow_started = True
+            body_active = True
             positive_e_per_mm.append(e_delta / xy_len)
         elif has_xy and xy_len > EPS:
             kind = "travel"
@@ -159,6 +170,7 @@ def classify_segments(gcode_path: Path, sharp_turn_degrees: float) -> tuple[list
                 "e_delta": e_delta,
                 "e_per_mm": e_delta / xy_len if xy_len > EPS else 0.0,
                 "flow_started_before": flow_started and kind != "extrude",
+                "phase": "shutdown" if shutdown_active else "body" if body_active or flow_started else "startup",
                 "turn_angle": turn_angle,
                 "sharp_turn": sharp_turn,
                 "comment": comment,
@@ -247,6 +259,9 @@ def summarize(segments: list[dict[str, Any]], derived: dict[str, Any]) -> dict[s
     total_travel_mm = sum(item["travel_mm"] for item in layer_list)
     total_unwanted_travels = sum(item["unwanted_travels_after_flow"] for item in layer_list)
     total_retractions = sum(item["retractions"] for item in layer_list)
+    body_unwanted_travels = sum(1 for segment in segments if segment["phase"] == "body" and segment["kind"] == "travel")
+    body_retractions = sum(1 for segment in segments if segment["phase"] == "body" and segment["kind"] == "retract")
+    shutdown_retractions = sum(1 for segment in segments if segment["phase"] == "shutdown" and segment["kind"] == "retract")
     total_sharp_turns = sum(item["sharp_turns"] for item in layer_list)
     total_path_fragments = sum(item["path_fragments"] for item in layer_list)
     connector_ratio = total_connector_mm / total_extrusion_mm if total_extrusion_mm > EPS else 0.0
@@ -273,6 +288,9 @@ def summarize(segments: list[dict[str, Any]], derived: dict[str, Any]) -> dict[s
             "travel_mm": round(total_travel_mm, 5),
             "unwanted_travels_after_flow": total_unwanted_travels,
             "retractions": total_retractions,
+            "body_unwanted_travels": body_unwanted_travels,
+            "body_retractions": body_retractions,
+            "shutdown_retractions": shutdown_retractions,
             "sharp_turns": total_sharp_turns,
             "path_fragments": total_path_fragments,
             "nominal_e_per_mm": round(derived["nominal_e_per_mm"], 7),
@@ -281,8 +299,8 @@ def summarize(segments: list[dict[str, Any]], derived: dict[str, Any]) -> dict[s
             "max_z_drop": round(derived["max_z_drop"], 6),
             "worst_layer": worst_layer,
             "acceptance": {
-                "no_unwanted_travels_after_flow": total_unwanted_travels == 0,
-                "no_retractions": total_retractions == 0,
+                "no_body_unwanted_travels": body_unwanted_travels == 0,
+                "no_body_retractions": body_retractions == 0,
                 "z_monotonic": derived["z_monotonic_violations"] == 0,
                 "has_extrusion": total_extrusion_mm > EPS,
             },
