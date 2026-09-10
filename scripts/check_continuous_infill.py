@@ -11,6 +11,7 @@ import sys
 import time
 
 from check_continuous_gcode import check
+from check_continuous_crossings import check as check_crossings
 from check_continuous_generalization import rectangle, solid, circle
 
 
@@ -44,6 +45,8 @@ def run(executable, options_path, output):
         try:
             assert process.returncode == 0, "Native slicing failed"
             result.update(check(gcode))
+            result["same_height_crossings"] = check_crossings(gcode)["conflicts"]
+            assert result["same_height_crossings"] == 0, "Extrusion crosses or retraces a deposited path"
             layers = json.loads(Path(str(gcode) + ".json").read_text())["layers"]
             voids = [layer["intentional_void_area"] for layer in layers]
             assert all(value < 1e-5 for value in voids[:3] + voids[-3:]), "Shells contain sparse voids"

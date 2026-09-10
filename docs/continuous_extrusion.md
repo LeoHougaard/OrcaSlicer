@@ -25,7 +25,10 @@ remain holes; connectors must stay within the model's boundary tolerance.
 
 Use Orca's **Seam position**, **Staggered inner seams**, and seam painting to set
 preferred wall attachment positions. Here an attachment is where the route
-leaves a wall to print the interior. The planner uses Orca's seam placement
+leaves a wall to print the interior. Connections join neighboring contours
+through clear openings. Retained wall and infill paths remain uncrossed.
+An incoming layer connection that follows an edge replaces that part of the
+layer path so it is extruded once. The planner uses Orca's seam placement
 priorities, subject to a contained connection being possible. Layer ramps prefer
 wall material on sparse layers. Scarf seams and intentional seam gaps do not
 apply to an uninterrupted route.
@@ -40,8 +43,8 @@ apply to an uninterrupted route.
 | Planning resolution | Geometric approximation tolerance. Smaller values cost more slicing time. |
 | Boundary tolerance | Permitted bead excursion beyond the model boundary. |
 | Planning time budget | Total search seconds. Increase and reslice to continue cached candidates. |
-| Layer ramp length | Distance over which a layer transition rises in Z. |
-| Maximum layer connection | Maximum length of an extruding connection between adjacent layers. |
+| Layer ramp length | Maximum distance over which a layer transition rises in Z. Incoming connections rise immediately and reach the new height before crossing completed strokes. |
+| Maximum layer connection | Maximum length of an extruding connection between adjacent layers, within the combined outlines and boundary tolerance. |
 | Missing / excess material penalty | Relative weights for missing target material and repeated deposition. |
 | Omit unreachable material | Permit omission of disconnected or unprintably narrow material. Otherwise it is a slicing error. |
 
