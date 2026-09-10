@@ -577,6 +577,16 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig *config, co
     const bool gcf_is_marlin_firmware = gcflavor == GCodeFlavor::gcfMarlinFirmware;
     const bool gcf_is_klipper = gcflavor == GCodeFlavor::gcfKlipper;
 
+    const bool has_cbp =
+        (config->has("continuous_extrusion") && config->opt_bool("continuous_extrusion")) ||
+        (config->has("slicing_mode") &&
+         config->opt_enum<SlicingMode>("slicing_mode") == SlicingMode::ConstrainedBeadPlanner);
+    for (auto el : { "ce_flow_control", "ce_nominal_width", "ce_min_width", "ce_max_width", "ce_resolution", "ce_boundary_tolerance", "ce_search_time", "ce_ramp_length", "ce_max_connection", "ce_missing_weight", "ce_excess_weight", "ce_omit_unreachable" })
+        toggle_line(el, has_cbp);
+    const auto continuous_flow = config->opt_enum<ContinuousFlowControl>("ce_flow_control");
+    toggle_line("ce_volumetric_flow", has_cbp && continuous_flow == ContinuousFlowControl::Volumetric);
+    toggle_line("ce_filament_speed", has_cbp && continuous_flow == ContinuousFlowControl::Filament);
+
     bool have_volumetric_extrusion_rate_slope = config->option<ConfigOptionFloat>("max_volumetric_extrusion_rate_slope")->value > 0;
     float have_volumetric_extrusion_rate_slope_segment_length = config->option<ConfigOptionFloat>("max_volumetric_extrusion_rate_slope_segment_length")->value;
     toggle_field("enable_arc_fitting", !have_volumetric_extrusion_rate_slope);

@@ -4,6 +4,8 @@
 #include "BoundingBox.hpp"
 #include "Brim.hpp"
 #include "ClipperUtils.hpp"
+#include "ConstrainedBeadPlanner.hpp"
+#include "ContinuousPrint.hpp"
 #include "Extruder.hpp"
 #include "Flow.hpp"
 #include "Geometry/ConvexHull.hpp"
@@ -1266,6 +1268,9 @@ StringObjectException Print::validate(StringObjectException *warning, Polygons* 
     if (m_objects.empty())
         return {std::string()};
 
+    if (auto error = continuous_print_validation(*this); !error.empty())
+        return { error, nullptr, "continuous_extrusion" };
+
     if (extruders.empty())
         return { L("No extrusions under current settings.") };
 
@@ -2400,8 +2405,6 @@ void Print::process(long long *time_cost_with_cache, bool use_cache)
         }
     }
 
-
-
     if (this->set_started(psWipeTower)) {
         {
             std::vector<std::set<int>> geometric_unprintables(m_config.nozzle_diameter.size());
@@ -2578,6 +2581,8 @@ void Print::process(long long *time_cost_with_cache, bool use_cache)
                 obj->set_done(posSimplifySupportPath);
         }
     }
+
+    apply_continuous_print(*this, this->make_try_cancel());
 
     // BBS
     bool has_adaptive_layer_height = false;

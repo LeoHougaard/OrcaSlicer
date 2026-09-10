@@ -100,6 +100,12 @@ set(lisbslic3r_sources
     CommonDefs.hpp
     Config.cpp
     Config.hpp
+    ConstrainedBeadPlanner.cpp
+    ConstrainedBeadPlanner.hpp
+    ContinuousExtrusion.cpp
+    ContinuousExtrusion.hpp
+    ContinuousPrint.cpp
+    ContinuousPrint.hpp
     ContourZ.cpp
     CustomGCode.cpp
     CustomGCode.hpp

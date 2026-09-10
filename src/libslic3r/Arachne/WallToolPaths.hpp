@@ -31,6 +31,9 @@ public:
     float   wall_transition_filter_deviation;
     int     wall_distribution_count;
     bool    is_top_or_bottom_layer;
+    // Continuous solid filling may redistribute a center bead into its two
+    // neighbors to avoid an open-ended stroke. Ordinary Arachne is unchanged.
+    bool    prefer_closed_loops = false;
 
     coord_t wall_maximum_resolution = meshfix_maximum_resolution();
     coord_t wall_maximum_deviation  = meshfix_maximum_deviation();

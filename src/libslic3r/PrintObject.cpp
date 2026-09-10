@@ -1099,7 +1099,13 @@ bool PrintObject::invalidate_state_by_config_options(
     std::vector<PrintObjectStep> steps;
     bool invalidated = false;
     for (const t_config_option_key &opt_key : opt_keys) {
-        if (   opt_key == "brim_width"
+        if (opt_key == "ce_flow_control" || opt_key == "ce_volumetric_flow" || opt_key == "ce_filament_speed") {
+            invalidated |= m_print->invalidate_step(psGCodeExport);
+        } else if (opt_key == "continuous_extrusion" || opt_key.rfind("cbp_", 0) == 0 || opt_key.rfind("ce_", 0) == 0) {
+            if (opt_key != "ce_search_time")
+                continuous_job.reset();
+            steps.emplace_back(posPerimeters);
+        } else if (   opt_key == "brim_width"
             || opt_key == "brim_object_gap"
             || opt_key == "brim_use_efc_outline"
             || opt_key == "brim_type"
@@ -1469,6 +1475,8 @@ bool PrintObject::invalidate_state_by_config_options(
 
 bool PrintObject::invalidate_step(PrintObjectStep step)
 {
+    if (step == posSlice)
+        continuous_job.reset();
 	bool invalidated = Inherited::invalidate_step(step);
 
     // propagate to dependent steps

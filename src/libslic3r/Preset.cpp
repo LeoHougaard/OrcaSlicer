@@ -483,6 +483,17 @@ void Preset::normalize(DynamicPrintConfig &config)
         }
     }
 
+    if (config.has("slicing_mode") && config.has("continuous_extrusion")) {
+        const bool cbp_enabled =
+            config.opt_bool("continuous_extrusion") ||
+            config.opt_enum<SlicingMode>("slicing_mode") == SlicingMode::ConstrainedBeadPlanner;
+
+        if (cbp_enabled) {
+            config.set_key_value("continuous_extrusion", new ConfigOptionBool(true));
+            config.set_key_value("slicing_mode", new ConfigOptionEnum<SlicingMode>(SlicingMode::ConstrainedBeadPlanner));
+        }
+    }
+
     handle_legacy_sla(config);
 }
 
@@ -979,6 +990,43 @@ static std::vector<std::string> s_Preset_print_options{
     "spiral_starting_flow_ratio",
     "spiral_finishing_flow_ratio",
     "slicing_mode",
+    "continuous_extrusion",
+    "ce_nominal_width", "ce_min_width", "ce_max_width", "ce_filament_speed", "ce_flow_control", "ce_volumetric_flow",
+    "ce_resolution", "ce_boundary_tolerance", "ce_search_time", "ce_ramp_length",
+    "ce_max_connection", "ce_missing_weight", "ce_excess_weight", "ce_omit_unreachable",
+    "cbp_scope",
+    "cbp_debug",
+    "cbp_max_candidates",
+    "cbp_max_lookahead_depth",
+    "cbp_max_backtracks",
+    "cbp_layer_operation_budget",
+    "cbp_bead_model",
+    "cbp_collision_margin",
+    "cbp_coverage_margin",
+    "cbp_use_variable_width",
+    "cbp_min_width",
+    "cbp_max_width",
+    "cbp_check_containment",
+    "cbp_check_same_layer_collision",
+    "cbp_check_centerline_crossing",
+    "cbp_check_double_back",
+    "cbp_min_clearance",
+    "cbp_min_adjacent_overlap",
+    "cbp_max_adjacent_overlap",
+    "cbp_allow_junction_overlap",
+    "cbp_junction_overlap_radius",
+    "cbp_check_turns",
+    "cbp_min_segment_length",
+    "cbp_min_turn_radius",
+    "cbp_max_width_change_per_mm",
+    "cbp_penalize_sharp_turns",
+    "cbp_check_dead_ends",
+    "cbp_check_euler_feasibility",
+    "cbp_prevent_unreachable_regions",
+    "cbp_beam_width",
+    "cbp_topology_check_interval",
+    "cbp_check_support",
+    "cbp_bridge_mode_handling",
     "top_shell_layers",
     "top_shell_thickness",
     "top_surface_density",

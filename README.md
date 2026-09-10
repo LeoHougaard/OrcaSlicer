@@ -57,6 +57,8 @@ If you come across any of these in search results, please <b>report them</b> as 
   Use varied infill [patterns](https://www.orcaslicer.com/wiki/strength_settings_patterns) and accurate hole shapes for improved clarity.
 - **[Overhang](https://www.orcaslicer.com/wiki/quality_settings_overhangs) and [Support Optimization](https://www.orcaslicer.com/wiki#support-settings)**  
   Modify geometry for printable overhangs with precise support placement.
+- **[Continuous extrusion](docs/continuous_extrusion.md)**  
+  Experimental special mode for bounded bead-aware extrusion planning, exposed as a standalone toggle alongside other special print modes.
 - **[Granular Controls and Customization](https://www.orcaslicer.com/wiki#process-settings)**  
   Fine-tune print speed, layer height, pressure, and temperature with precision.
 - **Network Printer Support**  

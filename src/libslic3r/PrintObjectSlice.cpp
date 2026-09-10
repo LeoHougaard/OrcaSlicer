@@ -171,9 +171,16 @@ static std::vector<VolumeSlices> slice_volumes_inner(
     //Also has on influence on arc fitting which has default resolution 0.0125mm.
     params_base.resolution = print_config.resolution <= 0.001 ? 0.0f : 0.0025;
     switch (print_object_config.slicing_mode.value) {
-    case SlicingMode::Regular:    params_base.mode = MeshSlicingParams::SlicingMode::Regular; break;
-    case SlicingMode::EvenOdd:    params_base.mode = MeshSlicingParams::SlicingMode::EvenOdd; break;
-    case SlicingMode::CloseHoles: params_base.mode = MeshSlicingParams::SlicingMode::Positive; break;
+    case SlicingMode::Regular:
+    case SlicingMode::ConstrainedBeadPlanner:
+        params_base.mode = MeshSlicingParams::SlicingMode::Regular;
+        break;
+    case SlicingMode::EvenOdd:
+        params_base.mode = MeshSlicingParams::SlicingMode::EvenOdd;
+        break;
+    case SlicingMode::CloseHoles:
+        params_base.mode = MeshSlicingParams::SlicingMode::Positive;
+        break;
     }
 
     params_base.mode_below     = params_base.mode;

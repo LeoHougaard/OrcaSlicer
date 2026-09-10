@@ -307,9 +307,33 @@ CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(PrintOrder)
 static t_config_enum_values s_keys_map_SlicingMode {
     { "regular",        int(SlicingMode::Regular) },
     { "even_odd",       int(SlicingMode::EvenOdd) },
-    { "close_holes",    int(SlicingMode::CloseHoles) }
+    { "close_holes",    int(SlicingMode::CloseHoles) },
+    { "constrained_bead_planner", int(SlicingMode::ConstrainedBeadPlanner) }
 };
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(SlicingMode)
+
+static t_config_enum_values s_keys_map_ContinuousFlowControl {
+    {"automatic", int(ContinuousFlowControl::Automatic)},
+    {"volumetric", int(ContinuousFlowControl::Volumetric)},
+    {"filament", int(ContinuousFlowControl::Filament)},
+    {"process_speeds", int(ContinuousFlowControl::ProcessSpeeds)}
+};
+CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(ContinuousFlowControl)
+
+static t_config_enum_values s_keys_map_ConstrainedBeadPlannerScope {
+    { "perimeters_only",       int(ConstrainedBeadPlannerScope::PerimetersOnly) },
+    { "infill_only",           int(ConstrainedBeadPlannerScope::InfillOnly) },
+    { "perimeters_and_infill", int(ConstrainedBeadPlannerScope::PerimetersAndInfill) },
+    { "all_supported_roles",   int(ConstrainedBeadPlannerScope::AllSupportedRoles) },
+};
+CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(ConstrainedBeadPlannerScope)
+
+static t_config_enum_values s_keys_map_ConstrainedBeadPlannerBridgeModeHandling {
+    { "ignore",              int(ConstrainedBeadPlannerBridgeModeHandling::Ignore) },
+    { "fail_unsupported",    int(ConstrainedBeadPlannerBridgeModeHandling::FailUnsupported) },
+    { "check_simple",        int(ConstrainedBeadPlannerBridgeModeHandling::CheckSimple) },
+};
+CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(ConstrainedBeadPlannerBridgeModeHandling)
 
 static t_config_enum_values s_keys_map_SupportMaterialPattern {
     { "rectilinear",        smpRectilinear },
@@ -6030,16 +6054,357 @@ void PrintConfigDef::init_fff_params()
     def = this->add("slicing_mode", coEnum);
     def->label = L("Slicing Mode");
     def->category = L("Other");
-    def->tooltip = L("Use \"Even-odd\" for 3DLabPrint airplane models. Use \"Close holes\" to close all holes in the model.");
+    def->tooltip = L("Use \"Even-odd\" for 3DLabPrint airplane models. Use \"Close holes\" to close all holes in the model. Use \"Continuous extrusion\" to run the experimental constrained bead planner after regular mesh slicing.");
     def->enum_keys_map = &ConfigOptionEnum<SlicingMode>::get_enum_values();
     def->enum_values.push_back("regular");
     def->enum_values.push_back("even_odd");
     def->enum_values.push_back("close_holes");
+    // Kept for backward compatibility with projects and profiles saved before Continuous extrusion became a separate option.
+    def->enum_values.push_back("constrained_bead_planner");
     def->enum_labels.push_back(L("Regular"));
     def->enum_labels.push_back(L("Even-odd"));
     def->enum_labels.push_back(L("Close holes"));
+    def->enum_labels.push_back(L("Continuous extrusion"));
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionEnum<SlicingMode>(SlicingMode::Regular));
+
+    def = this->add("continuous_extrusion", coBool);
+    def->label = L("Continuous extrusion");
+    def->category = L("Other");
+    def->tooltip = L("Fill a solid object with one uninterrupted, variable-width extrusion route using standard Klipper G-code. Extrusion follows toolhead acceleration to preserve deposited volume. Unreachable material may be omitted; it is never reached by travel.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("ce_flow_control", coEnum);
+    def->label = L("Continuous flow control");
+    def->category = L("Other");
+    def->tooltip = L("Automatic chooses a common nominal flow from the layer's bead widths and feature speeds, subject to the filament's volumetric limit. Alternatively specify a target flow, a nominal input filament speed, or use normal process speeds. Speed, cooling, and printer limits still apply. Physical filament feed varies during acceleration on standard Klipper. Older projects retain their saved feed target.");
+    def->enum_keys_map = &ConfigOptionEnum<ContinuousFlowControl>::get_enum_values();
+    def->enum_values = {"automatic", "volumetric", "filament", "process_speeds"};
+    def->enum_labels = {L("Steady flow - automatic"), L("Steady flow - volumetric target"), L("Steady flow - filament target"), L("Normal process speeds")};
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionEnum<ContinuousFlowControl>(ContinuousFlowControl::Automatic));
+
+    struct ContinuousOption { const char *key; const char *label; const char *tooltip; const char *unit; double value; double min; double max; };
+    for (const auto &option : {
+        ContinuousOption {"ce_nominal_width", L("Preferred bead width"), L("Prefer this width while filling the part. Width varies between the minimum and maximum."), "mm", .42, .01, 10.},
+        ContinuousOption {"ce_min_width", L("Minimum bead width"), L("Smallest permitted bead width. Must be at least the layer height."), "mm", .30, .01, 10.},
+        ContinuousOption {"ce_max_width", L("Maximum bead width"), L("Largest permitted bead width. Wider beads require slower toolhead motion."), "mm", .80, .01, 10.},
+        ContinuousOption {"ce_filament_speed", L("Target filament feed"), L("Nominal incoming filament speed, converted to volumetric flow using the selected filament diameter. Motion and cooling limits may reduce it; acceleration changes physical feed."), "mm/s", .50, .001, 20.},
+        ContinuousOption {"ce_volumetric_flow", L("Target volumetric flow"), L("Requested continuous flow of incoming filament. The selected filament and printer motion limits still apply."), "mm³/s", 5., .01, 1000.},
+        ContinuousOption {"ce_resolution", L("Planning resolution"), L("Geometric approximation tolerance. Smaller values retain more detail and take longer to slice."), "mm", .025, .001, 1.},
+        ContinuousOption {"ce_boundary_tolerance", L("Boundary tolerance"), L("Maximum permitted bead excursion beyond the model boundary."), "mm", .05, 0., 2.},
+        ContinuousOption {"ce_search_time", L("Planning time budget"), L("Total search seconds for this object. Increase and slice again to continue retained candidates. Geometry changes restart the search. A candidate already running may finish after the deadline."), "s", 120., 1., 600.},
+        ContinuousOption {"ce_ramp_length", L("Layer ramp length"), L("Distance along the start of each layer over which Z rises. The ramp replaces a non-extruding layer change."), "mm", 10., .1, 100.},
+        ContinuousOption {"ce_max_connection", L("Maximum layer connection"), L("Maximum extruding connection distance between adjacent layers. Connections must stay inside both layers' boundary tolerances. If no connection fits, slicing stops instead of inserting travel."), "mm", 2., .01, 10.},
+        ContinuousOption {"ce_missing_weight", L("Missing material penalty"), L("Relative importance of missing material in candidate scoring. Higher values favor more complete filling."), "", 1., .01, 100.},
+        ContinuousOption {"ce_excess_weight", L("Excess material penalty"), L("Relative importance of repeated deposition in candidate scoring. Higher values favor less overfill."), "", 1., .01, 100.}
+    }) {
+        def = this->add(option.key, coFloat);
+        def->label = option.label;
+        def->tooltip = option.tooltip;
+        def->category = L("Other");
+        def->sidetext = option.unit;
+        def->mode = comAdvanced;
+        def->min = option.min;
+        def->max = option.max;
+        def->set_default_value(new ConfigOptionFloat(option.value));
+    }
+    def = this->add("ce_omit_unreachable", coBool);
+    def->label = L("Omit unreachable material");
+    def->category = L("Other");
+    def->tooltip = L("Leave narrow features and disconnected strokes unfilled when needed to preserve a single extrusion route. Missing material remains in the slice report. When disabled, these features cause a slicing error; travel is never a fallback.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("cbp_scope", coEnum);
+    def->label = L("Continuous extrusion scope");
+    def->category = L("Other");
+    def->tooltip = L("Select which generated extrusion roles are reordered and checked by continuous extrusion.");
+    def->enum_keys_map = &ConfigOptionEnum<ConstrainedBeadPlannerScope>::get_enum_values();
+    def->enum_values.push_back("perimeters_only");
+    def->enum_values.push_back("infill_only");
+    def->enum_values.push_back("perimeters_and_infill");
+    def->enum_values.push_back("all_supported_roles");
+    def->enum_labels.push_back(L("Perimeters only"));
+    def->enum_labels.push_back(L("Infill only"));
+    def->enum_labels.push_back(L("Perimeters and infill"));
+    def->enum_labels.push_back(L("All supported roles"));
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionEnum<ConstrainedBeadPlannerScope>(ConstrainedBeadPlannerScope::PerimetersAndInfill));
+
+    def = this->add("cbp_debug", coBool);
+    def->label = L("Continuous extrusion debug logging");
+    def->category = L("Other");
+    def->tooltip = L("Write additional continuous extrusion decisions and failure reasons to the application log.");
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("cbp_max_candidates", coInt);
+    def->label = L("Continuous extrusion max candidates");
+    def->category = L("Other");
+    def->tooltip = L("Maximum number of nearby extrusion candidates considered at each planner decision.");
+    def->min = 1;
+    def->max = 64;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionInt(8));
+
+    def = this->add("cbp_max_lookahead_depth", coInt);
+    def->label = L("Continuous extrusion lookahead depth");
+    def->category = L("Other");
+    def->tooltip = L("Optional bounded lookahead depth. Zero disables lookahead.");
+    def->min = 0;
+    def->max = 4;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionInt(0));
+
+    def = this->add("cbp_max_backtracks", coInt);
+    def->label = L("Continuous extrusion max backtracks");
+    def->category = L("Other");
+    def->tooltip = L("Reserved backtracking limit for future planner expansion. The MVP planner does not backtrack.");
+    def->min = 0;
+    def->max = 64;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionInt(0));
+
+    def = this->add("cbp_layer_operation_budget", coInt);
+    def->label = L("Continuous extrusion operation budget");
+    def->category = L("Other");
+    def->tooltip = L("Maximum number of planner checks per layer region before continuous extrusion fails the slice.");
+    def->min = 1;
+    def->max = 10000000;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionInt(20000));
+
+    def = this->add("cbp_bead_model", coBool);
+    def->label = L("Continuous extrusion bead model");
+    def->category = L("Other");
+    def->tooltip = L("Treat extrusion candidates as finite-width bead footprints for containment and collision checks.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("cbp_collision_margin", coFloat);
+    def->label = L("Continuous extrusion collision margin");
+    def->category = L("Other");
+    def->tooltip = L("Extra bead footprint margin used by collision checks.");
+    def->sidetext = L("mm");
+    def->min = 0;
+    def->max = 2;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionFloat(0.0));
+
+    def = this->add("cbp_coverage_margin", coFloat);
+    def->label = L("Continuous extrusion coverage margin");
+    def->category = L("Other");
+    def->tooltip = L("Small tolerance used by containment checks.");
+    def->sidetext = L("mm");
+    def->min = 0;
+    def->max = 2;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionFloat(0.02));
+
+    def = this->add("cbp_use_variable_width", coBool);
+    def->label = L("Continuous extrusion variable width");
+    def->category = L("Other");
+    def->tooltip = L("Allow existing variable-width extrusion entities to participate in continuous extrusion checks.");
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("cbp_min_width", coFloat);
+    def->label = L("Continuous extrusion minimum bead width");
+    def->category = L("Other");
+    def->tooltip = L("Reject candidate extrusion widths below this value. Zero disables this limit.");
+    def->sidetext = L("mm");
+    def->min = 0;
+    def->max = 10;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionFloat(0.0));
+
+    def = this->add("cbp_max_width", coFloat);
+    def->label = L("Continuous extrusion maximum bead width");
+    def->category = L("Other");
+    def->tooltip = L("Reject candidate extrusion widths above this value. Zero disables this limit.");
+    def->sidetext = L("mm");
+    def->min = 0;
+    def->max = 10;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionFloat(0.0));
+
+    def = this->add("cbp_check_containment", coBool);
+    def->label = L("Continuous extrusion check containment");
+    def->category = L("Other");
+    def->tooltip = L("Reject bead footprints that leave the printable region.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("cbp_check_same_layer_collision", coBool);
+    def->label = L("Continuous extrusion check same-layer collision");
+    def->category = L("Other");
+    def->tooltip = L("Reject candidates that collide with already accepted same-layer extrusion in the active continuous extrusion scope.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("cbp_check_centerline_crossing", coBool);
+    def->label = L("Continuous extrusion check centerline crossing");
+    def->category = L("Other");
+    def->tooltip = L("Reject non-local centerline crossings in candidate extrusion paths.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("cbp_check_double_back", coBool);
+    def->label = L("Continuous extrusion check double-back");
+    def->category = L("Other");
+    def->tooltip = L("Reject obvious local turnbacks in candidate centerlines.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("cbp_min_clearance", coFloat);
+    def->label = L("Continuous extrusion minimum clearance");
+    def->category = L("Other");
+    def->tooltip = L("Additional clearance required between non-local bead footprints.");
+    def->sidetext = L("mm");
+    def->min = 0;
+    def->max = 5;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionFloat(0.0));
+
+    def = this->add("cbp_min_adjacent_overlap", coPercent);
+    def->label = L("Continuous extrusion minimum adjacent overlap");
+    def->category = L("Other");
+    def->tooltip = L("Reserved minimum adjacent bead overlap rule. The MVP planner records the setting but does not enforce underfill.");
+    def->min = 0;
+    def->max = 100;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionPercent(0));
+
+    def = this->add("cbp_max_adjacent_overlap", coPercent);
+    def->label = L("Continuous extrusion maximum adjacent overlap");
+    def->category = L("Other");
+    def->tooltip = L("Maximum non-local bead overlap allowed before treating candidates as colliding.");
+    def->min = 0;
+    def->max = 100;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionPercent(35));
+
+    def = this->add("cbp_allow_junction_overlap", coBool);
+    def->label = L("Continuous extrusion allow junction overlap");
+    def->category = L("Other");
+    def->tooltip = L("Allow bead overlap near shared endpoints and junctions.");
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("cbp_junction_overlap_radius", coFloat);
+    def->label = L("Continuous extrusion junction overlap radius");
+    def->category = L("Other");
+    def->tooltip = L("Radius around path endpoints where junction overlap is allowed.");
+    def->sidetext = L("mm");
+    def->min = 0;
+    def->max = 5;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionFloat(0.12));
+
+    def = this->add("cbp_check_turns", coBool);
+    def->label = L("Continuous extrusion check turns");
+    def->category = L("Other");
+    def->tooltip = L("Enable stricter checks for short segments, sharp turns, and width changes.");
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("cbp_min_segment_length", coFloat);
+    def->label = L("Continuous extrusion minimum segment length");
+    def->category = L("Other");
+    def->tooltip = L("Reject candidate segments shorter than this length when turn checks are enabled.");
+    def->sidetext = L("mm");
+    def->min = 0;
+    def->max = 10;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionFloat(0.2));
+
+    def = this->add("cbp_min_turn_radius", coFloat);
+    def->label = L("Continuous extrusion minimum turn radius");
+    def->category = L("Other");
+    def->tooltip = L("Reserved minimum turn radius for future continuous extrusion turn modeling.");
+    def->sidetext = L("mm");
+    def->min = 0;
+    def->max = 10;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionFloat(0.0));
+
+    def = this->add("cbp_max_width_change_per_mm", coFloat);
+    def->label = L("Continuous extrusion max width change per mm");
+    def->category = L("Other");
+    def->tooltip = L("Reject width transitions above this rate when turn checks are enabled. Zero disables this limit.");
+    def->min = 0;
+    def->max = 20;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionFloat(0.0));
+
+    def = this->add("cbp_penalize_sharp_turns", coBool);
+    def->label = L("Continuous extrusion penalize sharp turns");
+    def->category = L("Other");
+    def->tooltip = L("Prefer smoother candidate paths when turn checks are enabled.");
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("cbp_check_dead_ends", coBool);
+    def->label = L("Continuous extrusion check dead ends");
+    def->category = L("Other");
+    def->tooltip = L("Enable lightweight bounded lookahead to avoid obvious dead ends.");
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("cbp_check_euler_feasibility", coBool);
+    def->label = L("Continuous extrusion check Euler feasibility");
+    def->category = L("Other");
+    def->tooltip = L("Reserved optional topology feasibility rule. Off by default.");
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("cbp_prevent_unreachable_regions", coBool);
+    def->label = L("Continuous extrusion prevent unreachable regions");
+    def->category = L("Other");
+    def->tooltip = L("Reserved optional reachability rule. Off by default.");
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("cbp_beam_width", coInt);
+    def->label = L("Continuous extrusion beam width");
+    def->category = L("Other");
+    def->tooltip = L("Reserved beam width for future bounded search. The MVP planner uses greedy width 1.");
+    def->min = 1;
+    def->max = 16;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionInt(1));
+
+    def = this->add("cbp_topology_check_interval", coInt);
+    def->label = L("Continuous extrusion topology check interval");
+    def->category = L("Other");
+    def->tooltip = L("Reserved interval for future topology checks.");
+    def->min = 1;
+    def->max = 10000;
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionInt(32));
+
+    def = this->add("cbp_check_support", coBool);
+    def->label = L("Continuous extrusion check support");
+    def->category = L("Other");
+    def->tooltip = L("Reserved support-aware deposition rule. Off by default.");
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("cbp_bridge_mode_handling", coEnum);
+    def->label = L("Continuous extrusion bridge handling");
+    def->category = L("Other");
+    def->tooltip = L("Choose how continuous extrusion treats bridge and overhang extrusion candidates.");
+    def->enum_keys_map = &ConfigOptionEnum<ConstrainedBeadPlannerBridgeModeHandling>::get_enum_values();
+    def->enum_values.push_back("ignore");
+    def->enum_values.push_back("fail_unsupported");
+    def->enum_values.push_back("check_simple");
+    def->enum_labels.push_back(L("Ignore"));
+    def->enum_labels.push_back(L("Fail unsupported"));
+    def->enum_labels.push_back(L("Check simple"));
+    def->mode = comDevelop;
+    def->set_default_value(new ConfigOptionEnum<ConstrainedBeadPlannerBridgeModeHandling>(ConstrainedBeadPlannerBridgeModeHandling::FailUnsupported));
 
     def = this->add("z_offset", coFloat);
     def->label = L("Z offset");
@@ -8274,6 +8639,8 @@ void PrintConfigDef::handle_legacy(t_config_option_key &opt_key, std::string &va
 // Don't convert single options here, implement such conversion in PrintConfigDef::handle_legacy() instead.
 void PrintConfigDef::handle_legacy_composite(DynamicPrintConfig &config)
 {
+    if (config.has("ce_filament_speed") && !config.has("ce_flow_control"))
+        config.set_key_value("ce_flow_control", new ConfigOptionEnum<ContinuousFlowControl>(ContinuousFlowControl::Filament));
     if (config.has("thumbnails")) {
         std::string extention;
         if (config.has("thumbnails_format")) {

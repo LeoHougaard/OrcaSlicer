@@ -1,0 +1,11 @@
+{
+  "nominal_width": 0.42,
+  "min_width": 0.30,
+  "max_width": 0.80,
+  "layer_height": 0.20,
+  "nozzle_diameter": 0.40,
+  "filament_diameter": 1.75,
+  "filament_speed": 0.50,
+  "boundary_tolerance": 0.05,
+  "resolution": 0.025
+}

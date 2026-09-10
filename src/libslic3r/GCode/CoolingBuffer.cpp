@@ -820,7 +820,8 @@ std::string CoolingBuffer::apply_layer_cooldown(
     };
 
     const char         *pos               = gcode.c_str();
-    int                 current_feedrate  = 0;
+    double              current_feedrate  = 0.;
+    const bool precise_feedrate = gcode.find(";_CONTINUOUS_EXTRUSION\n") != std::string::npos;
     change_extruder_set_fan(true);
 
     // Orca: Reduce set fan commands by deferring the GCodeWriter::set_fan calls. Inspired by SuperSlicer
@@ -904,13 +905,18 @@ std::string CoolingBuffer::apply_layer_cooldown(
             for (; end < line_end && *end != ';'; ++ end);
             // Find the 'F' word.
             const char *fpos            = strstr(line_start + 2, " F") + 2;
-            int         new_feedrate    = current_feedrate;
+            double      new_feedrate    = current_feedrate;
             // Modify the F word of the current G-code line.
             bool        modify          = false;
             // Remove the F word from the current G-code line.
             bool        remove          = false;
             assert(fpos != nullptr);
-            new_feedrate = line->slowdown ? int(floor(60. * line->feedrate + 0.5)) : atoi(fpos);
+            // Truncating F to an integer can discard a real speed reduction
+            // at a bead/ramp transition and exceed a continuous flow limit.
+            if (precise_feedrate)
+                new_feedrate = line->slowdown ? floor(60000. * line->feedrate) / 1000. : atof(fpos);
+            else
+                new_feedrate = line->slowdown ? int(floor(60. * line->feedrate + 0.5)) : atoi(fpos);
             if (new_feedrate == current_feedrate) {
                 // No need to change the F value.
                 if ((line->type & (CoolingLine::TYPE_ADJUSTABLE | CoolingLine::TYPE_EXTERNAL_PERIMETER | CoolingLine::TYPE_WIPE)) || line->length == 0.)
@@ -934,7 +940,10 @@ std::string CoolingBuffer::apply_layer_cooldown(
                     new_gcode.append(line_start, fpos - line_start);
                     current_feedrate = new_feedrate;
                     char buf[64];
-                    sprintf(buf, "%d", int(current_feedrate));
+                    if (precise_feedrate)
+                        sprintf(buf, "%.3f", current_feedrate);
+                    else
+                        sprintf(buf, "%d", int(current_feedrate));
                     new_gcode += buf;
                 } else {
                     // Remove the feedrate word.

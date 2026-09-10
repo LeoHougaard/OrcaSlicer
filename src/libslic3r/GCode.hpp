@@ -333,6 +333,7 @@ private:
         GCodeProcessor &m_processor;
     };
     void            _do_export(Print &print, GCodeOutputStream &file, ThumbnailsGeneratorCallback thumbnail_cb);
+    void            export_continuous_print(Print &print, GCodeOutputStream &file);
 
     static std::vector<LayerToPrint>        		                   collect_layers_to_print(const PrintObject &object);
     static std::vector<std::pair<coordf_t, std::vector<LayerToPrint>>> collect_layers_to_print(const Print &print);
@@ -641,6 +642,8 @@ private:
     unsigned int m_toolchange_count;
     coordf_t m_nominal_z;
     bool m_need_change_layer_lift_z = false;
+    bool m_continuous_export = false;
+    double m_continuous_flow_limit = 0.;
     int m_start_gcode_filament = -1;
     std::string m_filament_instances_code;
 

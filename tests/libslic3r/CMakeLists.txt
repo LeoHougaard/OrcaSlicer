@@ -9,6 +9,8 @@ add_executable(${_TEST_NAME}_tests
     test_bambu_networking.cpp
     test_clipper_offset.cpp
     test_clipper_utils.cpp
+    test_constrained_bead_planner.cpp
+    test_continuous_extrusion.cpp
     test_config.cpp
     test_preset_bundle_loading.cpp
     test_elephant_foot_compensation.cpp

@@ -31,7 +31,8 @@ public:
         coord_t max_bead_count = 0,
         coord_t outer_wall_offset = 0,
         int inward_distributed_center_wall_count = 2,
-        double minimum_variable_line_width = 0.5
+        double minimum_variable_line_width = 0.5,
+        bool prefer_closed_loops = false
     );
 };
 

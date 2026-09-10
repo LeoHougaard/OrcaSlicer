@@ -29,6 +29,7 @@
 namespace Slic3r {
 
 class GCode;
+struct ContinuousPrintJob;
 class Layer;
 class ModelObject;
 class Print;
@@ -331,6 +332,7 @@ public:
 
     // Whoever will get a non-const pointer to PrintObject will be able to modify its layers.
     LayerPtrs&                   layers()               { return m_layers; }
+    std::shared_ptr<ContinuousPrintJob> continuous_job;
     SupportLayerPtrs&            support_layers()       { return m_support_layers; }
 
     template<typename PolysType>

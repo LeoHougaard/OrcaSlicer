@@ -159,6 +159,8 @@ enum class PrintOrder
     Count,
 };
 
+enum class ContinuousFlowControl { Automatic, Volumetric, Filament, ProcessSpeeds };
+
 enum class SlicingMode
 {
     // Regular, applying ClipperLib::pftNonZero rule when creating ExPolygons.
@@ -167,6 +169,24 @@ enum class SlicingMode
     EvenOdd,
     // Orienting all contours CCW, thus closing all holes.
     CloseHoles,
+    // Legacy value for Continuous extrusion. Mesh slicing stays regular; generated extrusion
+    // entities are then planned by ConstrainedBeadPlanner.
+    ConstrainedBeadPlanner,
+};
+
+enum class ConstrainedBeadPlannerScope
+{
+    PerimetersOnly,
+    InfillOnly,
+    PerimetersAndInfill,
+    AllSupportedRoles,
+};
+
+enum class ConstrainedBeadPlannerBridgeModeHandling
+{
+    Ignore,
+    FailUnsupported,
+    CheckSimple,
 };
 
 enum SupportMaterialPattern {
@@ -528,6 +548,9 @@ CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(NoiseType)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(InfillPattern)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(IroningType)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(SlicingMode)
+CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(ContinuousFlowControl)
+CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(ConstrainedBeadPlannerScope)
+CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(ConstrainedBeadPlannerBridgeModeHandling)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(SupportMaterialPattern)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(SupportMaterialStyle)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(SupportMaterialInterfacePattern)
@@ -945,6 +968,54 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionBool,                staggered_inner_seams))
     ((ConfigOptionFloat,               slice_closing_radius))
     ((ConfigOptionEnum<SlicingMode>,   slicing_mode))
+    ((ConfigOptionBool,                continuous_extrusion))
+    ((ConfigOptionEnum<ContinuousFlowControl>, ce_flow_control))
+    ((ConfigOptionFloat,               ce_volumetric_flow))
+    ((ConfigOptionFloat,               ce_nominal_width))
+    ((ConfigOptionFloat,               ce_min_width))
+    ((ConfigOptionFloat,               ce_max_width))
+    ((ConfigOptionFloat,               ce_filament_speed))
+    ((ConfigOptionFloat,               ce_resolution))
+    ((ConfigOptionFloat,               ce_boundary_tolerance))
+    ((ConfigOptionFloat,               ce_search_time))
+    ((ConfigOptionFloat,               ce_ramp_length))
+    ((ConfigOptionFloat,               ce_max_connection))
+    ((ConfigOptionFloat,               ce_missing_weight))
+    ((ConfigOptionFloat,               ce_excess_weight))
+    ((ConfigOptionBool,                ce_omit_unreachable))
+    ((ConfigOptionEnum<ConstrainedBeadPlannerScope>, cbp_scope))
+    ((ConfigOptionBool,                cbp_debug))
+    ((ConfigOptionInt,                 cbp_max_candidates))
+    ((ConfigOptionInt,                 cbp_max_lookahead_depth))
+    ((ConfigOptionInt,                 cbp_max_backtracks))
+    ((ConfigOptionInt,                 cbp_layer_operation_budget))
+    ((ConfigOptionBool,                cbp_bead_model))
+    ((ConfigOptionFloat,               cbp_collision_margin))
+    ((ConfigOptionFloat,               cbp_coverage_margin))
+    ((ConfigOptionBool,                cbp_use_variable_width))
+    ((ConfigOptionFloat,               cbp_min_width))
+    ((ConfigOptionFloat,               cbp_max_width))
+    ((ConfigOptionBool,                cbp_check_containment))
+    ((ConfigOptionBool,                cbp_check_same_layer_collision))
+    ((ConfigOptionBool,                cbp_check_centerline_crossing))
+    ((ConfigOptionBool,                cbp_check_double_back))
+    ((ConfigOptionFloat,               cbp_min_clearance))
+    ((ConfigOptionPercent,             cbp_min_adjacent_overlap))
+    ((ConfigOptionPercent,             cbp_max_adjacent_overlap))
+    ((ConfigOptionBool,                cbp_allow_junction_overlap))
+    ((ConfigOptionFloat,               cbp_junction_overlap_radius))
+    ((ConfigOptionBool,                cbp_check_turns))
+    ((ConfigOptionFloat,               cbp_min_segment_length))
+    ((ConfigOptionFloat,               cbp_min_turn_radius))
+    ((ConfigOptionFloat,               cbp_max_width_change_per_mm))
+    ((ConfigOptionBool,                cbp_penalize_sharp_turns))
+    ((ConfigOptionBool,                cbp_check_dead_ends))
+    ((ConfigOptionBool,                cbp_check_euler_feasibility))
+    ((ConfigOptionBool,                cbp_prevent_unreachable_regions))
+    ((ConfigOptionInt,                 cbp_beam_width))
+    ((ConfigOptionInt,                 cbp_topology_check_interval))
+    ((ConfigOptionBool,                cbp_check_support))
+    ((ConfigOptionEnum<ConstrainedBeadPlannerBridgeModeHandling>, cbp_bridge_mode_handling))
     ((ConfigOptionBool,                enable_support))
     // Automatic supports (generated based on support_threshold_angle).
     ((ConfigOptionEnum<SupportType>,   support_type))
