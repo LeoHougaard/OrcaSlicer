@@ -536,7 +536,9 @@ const std::vector<VariableWidthLines> &WallToolPaths::generate()
             wall_add_middle_threshold,
             max_bead_count,
             wall_0_inset,
-            wall_distribution_count
+            wall_distribution_count,
+            0.5,
+            m_params.prefer_closed_loops
         );
     const coord_t transition_filter_dist   = scaled<coord_t>(100.f);
     const coord_t allowed_filter_deviation = wall_transition_filter_deviation;
@@ -555,6 +557,15 @@ const std::vector<VariableWidthLines> &WallToolPaths::generate()
     stitchToolPaths(toolpaths, this->bead_width_x);
 
     removeSmallLines(toolpaths);
+
+    if (m_params.prefer_closed_loops) {
+        // Center markers may share an inset with real contours elsewhere in
+        // the region. Remove only these zero-width odd paths, not the inset.
+        for (auto &inset : toolpaths)
+            inset.erase(std::remove_if(inset.begin(), inset.end(), [](const ExtrusionLine &line) {
+                return line.is_odd && std::all_of(line.begin(), line.end(), [](const ExtrusionJunction &j) { return j.w == 0; });
+            }), inset.end());
+    }
 
     separateOutInnerContour();
 
@@ -746,6 +757,11 @@ void WallToolPaths::separateOutInnerContour()
                 break;
             }
         }
+
+        if (m_params.prefer_closed_loops)
+            is_contour = std::all_of(inset.begin(), inset.end(), [](const ExtrusionLine &line) {
+                return std::all_of(line.begin(), line.end(), [](const ExtrusionJunction &j) { return j.w == 0; });
+            });
 
         if (is_contour) {
 #ifdef DEBUG

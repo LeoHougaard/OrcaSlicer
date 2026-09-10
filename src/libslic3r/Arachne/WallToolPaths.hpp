@@ -31,6 +31,8 @@ public:
     float   wall_transition_filter_deviation = 0.f;
     int     wall_distribution_count          = 1;
     bool    is_top_or_bottom_layer           = false;
+    // Redistribute odd center beads only for continuous routes.
+    bool    prefer_closed_loops = false;
 
     coord_t wall_maximum_resolution = meshfix_maximum_resolution();
     coord_t wall_maximum_deviation  = meshfix_maximum_deviation();

@@ -6,6 +6,7 @@
 #include "libslic3r.h"
 #include "I18N.hpp"
 #include "GCode.hpp"
+#include "ContinuousPrint.hpp"
 #include "Exception.hpp"
 #include "ExtrusionEntity.hpp"
 #include "EdgeGrid.hpp"
@@ -2627,6 +2628,150 @@ void GCode::do_export(Print* print, const char* path, GCodeProcessorResult* resu
     PROFILE_OUTPUT(debug_out_path("gcode-export-profile.txt").c_str());
 }
 
+void GCode::export_continuous_print(Print &print, GCodeOutputStream &file)
+{
+    const auto &object = *print.objects().front();
+    if (!object.continuous_job || !object.continuous_job->complete || object.continuous_job->layers.empty())
+        throw SlicingError("Continuous extrusion planning is incomplete");
+    const auto &job = *object.continuous_job;
+    this->set_origin(unscale(object.instances().front().shift));
+    m_config.apply(object.config());
+    m_config.apply(object.printing_region(0).config());
+    m_layer = object.layers().front();
+    m_layer_index = 0;
+    m_nominal_z = job.layers.front().print_z + m_config.z_offset.value;
+    m_avoid_crossing_perimeters.init_layer(*m_layer);
+    // Adhesion and priming finish before the uninterrupted object route starts.
+    this->set_origin(0., 0.);
+    std::string adhesion;
+    for (const auto *entity : print.skirt().entities)
+        adhesion += this->extrude_entity(*entity, "skirt", NOZZLE_CONFIG(support_speed));
+    this->set_origin(unscale(object.instances().front().shift));
+    for (const auto *entity : object.object_skirt().entities)
+        adhesion += this->extrude_entity(*entity, "skirt", NOZZLE_CONFIG(support_speed));
+    this->set_origin(0., 0.);
+    if (const auto brim = print.m_brimMap.find(object.id()); brim != print.m_brimMap.end())
+        for (const auto *entity : brim->second.entities)
+            adhesion += this->extrude_entity(*entity, "brim", NOZZLE_CONFIG(support_speed));
+    if (!adhesion.empty())
+        file.write(m_cooling_buffer->process_layer(std::move(adhesion), 0, true));
+    this->set_origin(unscale(object.instances().front().shift));
+    m_continuous_export = true;
+
+    // Quantize before calculating E, carrying the volume of collapsed segments
+    // into their neighbor. Otherwise normal G-code precision can turn tiny
+    // planner segments into stationary extrusion or travel-only moves.
+    const auto quantized = [this](const Point3 &point) {
+        const Vec3d p = point_to_gcode(point);
+        const auto offset = m_writer.get_xy_offset();
+        const Point xy = gcode_to_point(Vec2d(GCodeFormatter::quantize_xyzf(p.x() - offset.x()) + offset.x(),
+                                              GCodeFormatter::quantize_xyzf(p.y() - offset.y()) + offset.y()));
+        return Point3(xy, scale_(GCodeFormatter::quantize_xyzf(p.z() + m_config.z_offset.value) - m_config.z_offset.value));
+    };
+    Point3 previous = job.layers.front().paths.front().first_point3();
+    Point3 emitted = quantized(previous);
+    Vec3d first = point_to_gcode(emitted);
+    first.z() += m_config.z_offset.value;
+    file.write("; Continuous extrusion: standard Klipper coordinated motion\n"
+               "; Steady flow is a nominal target; acceleration and cooling may reduce it.\nG90\n");
+    file.write(m_writer.travel_to_z(first.z()));
+    file.write(m_writer.travel_to_xy(Vec2d(first.x(), first.y())));
+    file.write(this->unretract());
+    const bool relative_e = m_config.use_relative_e_distances.value;
+    m_config.use_relative_e_distances.value = true;
+    m_writer.config.use_relative_e_distances.value = true;
+    file.write("M83\n");
+    this->set_last_pos(emitted.to_point());
+    m_cooling_buffer->reset(m_writer.get_position());
+    m_cooling_buffer->set_current_extruder(m_writer.filament()->id(), get_extruder_id(m_writer.filament()->id()));
+    file.write("; CONTINUOUS_OBJECT_BEGIN\n");
+    double total_missing = 0., total_area = 0., total_volume = 0.;
+    for (size_t layer = 0; layer < job.layers.size(); ++layer) {
+        print.throw_if_canceled();
+        const auto &route = job.layers[layer];
+        m_layer = object.layers()[layer];
+        m_layer_index = int(layer);
+        m_nominal_z = route.print_z + m_config.z_offset.value;
+        m_need_change_layer_lift_z = false;
+        total_missing += route.coverage.missing_area;
+        total_area += route.coverage.target_area;
+        std::string gcode = ";" + GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Layer_Change) + "\n;Z:" + std::to_string(route.print_z) + "\n;_SET_FAN_SPEED_CHANGING_LAYER\n;_CONTINUOUS_EXTRUSION\n";
+        if (layer == 1) {
+            const int temperature = FILAMENT_CONFIG(nozzle_temperature);
+            if (temperature > 0)
+                gcode += m_writer.set_temperature(temperature, false, m_writer.filament()->id());
+            gcode += m_writer.set_bed_temperature(get_bed_temperature(m_writer.filament()->id(), false, m_config.curr_bed_type));
+        }
+        ExtrusionPaths paths;
+        double pending_volume = 0.;
+        for (const auto &path : route.paths) {
+            if (path.first_point3() != previous)
+                throw SlicingError("Continuous export rejected a non-extruding gap");
+            for (size_t i = 1; i < path.polyline.points.size(); ++i) {
+                const auto &point = path.polyline.points[i];
+                pending_volume += (point - previous).cast<double>().norm() * SCALING_FACTOR * path.mm3_per_mm;
+                previous = point;
+                const Point3 destination = quantized(point);
+                if (destination == emitted)
+                    continue;
+                auto segment = path;
+                segment.z_contoured = false;
+                segment.polyline.points = {emitted, destination};
+                segment.polyline.fitting_result.clear();
+                segment.mm3_per_mm = pending_volume / (segment.polyline.length() * SCALING_FACTOR);
+                paths.push_back(std::move(segment));
+                emitted = destination;
+                total_volume += pending_volume;
+                pending_volume = 0.;
+            }
+        }
+        if (paths.empty())
+            throw SlicingError("Continuous layer is smaller than G-code motion precision.");
+        paths.back().mm3_per_mm += pending_volume / (paths.back().polyline.length() * SCALING_FACTOR);
+        total_volume += pending_volume;
+
+        // Choose the highest common nominal flow allowed by this layer's
+        // feature speeds. Explicit targets are still capped during _extrude.
+        m_continuous_flow_limit = std::numeric_limits<double>::infinity();
+        for (const auto &path : paths) {
+            const bool wall = is_perimeter(path.role());
+            const char *speed_key = path.role() == erExternalPerimeter ? "outer_wall_speed" :
+                                    path.role() == erPerimeter ? "inner_wall_speed" :
+                                    path.role() == erInternalInfill ? "sparse_infill_speed" : "internal_solid_infill_speed";
+            double speed = m_config.get_abs_value_at(speed_key, get_nozzle_config_index(m_writer.filament()->id()));
+            if (layer == 0)
+                speed = m_config.get_abs_value_at(wall ? "initial_layer_speed" : "initial_layer_infill_speed", get_nozzle_config_index(m_writer.filament()->id()));
+            double flow = Flow(path.width, path.height, float(FILAMENT_CONFIG(nozzle_diameter))).mm3_per_mm() *
+                          m_config.print_flow_ratio * FILAMENT_CONFIG(filament_flow_ratio);
+            if (m_config.set_other_flow_ratios) {
+                flow *= path.role() == erExternalPerimeter ? m_config.outer_wall_flow_ratio :
+                        path.role() == erPerimeter ? m_config.inner_wall_flow_ratio :
+                        path.role() == erInternalInfill ? m_config.sparse_infill_flow_ratio : m_config.internal_solid_infill_flow_ratio;
+                if (layer == 0)
+                    flow *= m_config.first_layer_flow_ratio;
+            }
+            if (speed > 0.)
+                m_continuous_flow_limit = std::min(m_continuous_flow_limit, speed * flow);
+        }
+        for (const auto &path : paths)
+            gcode += this->extrude_path(path, "continuous extrusion");
+        gcode = m_cooling_buffer->process_layer(std::move(gcode), int(layer), true);
+        gcode = m_pa_processor->process_layer(std::move(gcode));
+        file.write(gcode);
+        m_sorted_layer_filaments.push_back({m_writer.filament()->id()});
+    }
+    file.write_format("; CONTINUOUS_OBJECT_END\n; continuous planned volume = %.9f mm3\n", total_volume);
+    m_config.use_relative_e_distances.value = relative_e;
+    m_writer.config.use_relative_e_distances.value = relative_e;
+    file.write(relative_e ? "M83\n" : "M82\n");
+    file.write(m_writer.reset_e(true));
+    m_continuous_export = false;
+    m_max_layer_z = job.layers.back().print_z;
+    print.active_step_add_warning(PrintStateBase::WarningLevel::NON_CRITICAL,
+        "Continuous extrusion: " + std::to_string(total_area > 0. ? 100. * total_missing / total_area : 0.) +
+        "% estimated missing material. Standard Klipper output; no travel within the object. Flow targets remain subject to speed, acceleration, and cooling limits. Overhang slowdown and custom layer/role commands are not applied.");
+}
+
 // free functions called by GCode::_do_export()
 namespace DoExport {
     static void init_gcode_processor(const PrintConfig& config, GCodeProcessor& processor, bool& silent_time_estimator_enabled,
@@ -3776,7 +3921,9 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
     if (this->m_objsWithBrim.empty()) m_brim_done = true;
 
     // SoftFever: calib
-    if (print.calib_params().mode == CalibMode::Calib_PA_Line) {
+    if (print.objects().size() == 1 && continuous_print_enabled(print.objects().front()->config())) {
+        export_continuous_print(print, file);
+    } else if (print.calib_params().mode == CalibMode::Calib_PA_Line) {
         std::string gcode;
         gcode += ";" + GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Layer_Change) + "\n";
         if ((NOZZLE_CONFIG(outer_wall_acceleration) > 0 && NOZZLE_CONFIG(outer_wall_acceleration) > 0)) {
@@ -3987,7 +4134,8 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
     }
     //BBS: the last retraction
     // Write end commands to file.
-    file.write(this->retract(false, true));
+    if (!(print.objects().size() == 1 && continuous_print_enabled(print.objects().front()->config())))
+        file.write(this->retract(false, true));
 
     // if needed, write the gcode_label_objects_end
     {
@@ -7836,7 +7984,7 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
     // path is 2D. But in slope lift case, lift z is done in travel_to function.
     // Add m_need_change_layer_lift_z when change_layer in case of no lift if m_last_pos is equal to path.first_point() by chance
     Point first_point = path.first_point();
-    if (!m_last_pos_defined || m_last_pos.to_point() != first_point || m_need_change_layer_lift_z || slope_need_z_travel) {
+    if (!m_continuous_export && (!m_last_pos_defined || m_last_pos.to_point() != first_point || m_need_change_layer_lift_z || slope_need_z_travel)) {
         const bool _last_pos_undefined = !m_last_pos_defined;
 
         double z = DBL_MAX;
@@ -7864,7 +8012,7 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
             gcode += m_writer.travel_to_z(first_z, "set Z for contouring", true);
         }
     }
-    if (!path.z_contoured && sloped == nullptr) {
+    if (!m_continuous_export && !path.z_contoured && sloped == nullptr) {
         double current_z = m_writer.get_position().z();
         if (GCodeFormatter::quantize_xyzf(current_z) != GCodeFormatter::quantize_xyzf(m_nominal_z)) {
             gcode += this->writer().travel_to_z(m_nominal_z, "reset Z after contouring", true);
@@ -7992,6 +8140,25 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
     double e_per_mm = m_writer.filament()->e_per_mm3() * _mm3_per_mm;
     e_per_mm /= filament_flow_ratio;
 
+    Vec3d continuous_delta = Vec3d::Zero();
+    double continuous_distance_ratio = 1.;
+    if (m_continuous_export) {
+        const auto offset = m_writer.get_xy_offset();
+        const auto emitted_point = [&](const Point3 &point) {
+            const Vec3d p = this->point_to_gcode(point);
+            return Vec3d(GCodeFormatter::quantize_xyzf(p.x() - offset.x()),
+                         GCodeFormatter::quantize_xyzf(p.y() - offset.y()),
+                         GCodeFormatter::quantize_xyzf(p.z() + m_config.z_offset.value));
+        };
+        continuous_delta = emitted_point(path.last_point3()) - emitted_point(path.first_point3());
+        if (continuous_delta.norm() <= 0.)
+            throw SlicingError("Continuous export rejected a move below G-code precision.");
+        continuous_distance_ratio = path.polyline.length() * SCALING_FACTOR / continuous_delta.norm();
+        // E preserves the planned volume. Flow/speed limits use the physical
+        // distance after formatting, including any coordinate-rounding change.
+        _mm3_per_mm *= continuous_distance_ratio;
+    }
+
     // set speed
     if (speed == -1) {
         if (path.role() == erPerimeter) {
@@ -8100,7 +8267,7 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
 {
     double ref_speed = speed;  // stash the pre‑cap speed
     if (path.role() == erExternalPerimeter
-        && m_config.resonance_avoidance.value) {
+        && !m_continuous_export && m_config.resonance_avoidance.value) {
 
         // if our original speed was above “max”, disable RA for this loop
         if (ref_speed > m_config.max_resonance_avoidance_speed.value) {
@@ -8135,10 +8302,35 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
     bool variable_speed = false;
     std::vector<ProcessedPoint> new_points {};
 
+    if (m_continuous_export) {
+        // Reuse the normal flow calibration and feature/first-layer speed above.
+        // These are nominal targets; Klipper coordinates E with acceleration.
+        double target = m_continuous_flow_limit;
+        if (m_config.ce_flow_control == ContinuousFlowControl::Volumetric)
+            target = m_config.ce_volumetric_flow.value;
+        else if (m_config.ce_flow_control == ContinuousFlowControl::Filament)
+            target = m_config.ce_filament_speed.value * PI * std::pow(FILAMENT_CONFIG(filament_diameter) * .5, 2);
+        if (target > 0. && m_config.ce_flow_control != ContinuousFlowControl::ProcessSpeeds)
+            speed = std::min(speed, target / _mm3_per_mm);
+        if (filament_max_volumetric_speed > 0.)
+            speed = std::min(speed, filament_max_volumetric_speed / _mm3_per_mm);
+        const Vec3d &delta = continuous_delta;
+        const double distance = delta.norm();
+        const double limits[] = {m_config.machine_max_speed_x.get_at(0), m_config.machine_max_speed_y.get_at(0),
+                                 m_config.machine_max_speed_z.get_at(0)};
+        for (int axis = 0; axis < 3; ++axis)
+            if (limits[axis] > 0. && std::abs(delta[axis]) > 0.)
+                speed = std::min(speed, limits[axis] * distance / std::abs(delta[axis]));
+        if (m_config.machine_max_speed_e.get_at(0) > 0.)
+            speed = std::min(speed, m_config.machine_max_speed_e.get_at(0) / (e_per_mm * continuous_distance_ratio));
+        if (!(speed > 0.) || !(e_per_mm > 0.) || !std::isfinite(speed) || !std::isfinite(e_per_mm))
+            throw SlicingError("Continuous extrusion requires positive speed and flow settings.");
+    }
+
     const bool need_overhang_detection = NOZZLE_CONFIG(enable_overhang_speed) ||
         (FILAMENT_CONFIG(enable_overhang_bridge_fan) && m_enable_cooling_markers);
 
-    if (need_overhang_detection && !this->on_first_layer() && !object_layer_over_raft() &&
+    if (!m_continuous_export && need_overhang_detection && !this->on_first_layer() && !object_layer_over_raft() &&
         (is_bridge(path.role()) || is_perimeter(path.role()))) {
             bool is_external = is_external_perimeter(path.role());
             double ref_speed   = is_external ? NOZZLE_CONFIG(outer_wall_speed) : NOZZLE_CONFIG(inner_wall_speed);
@@ -8232,7 +8424,7 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
     // Orca: End of dynamic PA trigger flag segment
     
     //Orca: process custom gcode for extrusion role change
-    if (path.role() != m_last_extrusion_role) {
+    if (!m_continuous_export && path.role() != m_last_extrusion_role) {
         const auto current_filament_id = m_writer.filament()->id();
         const std::string& machine_role_change_gcode  = m_config.change_extrusion_role_gcode.value;
         const std::string& filament_role_change_gcode = m_config.filament_change_extrusion_role_gcode.get_at(current_filament_id);
@@ -8519,7 +8711,7 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                         continue;
                     path_length += line_length;
                     auto dE = e_per_mm * line_length;
-                    if (_needSAFC(path)) {
+                    if (!m_continuous_export && _needSAFC(path)) {
                         auto oldE = dE;
                         dE = m_small_area_infill_flow_compensator->modify_flow(line_length, dE, path.role());
 
@@ -8527,7 +8719,19 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                             tempDescription += Slic3r::format(" | Old Flow Value: %0.5f Length: %0.5f",oldE, line_length);
                         }
                     }
-                    if (path.z_contoured) {
+                    if (m_continuous_export) {
+                        Vec3d destination = this->point_to_gcode(line.b);
+                        destination.z() += m_config.z_offset.value;
+                        // Preserve tiny positive E increments at width changes.
+                        // Use the normal writer for position/extruder accounting,
+                        // with extra E precision for the continuous route.
+                        m_writer.extrude_to_xyz(destination, dE);
+                        const auto offset = m_writer.get_xy_offset();
+                        char move[192];
+                        snprintf(move, sizeof(move), "G1 X%.3f Y%.3f Z%.3f E%.12f\n",
+                                 destination.x() - offset.x(), destination.y() - offset.y(), destination.z(), dE);
+                        gcode += move;
+                    } else if (path.z_contoured) {
                         // ZAA: Z anti-aliased extrusion with variable Z per point
                         Vec2d dest2d = this->point_to_gcode(line.b.to_point());
                         coordf_t z_diff = unscale_(line.b.z());

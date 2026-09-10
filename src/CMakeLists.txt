@@ -109,6 +109,8 @@ if (SLIC3R_GUI)
 endif()
 
 if(ORCA_TOOLS)
+    add_executable(continuous-extrusion-inspect dev-utils/continuous_extrusion_inspect.cpp)
+    target_link_libraries(continuous-extrusion-inspect libslic3r)
     # OrcaSlicer_profile_validator
     if(APPLE)
         add_executable(OrcaSlicer_profile_validator MACOSX_BUNDLE dev-utils/OrcaSlicer_profile_validator.cpp)

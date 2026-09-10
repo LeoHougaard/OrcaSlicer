@@ -719,6 +719,16 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig *config, in
     const bool gcf_is_marlin_firmware = gcflavor == GCodeFlavor::gcfMarlinFirmware;
     const bool gcf_is_klipper = gcflavor == GCodeFlavor::gcfKlipper;
 
+    const bool has_cbp =
+        (config->has("continuous_extrusion") && config->opt_bool("continuous_extrusion")) ||
+        (config->has("slicing_mode") &&
+         config->opt_enum<SlicingMode>("slicing_mode") == SlicingMode::ConstrainedBeadPlanner);
+    for (auto el : { "ce_flow_control", "ce_nominal_width", "ce_min_width", "ce_max_width", "ce_resolution", "ce_boundary_tolerance", "ce_search_time", "ce_ramp_length", "ce_max_connection", "ce_missing_weight", "ce_excess_weight", "ce_omit_unreachable" })
+        toggle_line(el, has_cbp);
+    const auto continuous_flow = config->opt_enum<ContinuousFlowControl>("ce_flow_control");
+    toggle_line("ce_volumetric_flow", has_cbp && continuous_flow == ContinuousFlowControl::Volumetric);
+    toggle_line("ce_filament_speed", has_cbp && continuous_flow == ContinuousFlowControl::Filament);
+
     bool have_volumetric_extrusion_rate_slope = config->option<ConfigOptionFloat>("max_volumetric_extrusion_rate_slope")->value > 0;
     float have_volumetric_extrusion_rate_slope_segment_length = config->option<ConfigOptionFloat>("max_volumetric_extrusion_rate_slope_segment_length")->value;
     toggle_field("enable_arc_fitting", !have_volumetric_extrusion_rate_slope);
@@ -786,14 +796,14 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig *config, in
     bool is_cross_zag = config->option<ConfigOptionEnum<InfillPattern>>("sparse_infill_pattern")->value == InfillPattern::ipCrossZag;
     bool is_locked_zig = config->option<ConfigOptionEnum<InfillPattern>>("sparse_infill_pattern")->value == InfillPattern::ipLockedZag;
 
-    toggle_line("infill_shift_step", is_cross_zag || is_locked_zig);
+    toggle_line("infill_shift_step", !has_cbp && (is_cross_zag || is_locked_zig));
     
     for (auto el : { "skeleton_infill_density", "skin_infill_density", "infill_lock_depth", "skin_infill_depth","skin_infill_line_width", "skeleton_infill_line_width" })
         toggle_line(el, is_locked_zig);
 
     bool is_zig_zag = config->option<ConfigOptionEnum<InfillPattern>>("sparse_infill_pattern")->value == InfillPattern::ipZigZag;
 
-    toggle_line("symmetric_infill_y_axis", is_zig_zag || is_cross_zag || is_locked_zig);
+    toggle_line("symmetric_infill_y_axis", !has_cbp && (is_zig_zag || is_cross_zag || is_locked_zig));
 
     bool has_spiral_vase         = config->opt_bool("spiral_mode");
     toggle_line("spiral_mode_smooth", has_spiral_vase);
@@ -1141,7 +1151,7 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig *config, in
 
 
     toggle_field("seam_slope_type", !has_spiral_vase);
-    bool has_seam_slope = !has_spiral_vase && config->opt_enum<SeamScarfType>("seam_slope_type") != SeamScarfType::None;
+    bool has_seam_slope = !has_spiral_vase && !has_cbp && config->opt_enum<SeamScarfType>("seam_slope_type") != SeamScarfType::None;
     toggle_line("seam_slope_conditional", has_seam_slope);
     toggle_line("seam_slope_start_height", has_seam_slope);
     toggle_line("seam_slope_entire_loop", has_seam_slope);
@@ -1182,6 +1192,17 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig *config, in
 
     std::string printer_type = wxGetApp().preset_bundle->printers.get_edited_preset().get_printer_type(wxGetApp().preset_bundle);
     toggle_line("enable_wrapping_detection", DevPrinterConfigUtil::support_wrapping_detection(printer_type));
+    // Continuous extrusion supplies its own connected interior. Keep density,
+    // shell thickness and seam placement editable, and hide unused patterns.
+    toggle_line("sparse_infill_pattern", have_infill && !has_cbp);
+    for (const auto *key : {"top_surface_pattern", "bottom_surface_pattern", "internal_solid_infill_pattern"})
+        toggle_line(key, !has_cbp);
+    for (const auto *key : {"infill_direction", "infill_anchor", "infill_anchor_max", "infill_combination",
+                            "sparse_infill_rotate_template", "solid_infill_direction", "solid_infill_rotate_template",
+                            "role_based_wipe_speed", "wipe_speed", "wipe_on_loops", "wipe_before_external_loop"})
+        toggle_line(key, !has_cbp);
+    toggle_line("seam_slope_type", !has_cbp);
+    toggle_line("seam_gap", !has_cbp);
 }
 
 void ConfigManipulation::update_print_sla_config(DynamicPrintConfig* config, const bool is_global_config/* = false*/)

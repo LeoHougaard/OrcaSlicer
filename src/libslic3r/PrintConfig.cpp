@@ -343,9 +343,20 @@ CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(PrintOrder)
 static t_config_enum_values s_keys_map_SlicingMode {
     { "regular",        int(SlicingMode::Regular) },
     { "even_odd",       int(SlicingMode::EvenOdd) },
-    { "close_holes",    int(SlicingMode::CloseHoles) }
+    { "close_holes",    int(SlicingMode::CloseHoles) },
+    { "constrained_bead_planner", int(SlicingMode::ConstrainedBeadPlanner) }
 };
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(SlicingMode)
+
+static t_config_enum_values s_keys_map_ContinuousFlowControl {
+    {"automatic", int(ContinuousFlowControl::Automatic)},
+    {"volumetric", int(ContinuousFlowControl::Volumetric)},
+    {"filament", int(ContinuousFlowControl::Filament)},
+    {"process_speeds", int(ContinuousFlowControl::ProcessSpeeds)}
+};
+CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(ContinuousFlowControl)
+
+
 
 static t_config_enum_values s_keys_map_SupportMaterialPattern {
     { "rectilinear",        smpRectilinear },
@@ -6695,6 +6706,60 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionEnum<SlicingMode>(SlicingMode::Regular));
 
+    def = this->add("ce_settings_version", coInt);
+    def->min = 1;
+    def->max = 1;
+    def->set_default_value(new ConfigOptionInt(1));
+
+    def = this->add("continuous_extrusion", coBool);
+    def->label = L("Continuous extrusion");
+    def->category = L("Other");
+    def->tooltip = L("Print one uninterrupted, variable-width extrusion route using standard Klipper G-code. Uses wall loops, sparse infill density, solid shell settings and seam placement. Sparse interiors use connected rectilinear passes; solid regions use connected concentric paths. Extrusion follows toolhead acceleration. Unreachable material may be omitted; it is never reached by travel.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("ce_flow_control", coEnum);
+    def->label = L("Continuous flow control");
+    def->category = L("Other");
+    def->tooltip = L("Automatic chooses a common nominal flow from the layer's bead widths and feature speeds, subject to the filament's volumetric limit. Alternatively specify a target flow, a nominal input filament speed, or use normal process speeds. Speed, cooling, and printer limits still apply. Physical filament feed varies during acceleration on standard Klipper. Older projects retain their saved feed target.");
+    def->enum_keys_map = &ConfigOptionEnum<ContinuousFlowControl>::get_enum_values();
+    def->enum_values = {"automatic", "volumetric", "filament", "process_speeds"};
+    def->enum_labels = {L("Steady flow - automatic"), L("Steady flow - volumetric target"), L("Steady flow - filament target"), L("Normal process speeds")};
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionEnum<ContinuousFlowControl>(ContinuousFlowControl::Automatic));
+
+    struct ContinuousOption { const char *key; const char *label; const char *tooltip; const char *unit; double value; double min; double max; };
+    for (const auto &option : {
+        ContinuousOption {"ce_nominal_width", L("Preferred bead width"), L("Prefer this width while filling the part. Width varies between the minimum and maximum."), "mm", .42, .01, 10.},
+        ContinuousOption {"ce_min_width", L("Minimum bead width"), L("Smallest permitted bead width. Must be at least the layer height."), "mm", .30, .01, 10.},
+        ContinuousOption {"ce_max_width", L("Maximum bead width"), L("Largest permitted bead width. Wider beads require slower toolhead motion."), "mm", .80, .01, 10.},
+        ContinuousOption {"ce_filament_speed", L("Target filament feed"), L("Nominal incoming filament speed, converted to volumetric flow using the selected filament diameter. Motion and cooling limits may reduce it; acceleration changes physical feed."), "mm/s", .50, .001, 20.},
+        ContinuousOption {"ce_volumetric_flow", L("Target volumetric flow"), L("Requested continuous flow of incoming filament. The selected filament and printer motion limits still apply."), "mm³/s", 5., .01, 1000.},
+        ContinuousOption {"ce_resolution", L("Planning resolution"), L("Geometric approximation tolerance. Smaller values retain more detail and take longer to slice."), "mm", .025, .001, 1.},
+        ContinuousOption {"ce_boundary_tolerance", L("Boundary tolerance"), L("Maximum permitted bead excursion beyond the model boundary."), "mm", .05, 0., 2.},
+        ContinuousOption {"ce_search_time", L("Planning time budget"), L("Total search seconds for this object. Increase and slice again to continue retained candidates. Geometry changes restart the search. A candidate already running may finish after the deadline."), "s", 120., 1., 600.},
+        ContinuousOption {"ce_ramp_length", L("Layer ramp length"), L("Distance along the start of each layer over which Z rises. The ramp replaces a non-extruding layer change."), "mm", 10., .1, 100.},
+        ContinuousOption {"ce_max_connection", L("Maximum layer connection"), L("Maximum extruding connection distance between adjacent layers. Connections must stay inside both layers' boundary tolerances. If no connection fits, slicing stops instead of inserting travel."), "mm", 2., .01, 10.},
+        ContinuousOption {"ce_missing_weight", L("Missing material penalty"), L("Relative importance of missing material in candidate scoring. Higher values favor more complete filling."), "", 1., .01, 100.},
+        ContinuousOption {"ce_excess_weight", L("Excess material penalty"), L("Relative importance of repeated deposition in candidate scoring. Higher values favor less overfill."), "", 1., .01, 100.}
+    }) {
+        def = this->add(option.key, coFloat);
+        def->label = option.label;
+        def->tooltip = option.tooltip;
+        def->category = L("Other");
+        def->sidetext = option.unit;
+        def->mode = comAdvanced;
+        def->min = option.min;
+        def->max = option.max;
+        def->set_default_value(new ConfigOptionFloat(option.value));
+    }
+    def = this->add("ce_omit_unreachable", coBool);
+    def->label = L("Omit unreachable material");
+    def->category = L("Other");
+    def->tooltip = L("Leave narrow features and disconnected strokes unfilled when needed to preserve a single extrusion route. Missing material remains in the slice report. When disabled, these features cause a slicing error; travel is never a fallback.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(true));
+
     def = this->add("z_offset", coFloat);
     def->label = L("Z offset");
     def->tooltip = L("This value will be added (or subtracted) from all the Z coordinates "
@@ -8958,6 +9023,12 @@ void PrintConfigDef::init_sla_params()
 
 void PrintConfigDef::handle_legacy(t_config_option_key &opt_key, std::string &value)
 {
+    // Retired prototype options never controlled the native continuous route.
+    if (opt_key.rfind("cbp_", 0) == 0) {
+        opt_key.clear();
+        return;
+    }
+
     //BBS: handle legacy options
     if (opt_key == "curr_bed_type" && value == "SuperTack Plate") {
         value = "Supertack Plate";
@@ -9216,6 +9287,20 @@ void PrintConfigDef::handle_legacy(t_config_option_key &opt_key, std::string &va
 // Don't convert single options here, implement such conversion in PrintConfigDef::handle_legacy() instead.
 void PrintConfigDef::handle_legacy_composite(DynamicPrintConfig &config)
 {
+    const bool legacy_continuous = (config.has("continuous_extrusion") && config.opt_bool("continuous_extrusion")) ||
+        (config.has("slicing_mode") && config.opt_enum<SlicingMode>("slicing_mode") == SlicingMode::ConstrainedBeadPlanner);
+    if (legacy_continuous && !config.has("ce_settings_version")) {
+        // Earlier continuous projects always printed solid regardless of the
+        // stored ordinary infill percentage. Preserve that deposited geometry.
+        config.set_key_value("sparse_infill_density", new ConfigOptionPercent(100.));
+        config.set_key_value("ce_settings_version", new ConfigOptionInt(1));
+    }
+    if (config.has("slicing_mode") && config.opt_enum<SlicingMode>("slicing_mode") == SlicingMode::ConstrainedBeadPlanner) {
+        config.set_key_value("continuous_extrusion", new ConfigOptionBool(true));
+        config.set_key_value("slicing_mode", new ConfigOptionEnum<SlicingMode>(SlicingMode::Regular));
+    }
+    if (config.has("ce_filament_speed") && !config.has("ce_flow_control"))
+        config.set_key_value("ce_flow_control", new ConfigOptionEnum<ContinuousFlowControl>(ContinuousFlowControl::Filament));
     if (config.has("thumbnails")) {
         std::string extention;
         if (config.has("thumbnails_format")) {

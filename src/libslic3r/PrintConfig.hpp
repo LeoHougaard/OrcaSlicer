@@ -242,6 +242,8 @@ enum class PrintOrder
     Count,
 };
 
+enum class ContinuousFlowControl { Automatic, Volumetric, Filament, ProcessSpeeds };
+
 enum class SlicingMode
 {
     // Regular, applying ClipperLib::pftNonZero rule when creating ExPolygons.
@@ -250,6 +252,9 @@ enum class SlicingMode
     EvenOdd,
     // Orienting all contours CCW, thus closing all holes.
     CloseHoles,
+    // Legacy value for Continuous extrusion. Mesh slicing stays regular; generated extrusion
+    // entities are then planned as continuous extrusion.
+    ConstrainedBeadPlanner,
 };
 
 enum SupportMaterialPattern {
@@ -670,6 +675,7 @@ CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(NoiseType)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(InfillPattern)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(IroningType)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(SlicingMode)
+CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(ContinuousFlowControl)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(SupportMaterialPattern)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(SupportMaterialStyle)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(SupportMaterialInterfacePattern)
@@ -1130,6 +1136,22 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionBool,                staggered_inner_seams))
     ((ConfigOptionFloat,               slice_closing_radius))
     ((ConfigOptionEnum<SlicingMode>,   slicing_mode))
+    ((ConfigOptionBool,                continuous_extrusion))
+    ((ConfigOptionInt,                 ce_settings_version))
+    ((ConfigOptionEnum<ContinuousFlowControl>, ce_flow_control))
+    ((ConfigOptionFloat,               ce_volumetric_flow))
+    ((ConfigOptionFloat,               ce_nominal_width))
+    ((ConfigOptionFloat,               ce_min_width))
+    ((ConfigOptionFloat,               ce_max_width))
+    ((ConfigOptionFloat,               ce_filament_speed))
+    ((ConfigOptionFloat,               ce_resolution))
+    ((ConfigOptionFloat,               ce_boundary_tolerance))
+    ((ConfigOptionFloat,               ce_search_time))
+    ((ConfigOptionFloat,               ce_ramp_length))
+    ((ConfigOptionFloat,               ce_max_connection))
+    ((ConfigOptionFloat,               ce_missing_weight))
+    ((ConfigOptionFloat,               ce_excess_weight))
+    ((ConfigOptionBool,                ce_omit_unreachable))
     ((ConfigOptionBool,                enable_support))
     // Automatic supports (generated based on support_threshold_angle).
     ((ConfigOptionEnum<SupportType>,   support_type))
