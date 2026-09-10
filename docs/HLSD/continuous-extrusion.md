@@ -22,7 +22,9 @@ cover differences between ordinary wall widths and continuous bead widths.
 
 For sparse interiors, clipped closed rectilinear strips provide paired passes.
 Pass spacing follows bead spacing divided by requested density. Joining cycles
-removes short intervals and replaces them with two contained extruding links.
+removes bead-spaced intervals measured along the contour and replaces them with
+two contained extruding links. Links avoid retained and pending contours, and
+nearby contours join first to avoid spending the budget on occluded hole walls.
 This avoids traversing a closed loop twice just to enter and leave it. Unreachable
 material is omitted only when the explicit omission setting permits it.
 
@@ -31,11 +33,14 @@ painted preferences. Join selection preserves long outer-wall runs and avoids
 bypassing inner-seam preferences by attaching to an existing connector. Geometric
 containment can override a requested location.
 
-Layer routes rotate to compatible attachment points and rise over a configurable
-ramp. Sparse departures must remain within reach of actual next-layer deposition.
-A solid shoulder can therefore connect through its interior. Every connector must
-remain inside both adjacent cross-sections within the selected boundary tolerance.
-The planner never inserts travel as a fallback.
+Layer routes rotate to visible attachment points and rise during incoming
+connections. Departures stay within reach of actual next-layer deposition.
+A ramp follows moving walls within the combined adjacent-section envelope and
+reaches full new-layer height before crossing completed strokes. When an incoming
+connection runs along its entry edge, that interval supplies part of the layer:
+the remaining cycle opens there and traverses away from it without a second pass.
+The reused edge retains its bead width and flow. The planner never inserts travel
+as a fallback.
 
 ## Evaluation and lifetime
 

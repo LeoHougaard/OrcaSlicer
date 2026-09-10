@@ -1,11 +1,14 @@
 #include "ContinuousExtrusion.hpp"
 
 #include "Arachne/WallToolPaths.hpp"
+#include "AABBTreeLines.hpp"
 #include "ClipperUtils.hpp"
 #include "Flow.hpp"
+#include "Geometry.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 
@@ -51,20 +54,46 @@ BeadPoint interpolate(const BeadPoint &a, const BeadPoint &b, double t)
 // Open a short interval on a cycle. The returned path runs from just after the
 // interval all the way around to just before it. Joining two such paths replaces
 // two local intervals with two connectors, instead of depositing a connector
-// on top of a completely closed loop.
+// on top of a completely closed loop. Measure the cut along the contour so
+// short tessellation edges cannot shrink the opening below the bead spacing.
 BeadLoop open_loop(const BeadLoop &loop, size_t edge, double t, double cut)
 {
-    const auto &a = loop[edge];
-    const auto &b = loop[(edge + 1) % loop.size()];
-    const double length = unscale<double>(a.point.distance_to(b.point));
-    const double half = std::min(cut / (2. * length), 0.45);
-    t = std::clamp(t, half, 1. - half);
+    std::vector<double> lengths;
+    lengths.reserve(loop.size());
+    double perimeter = 0., center = 0.;
+    for (size_t i = 0; i < loop.size(); ++i) {
+        lengths.push_back(unscale<double>(loop[i].point.distance_to(loop[(i + 1) % loop.size()].point)));
+        if (i < edge)
+            center += lengths.back();
+        perimeter += lengths.back();
+    }
+    center += std::clamp(t, 0., 1.) * lengths[edge];
+    const double removed = std::min(cut, perimeter * .9);
+    double start = std::fmod(center + removed * .5, perimeter);
+    size_t first = 0;
+    while (first + 1 < loop.size() && start >= lengths[first]) {
+        start -= lengths[first];
+        ++first;
+    }
     BeadLoop result;
     result.reserve(loop.size() + 2);
-    result.push_back(interpolate(a, b, t + half));
-    for (size_t j = 1; j <= loop.size(); ++j)
-        result.push_back(loop[(edge + j) % loop.size()]);
-    result.push_back(interpolate(a, b, t - half));
+    result.push_back(interpolate(loop[first], loop[(first + 1) % loop.size()], start / lengths[first]));
+    double remaining = perimeter - removed;
+    size_t i = first;
+    for (size_t visited = 0; visited <= loop.size(); ++visited) {
+        const double available = lengths[i] - start;
+        if (remaining <= available + 1e-9) {
+            result.push_back(interpolate(loop[i], loop[(i + 1) % loop.size()],
+                std::clamp((start + remaining) / lengths[i], 0., 1.)));
+            break;
+        }
+        remaining -= available;
+        i = (i + 1) % loop.size();
+        result.push_back(loop[i]);
+        start = 0.;
+    }
+    if (cut == 0.)
+        result.back() = result.front();
     return result;
 }
 
@@ -75,14 +104,53 @@ bool connector_inside(const BeadPoint &a, const BeadPoint &b, const ExPolygons &
     return diff_ex(strip(a.point, b.point, std::max(a.spacing, b.spacing)), region).empty();
 }
 
+// A connection replaces local contour intervals; it must not cut across any
+// retained contour, including loops that have not yet joined the route.
+bool crosses(const Point &a, const Point &b, const Point &c, const Point &d)
+{
+    if (std::max(a.x(), b.x()) < std::min(c.x(), d.x()) ||
+        std::min(a.x(), b.x()) > std::max(c.x(), d.x()) ||
+        std::max(a.y(), b.y()) < std::min(c.y(), d.y()) ||
+        std::min(a.y(), b.y()) > std::max(c.y(), d.y()))
+        return false;
+    if (a == c || a == d || b == c || b == d) {
+        const Point shared = a == c || a == d ? a : b;
+        const Vec2d u = ((shared == a ? b : a) - shared).cast<double>();
+        const Vec2d v = ((shared == c ? d : c) - shared).cast<double>();
+        return std::abs(cross2(u, v)) < 1. && u.dot(v) > 0.;
+    }
+    return Geometry::segments_intersect(a, b, c, d);
+}
+
+bool connector_clear(const Point &a, const Point &b, const BeadLoop &loop, bool closed)
+{
+    for (size_t i = 1; i < loop.size() + size_t(closed); ++i)
+        if (crosses(a, b, loop[i - 1].point, loop[i % loop.size()].point))
+            return false;
+    return true;
+}
+
+void reverse_path(BeadLoop &path)
+{
+    std::reverse(path.begin(), path.end());
+    // Roles describe outgoing edges, so reversing vertices also shifts roles.
+    for (size_t i = 1; i < path.size(); ++i) {
+        path[i - 1].external = path[i].external;
+        path[i - 1].role = path[i].role;
+        path[i - 1].connector = path[i].connector;
+    }
+}
+
 bool join_loop(BeadLoop &route, const BeadLoop &loop, const ExPolygons &region,
+               const std::vector<BeadLoop> &pending,
                double cut, double max_distance, const ContinuousExtrusionSettings &settings,
                const std::function<void()> &throw_on_cancel)
 {
     struct Join { size_t a, b; double ta, tb, distance, seam_cost; int external_changes, connector_changes; };
     std::vector<Join> candidates;
     // Search edge interiors as well as vertices: long straight walls otherwise
-    // force seams into corners. Keep a bounded shortlist before polygon checks.
+    // force seams into corners. Try further candidates when a preferred seam
+    // would cut across retained material.
     for (size_t a = 0; a < route.size(); ++a) {
         if ((a & 63) == 0)
             throw_on_cancel();
@@ -122,10 +190,11 @@ bool join_loop(BeadLoop &route, const BeadLoop &loop, const ExPolygons &region,
                 const Vec2d attachment = wall_a ? pa.cast<double>() + ta * da : pb.cast<double>() + tb * db;
                 seam_cost = 1. + (attachment - target).norm();
             }
-            if (distance <= std::pow(scaled<double>(max_distance), 2))
+            if (distance <= std::pow(scaled<double>(max_distance), 2)) {
                 candidates.push_back({ a, b, ta, tb, distance, seam_cost,
                     settings.seam_positions.empty() ? 0 : int(external_a) + int(external_b),
                     use_seam || !settings.inner_seam_positions.empty() ? int(route[a].connector) + int(loop[b].connector) : 0 });
+            }
         }
     }
     std::stable_sort(candidates.begin(), candidates.end(), [](const Join &a, const Join &b) {
@@ -135,8 +204,6 @@ bool join_loop(BeadLoop &route, const BeadLoop &loop, const ExPolygons &region,
             return a.connector_changes < b.connector_changes;
         return a.seam_cost != b.seam_cost ? a.seam_cost < b.seam_cost : a.distance < b.distance;
     });
-    if (candidates.size() > 64)
-        candidates.resize(64);
     for (const auto &candidate : candidates) {
         throw_on_cancel();
         BeadLoop a = open_loop(route, candidate.a, candidate.ta, cut);
@@ -144,7 +211,18 @@ bool join_loop(BeadLoop &route, const BeadLoop &loop, const ExPolygons &region,
         double forward = a.back().point.distance_to(b.front().point) + b.back().point.distance_to(a.front().point);
         double reverse = a.back().point.distance_to(b.back().point) + b.front().point.distance_to(a.front().point);
         if (reverse < forward)
-            std::reverse(b.begin(), b.end());
+            reverse_path(b);
+        const Point p = a.back().point, q = b.front().point;
+        const Point r = b.back().point, s = a.front().point;
+        if (crosses(p, q, r, s) ||
+            !connector_clear(p, q, a, false) || !connector_clear(p, q, b, false) ||
+            !connector_clear(r, s, a, false) || !connector_clear(r, s, b, false))
+            continue;
+        if (std::any_of(pending.begin(), pending.end(), [&](const BeadLoop &other) {
+                return &other != &loop &&
+                    (!connector_clear(p, q, other, true) || !connector_clear(r, s, other, true));
+            }))
+            continue;
         if (!connector_inside(a.back(), b.front(), region) || !connector_inside(b.back(), a.front(), region))
             continue;
         a.back().external = false;
@@ -189,7 +267,10 @@ bool attach_stroke(BeadLoop &route, const BeadLoop &stroke, const ExPolygons &re
         BeadLoop opened = open_loop(route, candidate.edge, candidate.t, 0.);
         BeadLoop tail = stroke;
         if (candidate.reverse)
-            std::reverse(tail.begin(), tail.end());
+            reverse_path(tail);
+        if (!connector_clear(opened.back().point, tail.front().point, opened, false) ||
+            !connector_clear(opened.back().point, tail.front().point, tail, false))
+            continue;
         if (!connector_inside(opened.back(), tail.front(), region))
             continue;
         opened.back().external = false;
@@ -446,10 +527,26 @@ ContinuousRegionPlan ContinuousRegionPlanner::generate_region(const ExPolygons &
         bool progress = true;
         while (progress && !loops.empty()) {
             progress = false;
+            // Join neighboring contours first. Inset order interleaves outer
+            // walls and hole walls; repeatedly trying to bridge them across all
+            // intervening rings wastes the search budget on occluded pairs.
+            Lines edges;
+            edges.reserve(route.size());
+            for (size_t i = 0; i < route.size(); ++i)
+                edges.emplace_back(route[i].point, route[(i + 1) % route.size()].point);
+            const AABBTreeLines::LinesDistancer<Line> nearby(std::move(edges));
+            std::vector<std::pair<double, size_t>> order;
             for (size_t i = 0; i < loops.size(); ++i) {
+                double distance = std::numeric_limits<double>::infinity();
+                for (const auto &point : loops[i])
+                    distance = std::min(distance, nearby.distance_from_lines<false>(point.point));
+                order.emplace_back(distance, i);
+            }
+            std::sort(order.begin(), order.end());
+            for (const auto &[distance, i] : order) {
                 throw_on_cancel();
                 const double reach = spacing * 3. / std::max(.01, m_settings.infill_density);
-                if (join_loop(route, loops[i], allowed, spacing, reach, m_settings, throw_on_cancel)) {
+                if (join_loop(route, loops[i], allowed, loops, spacing, reach, m_settings, throw_on_cancel)) {
                     loops.erase(loops.begin() + i);
                     progress = true;
                     break;

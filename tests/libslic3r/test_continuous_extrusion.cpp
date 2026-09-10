@@ -4,6 +4,7 @@
 #include "libslic3r/ContinuousPrint.hpp"
 #include "libslic3r/Preset.hpp"
 #include "libslic3r/Flow.hpp"
+#include "libslic3r/Geometry.hpp"
 #include "libslic3r/TriangleMesh.hpp"
 #include "libslic3r/TriangleMeshSlicer.hpp"
 #include "libslic3r/Arachne/BeadingStrategy/BeadingStrategyFactory.hpp"
@@ -14,6 +15,46 @@
 
 using namespace Slic3r;
 using Catch::Matchers::WithinAbs;
+
+TEST_CASE("Continuous joins preserve fill without crossing retained contours", "[ContinuousCrossing][ContinuousInfill]")
+{
+    const bool hole = GENERATE(false, true);
+    const bool solid = GENERATE(false, true);
+    ExPolygon region(Polygon{Points{Point::new_scale(0., 0.), Point::new_scale(24., 0.),
+        Point::new_scale(24., 20.), Point::new_scale(0., 20.)}});
+    if (hole) {
+        region.holes.emplace_back(Points{Point::new_scale(9., 7.), Point::new_scale(9., 13.),
+            Point::new_scale(15., 13.), Point::new_scale(15., 7.)});
+    }
+    ContinuousExtrusionSettings settings;
+    settings.closed_route = true;
+    settings.infill_density = .15;
+    settings.seam_positions = {Point::new_scale(24., 20.)};
+    settings.inner_seam_positions = settings.seam_positions;
+    if (solid)
+        settings.solid_regions = {region};
+    ContinuousRegionPlanner planner({region}, settings);
+    planner.advance(std::chrono::steady_clock::now() + std::chrono::seconds(20));
+    const auto &plan = planner.best();
+    INFO(plan.reason);
+    REQUIRE(plan.connected);
+    REQUIRE(plan.contained);
+    REQUIRE(plan.widths_valid);
+    REQUIRE(plan.unresolved_paths.empty());
+    REQUIRE(plan.coverage.missing_area / plan.coverage.target_area < .06);
+    Lines edges;
+    for (const auto &path : plan.paths)
+        for (size_t i = 1; i < path.polyline.points.size(); ++i)
+            edges.emplace_back(path.polyline.points[i - 1].to_point(), path.polyline.points[i].to_point());
+    size_t crossings = 0;
+    for (size_t i = 0; i < edges.size(); ++i)
+        for (size_t j = i + 2; j < edges.size(); ++j) {
+            if (i == 0 && j + 1 == edges.size())
+                continue;
+            crossings += Geometry::segments_intersect(edges[i].a, edges[i].b, edges[j].a, edges[j].b);
+        }
+    REQUIRE(crossings == 0);
+}
 
 TEST_CASE("Legacy continuous projects remain solid and new projects retain their density", "[ContinuousIntegration][Config]")
 {
@@ -268,7 +309,8 @@ TEST_CASE("Continuous routes connect independent shapes and moving cross section
         plans.push_back(planner.best());
         zs.push_back((i + 1) * .2);
     }
-    const auto routes = continuous_join_layers(plans, regions, zs, settings, 5., 2.);
+    std::vector<ContinuousLayerRoute> routes;
+    REQUIRE_NOTHROW(routes = continuous_join_layers(plans, regions, zs, settings, 5., 2.));
     REQUIRE(routes.size() == regions.size());
     // Layer attachment must preserve the selected fill. Its connection/ramp
     // volume is accounted separately, not used to disguise planar gaps.
@@ -506,4 +548,32 @@ TEST_CASE("Sparse layer attachments can cross a solid shoulder", "[ContinuousInf
     REQUIRE(routes.size() == regions.size());
     for (size_t i = 1; i < routes.size(); ++i)
         REQUIRE(routes[i - 1].paths.back().last_point() == routes[i].paths.front().first_point());
+}
+
+TEST_CASE("Moving walls rise during the incoming connection", "[ContinuousCrossing][ContinuousIntegration]")
+{
+    ContinuousExtrusionSettings settings;
+    settings.closed_route = true;
+    settings.infill_density = .15;
+    const std::vector<ExPolygons> regions{{rectangle(0., 0., 12., 10.)}, {rectangle(.3, 0., 12., 10.)}};
+    std::vector<ContinuousRegionPlan> plans;
+    for (const auto &region : regions) {
+        ContinuousRegionPlanner planner(region, settings);
+        planner.advance(std::chrono::steady_clock::now() + std::chrono::seconds(10));
+        REQUIRE(planner.best().connected);
+        REQUIRE(planner.best().unresolved_paths.empty());
+        plans.push_back(planner.best());
+    }
+    const auto layers = continuous_join_layers(plans, regions, {.2, .4}, settings, 10., 2.);
+    const auto &entry = layers[1].paths.front();
+    REQUIRE(entry.first_point3().z() == scaled<coord_t>(.2));
+    REQUIRE(entry.last_point3().z() == scaled<coord_t>(.4));
+    REQUIRE(entry.polyline.points[1].z() > entry.polyline.points[0].z());
+    // The ramp follows the moving outline at its interpolated height, even
+    // where a 2D intersection of the two sections would reject the connection.
+    for (const auto &point : entry.polyline.points) {
+        const double t = (unscale<double>(point.z()) - .2) / .2;
+        REQUIRE(unscale<double>(point.x()) - entry.width * .5 >= .3 * t - settings.boundary_tolerance);
+        REQUIRE(unscale<double>(point.x()) + entry.width * .5 <= 12. + .3 * t + settings.boundary_tolerance);
+    }
 }

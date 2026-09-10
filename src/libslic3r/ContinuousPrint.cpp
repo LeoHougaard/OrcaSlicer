@@ -4,6 +4,7 @@
 #include "Print.hpp"
 #include "GCode/SeamPlacer.hpp"
 #include "I18N.hpp"
+#include "Geometry.hpp"
 
 #include <tbb/parallel_for.h>
 #include <tbb/task_arena.h>
@@ -142,17 +143,17 @@ std::vector<ContinuousLayerRoute> continuous_join_layers(
                 throw SlicingError(_u8L("Disconnected continuous extrusion route"));
         ExtrusionPaths connection;
         const auto next_material = layer + 1 < regions.size() ? intersection_ex(regions[layer], regions[layer + 1]) : regions[layer];
-        auto next_centers = offset_ex(next_material, -float(scale_(std::max(0., settings.min_width * .5 - settings.boundary_tolerance))));
-        if (settings.infill_density < 1. && layer + 1 < plans.size()) {
-            // A point inside the next section may be far from its printed walls.
-            // Keep the departure within reach of next-layer deposited material when
-            // a ledge or a disappearing hole changes the outline.
+        ExPolygons next_centers;
+        if (layer + 1 < plans.size()) {
+            // A sloping wall moves between layers. Its departure need only be
+            // within reach of next-layer deposition, not inside an inset of
+            // both sections at once. The incoming ramp follows that movement.
             Polygons reachable;
             for (auto path : plans[layer + 1].paths) {
                 path.width = float(2. * max_connection);
                 path.polygons_covered_by_width(reachable, 0.f);
             }
-            next_centers = intersection_ex(next_centers, reachable);
+            next_centers = union_ex(reachable);
         }
         const auto can_leave = [&](const Point &point) {
             return layer + 1 == regions.size() || std::any_of(next_centers.begin(), next_centers.end(), [&](const auto &r) { return r.contains(point); });
@@ -202,23 +203,29 @@ std::vector<ContinuousLayerRoute> continuous_join_layers(
             const auto &previous = result.back().paths.back();
             const Point a = previous.polyline.points.back().to_point();
             const Point target = target_reference.value_or(a);
-            struct Candidate { size_t edge; Point point; double distance; };
+            struct Candidate { size_t edge; Point point; double distance, preference; bool endpoint; };
             std::vector<Candidate> candidates;
             for (size_t i = 0; i < paths.size(); ++i) {
                 const Vec2d b = paths[i].polyline.points.front().to_point().cast<double>();
                 const Vec2d d = (paths[i].polyline.points.back().to_point() - paths[i].polyline.points.front().to_point()).cast<double>();
-                for (const auto &projection : {target, a}) {
+                const Points projections{target, a, paths[i].first_point(), paths[i].last_point()};
+                for (size_t projection_index = 0; projection_index < projections.size(); ++projection_index) {
+                    const auto &projection = projections[projection_index];
                     const double t = std::clamp((projection.cast<double>() - b).dot(d) / d.squaredNorm(), 0., 1.);
                     const Point point = (b + t * d).cast<coord_t>();
                     const double distance = unscale<double>(a.distance_to(point));
                     if (distance <= max_connection && can_leave(point))
-                        candidates.push_back({i, point, unscale<double>(target.distance_to(point))});
+                        candidates.push_back({i, point, distance, unscale<double>(target.distance_to(point)), projection_index >= 2});
                 }
             }
-            std::stable_sort(candidates.begin(), candidates.end(), [](const auto &a, const auto &b) { return a.distance < b.distance; });
-            const auto allowed = intersection_ex(
-                offset_ex(regions[layer - 1], float(scale_(settings.boundary_tolerance))),
-                offset_ex(regions[layer], float(scale_(settings.boundary_tolerance))));
+            std::stable_sort(candidates.begin(), candidates.end(), [](const auto &a, const auto &b) {
+                if (a.endpoint != b.endpoint)
+                    return !a.endpoint;
+                return a.distance != b.distance ? a.distance < b.distance : a.preference < b.preference;
+            });
+            ExPolygons envelope = regions[layer - 1];
+            append(envelope, regions[layer]);
+            const auto allowed = offset_ex(union_ex(envelope), float(scale_(settings.boundary_tolerance)));
             bool joined = false;
             for (const auto &candidate : candidates) {
                 throw_on_cancel();
@@ -228,7 +235,73 @@ std::vector<ContinuousLayerRoute> continuous_join_layers(
                 connector.polyline.points = {Point3(a, 0), Point3(candidate.point, 0)};
                 if (a != candidate.point && !footprint_inside(connector, allowed))
                     continue;
-                rotate_cycle(paths, candidate.edge, Point3(candidate.point, 0));
+                // Enter the next route at its first visible edge. A connector
+                // across another next-layer edge would be printed twice there.
+                bool crosses_route = false;
+                bool reuse_entry = false;
+                for (size_t i = 0; a != candidate.point && i < paths.size(); ++i) {
+                    const Point b = paths[i].first_point(), c = paths[i].last_point();
+                    const Vec2d incoming = (candidate.point - a).cast<double>();
+                    const double length = incoming.norm();
+                    // Include the entry edge itself. Running along it before
+                    // traversing the cycle is a retrace, even if both segments
+                    // share an endpoint. Allow only sub-quantization overlap.
+                    const double tolerance = scale_(.001);
+                    if (std::abs(cross2(incoming, (b - a).cast<double>())) <= tolerance * length &&
+                        std::abs(cross2(incoming, (c - a).cast<double>())) <= tolerance * length) {
+                        const double u = incoming.dot((b - a).cast<double>()) / length;
+                        const double v = incoming.dot((c - a).cast<double>()) / length;
+                        if (std::min(length, std::max(u, v)) - std::max(0., std::min(u, v)) > tolerance) {
+                            if (i == candidate.edge) {
+                                reuse_entry = true;
+                                continue;
+                            }
+                            crosses_route = true;
+                            break;
+                        }
+                    }
+                    if (i == candidate.edge)
+                        continue;
+                    if (b == a || c == a || b == candidate.point || c == candidate.point)
+                        continue;
+                    if (Geometry::segments_intersect(a, candidate.point, b, c)) {
+                        crosses_route = true;
+                        break;
+                    }
+                }
+                if (crosses_route)
+                    continue;
+                if (reuse_entry) {
+                    // The incoming ramp can replace a portion of its entry
+                    // edge. Traverse the rest of the cycle away from that
+                    // interval and finish at its other end, instead of
+                    // depositing the same interval again on the way back.
+                    auto opened = paths;
+                    size_t edge = candidate.edge;
+                    const Line entry(paths[edge].first_point(), paths[edge].last_point());
+                    Point finish;
+                    entry.distance_to_squared(a, &finish);
+                    if (!can_leave(finish))
+                        continue;
+                    if ((candidate.point - a).cast<double>().dot((entry.b - entry.a).cast<double>()) < 0.) {
+                        std::reverse(opened.begin(), opened.end());
+                        for (auto &path : opened)
+                            path.polyline.reverse();
+                        edge = opened.size() - 1 - edge;
+                    }
+                    rotate_cycle(opened, edge, Point3(candidate.point, 0));
+                    if (opened.back().first_point() == finish)
+                        opened.pop_back();
+                    else
+                        opened.back().polyline.points.back() = Point3(finish, 0);
+                    connector.width = paths[candidate.edge].width;
+                    connector.mm3_per_mm = paths[candidate.edge].mm3_per_mm;
+                    if (!footprint_inside(connector, allowed))
+                        continue;
+                    paths = std::move(opened);
+                } else {
+                    rotate_cycle(paths, candidate.edge, Point3(candidate.point, 0));
+                }
                 if (a != candidate.point)
                     connection.push_back(std::move(connector));
                 joined = true;
@@ -240,16 +313,41 @@ std::vector<ContinuousLayerRoute> continuous_join_layers(
         ContinuousLayerRoute route;
         route.coverage = plan.coverage;
         route.print_z = print_zs[layer];
+        // Rise during the incoming connection too. Printing it flat at the
+        // previous Z scratched across already completed walls and top skins.
+        paths.insert(paths.begin(), connection.begin(), connection.end());
         double length = 0.;
         for (const auto &path : paths)
             length += unscale<double>(path.length());
-        const double ramp = std::min(ramp_length, length);
+        double ramp = std::min(ramp_length, length);
+        if (!connection.empty())
+            ramp = std::min(ramp, unscale<double>(connection.front().length()));
         const double base_z = layer ? print_zs[layer - 1] : print_zs[layer];
-        for (auto &path : connection) {
-            route.transition_volume += unscale<double>(path.length()) * path.mm3_per_mm;
-            for (auto &point : path.polyline.points)
-                point.z() = scale_(base_z);
-            route.paths.push_back(std::move(path));
+        if (layer) {
+            // Reach the new layer height before crossing an old-layer stroke.
+            // Collinear stacking is the normal ramp; transverse crossings need
+            // full clearance, especially when a sparse layer meets a solid skin.
+            double along = 0.;
+            for (const auto &path : paths) {
+                if (along >= ramp)
+                    break;
+                const Line next(path.first_point(), path.last_point());
+                for (const auto &old_path : result.back().paths)
+                    for (size_t j = 1; j < old_path.polyline.points.size(); ++j) {
+                        const Line old(old_path.polyline.points[j - 1].to_point(), old_path.polyline.points[j].to_point());
+                        if (std::abs(cross2((next.b - next.a).cast<double>(), (old.b - old.a).cast<double>())) < 1.)
+                            continue;
+                        Point hit;
+                        if (next.intersection(old, &hit)) {
+                            if ((hit == next.a || hit == next.b) && (hit == old.a || hit == old.b))
+                                continue;
+                            const double distance = along + unscale<double>(next.a.distance_to(hit));
+                            if (distance > .001)
+                                ramp = std::min(ramp, distance * .5);
+                        }
+                    }
+                along += unscale<double>(next.length());
+            }
         }
         double distance = 0.;
         for (auto &path : paths) {
