@@ -2311,13 +2311,18 @@ void GCode::export_continuous_print(Print &print, GCodeOutputStream &file)
         m_continuous_flow_limit = std::numeric_limits<double>::infinity();
         for (const auto &path : paths) {
             const bool wall = is_perimeter(path.role());
-            double speed = m_config.get_abs_value(wall ? "outer_wall_speed" : "internal_solid_infill_speed");
+            const char *speed_key = path.role() == erExternalPerimeter ? "outer_wall_speed" :
+                                    path.role() == erPerimeter ? "inner_wall_speed" :
+                                    path.role() == erInternalInfill ? "sparse_infill_speed" : "internal_solid_infill_speed";
+            double speed = m_config.get_abs_value(speed_key);
             if (layer == 0)
                 speed = m_config.get_abs_value(wall ? "initial_layer_speed" : "initial_layer_infill_speed");
             double flow = Flow(path.width, path.height, float(FILAMENT_CONFIG(nozzle_diameter))).mm3_per_mm() *
                           m_config.print_flow_ratio * FILAMENT_CONFIG(filament_flow_ratio);
             if (m_config.set_other_flow_ratios) {
-                flow *= wall ? m_config.outer_wall_flow_ratio : m_config.internal_solid_infill_flow_ratio;
+                flow *= path.role() == erExternalPerimeter ? m_config.outer_wall_flow_ratio :
+                        path.role() == erPerimeter ? m_config.inner_wall_flow_ratio :
+                        path.role() == erInternalInfill ? m_config.sparse_infill_flow_ratio : m_config.internal_solid_infill_flow_ratio;
                 if (layer == 0)
                     flow *= m_config.first_layer_flow_ratio;
             }

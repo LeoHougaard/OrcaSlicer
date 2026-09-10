@@ -25,18 +25,6 @@ namespace Slic3r { namespace GUI {
 // BBS: new layout
 constexpr int titleWidth = 20;
 
-static const ConfigOption* config_option_or_default(const DynamicPrintConfig& config, const ConfigOptionDef* opt, const std::string& opt_key)
-{
-	const ConfigOption *value = config.option(opt_key);
-	return value != nullptr || opt == nullptr ? value : opt->default_value.get();
-}
-
-template<class T>
-static const T* typed_config_option_or_default(const DynamicPrintConfig& config, const ConfigOptionDef* opt, const std::string& opt_key)
-{
-	return dynamic_cast<const T*>(config_option_or_default(config, opt, opt_key));
-}
-
 const t_field& OptionsGroup::build_field(const Option& opt) {
     return build_field(opt.opt_id, opt.opt);
 }
@@ -957,8 +945,6 @@ boost::any ConfigOptionsGroup::get_config_value(const DynamicPrintConfig& config
 	boost::any ret;
 	wxString text_value = wxString("");
 	const ConfigOptionDef* opt = config.def()->get(opt_key);
-	if (opt == nullptr)
-		return ret;
 
     if (opt->nullable)
     {
@@ -1006,22 +992,17 @@ boost::any ConfigOptionsGroup::get_config_value(const DynamicPrintConfig& config
 
 	switch (opt->type) {
 	case coFloatOrPercent:{
-		const auto *value = typed_config_option_or_default<ConfigOptionFloatOrPercent>(config, opt, opt_key);
-		if (value == nullptr)
-			break;
+		const auto &value = *config.option<ConfigOptionFloatOrPercent>(opt_key);
 
-        text_value = double_to_string(value->value);
-		if (value->percent)
+        text_value = double_to_string(value.value);
+		if (value.percent)
 			text_value += "%";
 
 		ret = text_value;
 		break;
 	}
     case coFloatsOrPercents: {
-        const auto *values = typed_config_option_or_default<ConfigOptionFloatsOrPercents>(config, opt, opt_key);
-        if (values == nullptr || idx >= values->values.size())
-            break;
-        const auto &value = values->get_at(idx);
+        const auto &value = config.option<ConfigOptionFloatsOrPercents>(opt_key)->get_at(idx);
 
         text_value = double_to_string(value.value);
         if (value.percent) text_value += "%";
@@ -1030,10 +1011,7 @@ boost::any ConfigOptionsGroup::get_config_value(const DynamicPrintConfig& config
         break;
     }
     case coPercent: {
-		const auto *value = typed_config_option_or_default<ConfigOptionPercent>(config, opt, opt_key);
-		if (value == nullptr)
-			break;
-		double val = value->value;
+		double val = config.option<ConfigOptionPercent>(opt_key)->value;
 		ret = double_to_string(val);// += "%";
 	}
 		break;
@@ -1041,88 +1019,53 @@ boost::any ConfigOptionsGroup::get_config_value(const DynamicPrintConfig& config
 	case coFloats:
 	case coFloat:{
         if (opt_key == "extruder_printable_height") {
-            const auto *values = typed_config_option_or_default<ConfigOptionFloatsNullable>(config, opt, opt_key);
-            if (values == nullptr)
-                break;
-            auto opt_values = values->values;
+            auto opt_values = dynamic_cast<const ConfigOptionFloatsNullable *>(config.option(opt_key))->values;
             if (!opt_values.empty()) {
                 double val = opt_values[idx];
                 ret  = double_to_string(val);
             }
         }
         else {
-            double val = 0.;
-            if (opt->type == coFloats) {
-                const auto *value = typed_config_option_or_default<ConfigOptionFloats>(config, opt, opt_key);
-                if (value == nullptr || idx >= value->values.size())
-                    break;
-                val = value->get_at(idx);
-            } else if (opt->type == coFloat) {
-                const auto *value = typed_config_option_or_default<ConfigOptionFloat>(config, opt, opt_key);
-                if (value == nullptr)
-                    break;
-                val = value->value;
-            } else {
-                const auto *value = typed_config_option_or_default<ConfigOptionPercents>(config, opt, opt_key);
-                if (value == nullptr || idx >= value->values.size())
-                    break;
-                val = value->get_at(idx);
-            }
+            double val = opt->type == coFloats ?
+                config.opt_float(opt_key, idx) :
+                opt->type == coFloat ? config.opt_float(opt_key) :
+                config.option<ConfigOptionPercents>(opt_key)->get_at(idx);
             ret = double_to_string(val);
         }
         break;
     }
-	case coString: {
-		const auto *value = typed_config_option_or_default<ConfigOptionString>(config, opt, opt_key);
-		if (value != nullptr)
-			ret = from_u8(value->value);
+	case coString:
+		ret = from_u8(config.opt_string(opt_key));
 		break;
-	}
-	case coStrings: {
-		const auto *value = typed_config_option_or_default<ConfigOptionStrings>(config, opt, opt_key);
-		if (value == nullptr)
-			break;
+	case coStrings:
 		if (opt_key == "compatible_printers" || opt_key == "compatible_prints") {
-			ret = value->values;
+			ret = config.option<ConfigOptionStrings>(opt_key)->values;
 			break;
 		}
-		if (value->values.empty())
+		if (config.option<ConfigOptionStrings>(opt_key)->values.empty())
 			ret = text_value;
 		else if (opt->gui_flags == "serialized") {
-			std::vector<std::string> values = value->values;
+			std::vector<std::string> values = config.option<ConfigOptionStrings>(opt_key)->values;
 			if (!values.empty() && !values[0].empty())
 				for (auto el : values)
 					text_value += el + ";";
 			ret = text_value;
 		}
-		else if (idx < value->values.size())
-			ret = from_u8(value->get_at(idx));
+		else
+			ret = from_u8(config.opt_string(opt_key, static_cast<unsigned int>(idx)));
 		break;
-	}
-	case coBool: {
-		const ConfigOptionBool *value = typed_config_option_or_default<ConfigOptionBool>(config, opt, opt_key);
-		if (value != nullptr)
-			ret = value->value != 0;
+	case coBool:
+		ret = config.opt_bool(opt_key);
 		break;
-	}
-	case coBools: {
-		const ConfigOptionBools *value = typed_config_option_or_default<ConfigOptionBools>(config, opt, opt_key);
-		if (value != nullptr && idx < value->values.size())
-			ret = value->get_at(idx) != 0;
+	case coBools:
+		ret = config.opt_bool(opt_key, idx);
 		break;
-	}
-	case coInt: {
-		const ConfigOptionInt *value = typed_config_option_or_default<ConfigOptionInt>(config, opt, opt_key);
-		if (value != nullptr)
-			ret = value->value;
+	case coInt:
+		ret = config.opt_int(opt_key);
 		break;
-	}
-	case coInts: {
-		const ConfigOptionInts *value = typed_config_option_or_default<ConfigOptionInts>(config, opt, opt_key);
-		if (value != nullptr && idx < value->values.size())
-			ret = value->get_at(idx);
+	case coInts:
+		ret = config.opt_int(opt_key, idx);
 		break;
-	}
 	case coEnum:
         if (!config.has("first_layer_sequence_choice") && opt_key == "first_layer_sequence_choice") {
             // reset to Auto value
@@ -1140,16 +1083,12 @@ boost::any ConfigOptionsGroup::get_config_value(const DynamicPrintConfig& config
             ret = global_cfg.option("curr_bed_type")->getInt();
             break;
         }
-        if (const ConfigOption *value = config_option_or_default(config, opt, opt_key))
-            ret = value->getInt();
+        ret = config.option(opt_key)->getInt();
         break;
     // BBS
-    case coEnums: {
-        const ConfigOptionInts *value = typed_config_option_or_default<ConfigOptionInts>(config, opt, opt_key);
-        if (value != nullptr && idx < value->values.size())
-            ret = value->get_at(idx);
+    case coEnums:
+        ret = config.opt_int(opt_key, idx);
         break;
-    }
     case coPoint:
         ret = config.option<ConfigOptionPoint>(opt_key)->value;
         break;
@@ -1186,8 +1125,6 @@ boost::any ConfigOptionsGroup::get_config_value2(const DynamicPrintConfig& confi
 
     boost::any ret;
     const ConfigOptionDef* opt = config.def()->get(opt_key);
-    if (opt == nullptr)
-        return ret;
 
     if (opt->nullable)
     {
@@ -1231,103 +1168,64 @@ boost::any ConfigOptionsGroup::get_config_value2(const DynamicPrintConfig& confi
 
     switch (opt->type) {
     case coFloatOrPercent:{
-        const auto *value = typed_config_option_or_default<ConfigOptionFloatOrPercent>(config, opt, opt_key);
-        if (value == nullptr)
-            break;
+        const auto &value = *config.option<ConfigOptionFloatOrPercent>(opt_key);
 
-        wxString text_value = double_to_string(value->value);
-        if (value->percent)
+        wxString text_value = double_to_string(value.value);
+        if (value.percent)
             text_value += "%";
 
         ret = into_u8(text_value);
         break;
     }
     case coPercent:{
-        const auto *value = typed_config_option_or_default<ConfigOptionPercent>(config, opt, opt_key);
-        if (value != nullptr)
-            ret = value->value;
+        double val = config.option<ConfigOptionPercent>(opt_key)->value;
+        ret = val;
     }
                   break;
     case coPercents:
     case coFloats:
     case coFloat:{
-        double val = 0.;
-        if (opt->type == coFloats) {
-            const auto *value = typed_config_option_or_default<ConfigOptionFloats>(config, opt, opt_key);
-            if (value == nullptr || idx >= value->values.size())
-                break;
-            val = value->get_at(idx);
-        } else if (opt->type == coFloat) {
-            const auto *value = typed_config_option_or_default<ConfigOptionFloat>(config, opt, opt_key);
-            if (value == nullptr)
-                break;
-            val = value->value;
-        } else {
-            const auto *value = typed_config_option_or_default<ConfigOptionPercents>(config, opt, opt_key);
-            if (value == nullptr || idx >= value->values.size())
-                break;
-            val = value->get_at(idx);
-        }
+        double val = opt->type == coFloats ?
+            config.opt_float(opt_key, idx) :
+            opt->type == coFloat ? config.opt_float(opt_key) :
+            config.option<ConfigOptionPercents>(opt_key)->get_at(idx);
         ret = val;
     }
                 break;
-    case coString: {
-        const auto *value = typed_config_option_or_default<ConfigOptionString>(config, opt, opt_key);
-        if (value != nullptr)
-            ret = value->value;
+    case coString:
+        ret = config.opt_string(opt_key);
         break;
-    }
-    case coStrings: {
-        const auto *value = typed_config_option_or_default<ConfigOptionStrings>(config, opt, opt_key);
-        if (value == nullptr)
-            break;
+    case coStrings:
         if (opt_key == "compatible_printers" || opt_key == "compatible_prints") {
-            ret = value->values;
+            ret = config.option<ConfigOptionStrings>(opt_key)->values;
             break;
         }
-        if (value->values.empty())
+        if (config.option<ConfigOptionStrings>(opt_key)->values.empty())
             ret = std::string();
         else if (opt->gui_flags == "serialized") {
-            ret = value->values;
+            ret = config.option<ConfigOptionStrings>(opt_key)->values;
         }
-        else if (idx < value->values.size())
-            ret = value->get_at(idx);
+        else
+            ret = config.opt_string(opt_key, static_cast<unsigned int>(idx));
         break;
-    }
-    case coBool: {
-        const ConfigOptionBool *value = typed_config_option_or_default<ConfigOptionBool>(config, opt, opt_key);
-        if (value != nullptr)
-            ret = value->value != 0;
+    case coBool:
+        ret = config.opt_bool(opt_key);
         break;
-    }
-    case coBools: {
-        const ConfigOptionBools *value = typed_config_option_or_default<ConfigOptionBools>(config, opt, opt_key);
-        if (value != nullptr && idx < value->values.size())
-            ret = static_cast<unsigned char>(value->get_at(idx) != 0);
+    case coBools:
+        ret = static_cast<unsigned char>(config.opt_bool(opt_key, idx));
         break;
-    }
-    case coInt: {
-        const ConfigOptionInt *value = typed_config_option_or_default<ConfigOptionInt>(config, opt, opt_key);
-        if (value != nullptr)
-            ret = value->value;
+    case coInt:
+        ret = config.opt_int(opt_key);
         break;
-    }
-    case coInts: {
-        const ConfigOptionInts *value = typed_config_option_or_default<ConfigOptionInts>(config, opt, opt_key);
-        if (value != nullptr && idx < value->values.size())
-            ret = value->get_at(idx);
+    case coInts:
+        ret = config.opt_int(opt_key, idx);
         break;
-    }
     case coEnum:
-        if (const ConfigOption *value = config_option_or_default(config, opt, opt_key))
-            ret = value->getInt();
+        ret = config.option(opt_key)->getInt();
         break;
-    case coEnums: {
-        const ConfigOptionInts *value = typed_config_option_or_default<ConfigOptionInts>(config, opt, opt_key);
-        if (value != nullptr && idx < value->values.size())
-            ret = value->get_at(idx);
+    case coEnums:
+        ret = config.opt_int(opt_key, idx);
         break;
-    }
     case coPoint:
         ret = config.option<ConfigOptionPoint>(opt_key)->value;
         break;

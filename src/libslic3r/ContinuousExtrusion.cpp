@@ -37,13 +37,15 @@ struct BeadPoint {
     Point point;
     double spacing;
     bool external;
+    ExtrusionRole role = erSolidInfill;
+    bool connector = false;
 };
 using BeadLoop = std::vector<BeadPoint>;
 
 BeadPoint interpolate(const BeadPoint &a, const BeadPoint &b, double t)
 {
     return { (a.point.cast<double>() + t * (b.point - a.point).cast<double>()).cast<coord_t>(),
-             a.spacing + t * (b.spacing - a.spacing), a.external && b.external };
+             a.spacing + t * (b.spacing - a.spacing), a.external, a.role, a.connector };
 }
 
 // Open a short interval on a cycle. The returned path runs from just after the
@@ -74,9 +76,10 @@ bool connector_inside(const BeadPoint &a, const BeadPoint &b, const ExPolygons &
 }
 
 bool join_loop(BeadLoop &route, const BeadLoop &loop, const ExPolygons &region,
-               double cut, const std::function<void()> &throw_on_cancel)
+               double cut, double max_distance, const ContinuousExtrusionSettings &settings,
+               const std::function<void()> &throw_on_cancel)
 {
-    struct Join { size_t a, b; double ta, tb, distance; };
+    struct Join { size_t a, b; double ta, tb, distance, seam_cost; int external_changes, connector_changes; };
     std::vector<Join> candidates;
     // Search edge interiors as well as vertices: long straight walls otherwise
     // force seams into corners. Keep a bounded shortlist before polygon checks.
@@ -94,16 +97,44 @@ bool join_loop(BeadLoop &route, const BeadLoop &loop, const ExPolygons &region,
             const Vec2d db = (qb - pb).cast<double>();
             if (db.squaredNorm() < 1.)
                 continue;
-            double ta = std::clamp(((pb.cast<double>() + qb.cast<double>()) * .5 - pa.cast<double>()).dot(da) / da.squaredNorm(), .1, .9);
+            Vec2d target = (pb.cast<double>() + qb.cast<double>()) * .5;
+            const bool external_a = route[a].external;
+            const bool external_b = loop[b].external;
+            const bool wall_a = is_perimeter(route[a].role);
+            const bool wall_b = is_perimeter(loop[b].role);
+            const auto &seams = external_a || external_b ? settings.seam_positions : settings.inner_seam_positions;
+            const bool use_seam = !seams.empty() && (wall_a || wall_b);
+            if (use_seam) {
+                const Vec2d middle = wall_a ? (pa.cast<double>() + qa.cast<double>()) * .5 : target;
+                target = std::min_element(seams.begin(), seams.end(), [&](const Point &x, const Point &y) {
+                    return (x.cast<double>() - middle).squaredNorm() < (y.cast<double>() - middle).squaredNorm();
+                })->cast<double>();
+            }
+            const double margin_a = use_seam ? std::min(.45, scaled<double>(cut * .5) / da.norm()) : .1;
+            const double margin_b = use_seam ? std::min(.45, scaled<double>(cut * .5) / db.norm()) : .1;
+            double ta = std::clamp((target - pa.cast<double>()).dot(da) / da.squaredNorm(), margin_a, 1. - margin_a);
             Vec2d pos_a = pa.cast<double>() + ta * da;
-            double tb = std::clamp((pos_a - pb.cast<double>()).dot(db) / db.squaredNorm(), .1, .9);
-            ta = std::clamp((pb.cast<double>() + tb * db - pa.cast<double>()).dot(da) / da.squaredNorm(), .1, .9);
+            double tb = std::clamp((pos_a - pb.cast<double>()).dot(db) / db.squaredNorm(), margin_b, 1. - margin_b);
+            ta = std::clamp((pb.cast<double>() + tb * db - pa.cast<double>()).dot(da) / da.squaredNorm(), margin_a, 1. - margin_a);
             double distance = (pa.cast<double>() + ta * da - pb.cast<double>() - tb * db).squaredNorm();
-            if (distance <= std::pow(scaled<double>(cut * 3.), 2))
-                candidates.push_back({ a, b, ta, tb, distance });
+            double seam_cost = 0.;
+            if (use_seam) {
+                const Vec2d attachment = wall_a ? pa.cast<double>() + ta * da : pb.cast<double>() + tb * db;
+                seam_cost = 1. + (attachment - target).norm();
+            }
+            if (distance <= std::pow(scaled<double>(max_distance), 2))
+                candidates.push_back({ a, b, ta, tb, distance, seam_cost,
+                    settings.seam_positions.empty() ? 0 : int(external_a) + int(external_b),
+                    use_seam || !settings.inner_seam_positions.empty() ? int(route[a].connector) + int(loop[b].connector) : 0 });
         }
     }
-    std::stable_sort(candidates.begin(), candidates.end(), [](const Join &a, const Join &b) { return a.distance < b.distance; });
+    std::stable_sort(candidates.begin(), candidates.end(), [](const Join &a, const Join &b) {
+        if (a.external_changes != b.external_changes)
+            return a.external_changes < b.external_changes;
+        if (a.connector_changes != b.connector_changes)
+            return a.connector_changes < b.connector_changes;
+        return a.seam_cost != b.seam_cost ? a.seam_cost < b.seam_cost : a.distance < b.distance;
+    });
     if (candidates.size() > 64)
         candidates.resize(64);
     for (const auto &candidate : candidates) {
@@ -117,7 +148,11 @@ bool join_loop(BeadLoop &route, const BeadLoop &loop, const ExPolygons &region,
         if (!connector_inside(a.back(), b.front(), region) || !connector_inside(b.back(), a.front(), region))
             continue;
         a.back().external = false;
+        a.back().role = erSolidInfill;
+        a.back().connector = true;
         b.back().external = false;
+        b.back().role = erSolidInfill;
+        b.back().connector = true;
         a.insert(a.end(), b.begin(), b.end());
         route = std::move(a);
         return true;
@@ -158,6 +193,8 @@ bool attach_stroke(BeadLoop &route, const BeadLoop &stroke, const ExPolygons &re
         if (!connector_inside(opened.back(), tail.front(), region))
             continue;
         opened.back().external = false;
+        opened.back().role = erSolidInfill;
+        opened.back().connector = true;
         opened.insert(opened.end(), tail.begin(), tail.end());
         route = std::move(opened);
         return true;
@@ -179,7 +216,7 @@ ExtrusionPaths to_paths(const BeadLoop &loop, double height, bool closed)
         if (spacing <= 0.)
             continue;
         const float width = Flow::rounded_rectangle_extrusion_width_from_spacing(float(spacing), float(height));
-        const auto role = a.external && b.external ? erExternalPerimeter : erSolidInfill;
+        const auto role = a.external ? erExternalPerimeter : a.role;
         ExtrusionPath path(role, spacing * height, width, float(height));
         path.polyline.points = { Point3(a.point, 0), Point3(b.point, 0) };
         // Preserve long constant-width passes for preview and downstream checks.
@@ -259,6 +296,8 @@ ContinuousRegionPlanner::ContinuousRegionPlanner(ExPolygons region, ContinuousEx
     if (settings.min_width > settings.nominal_width || settings.nominal_width > settings.max_width ||
         settings.min_width < settings.layer_height || !std::isfinite(settings.boundary_tolerance) || settings.boundary_tolerance < 0.)
         throw std::invalid_argument("Continuous extrusion requires layer height <= minimum width <= nominal width <= maximum width");
+    if (!std::isfinite(settings.infill_density) || settings.infill_density < 0. || settings.infill_density > 1.)
+        throw std::invalid_argument("Continuous infill density must be between zero and one");
     m_widths.push_back(settings.nominal_width);
     // A deterministic, finite initial search. Extending a budget resumes at the
     // next candidate and never replaces a better candidate with a worse one.
@@ -318,6 +357,12 @@ ContinuousRegionPlan ContinuousRegionPlanner::generate_region(const ExPolygons &
     const size_t count = size_t(unscale<double>(std::max(box.size().x(), box.size().y())) / spacing) + 2;
     Arachne::WallToolPaths walls(outline, scaled<coord_t>(spacing), scaled<coord_t>(spacing), count, 0, h, params);
     std::vector<BeadLoop> loops, strokes;
+    Polygons intentional_void;
+    // Ordinary fill surfaces stop at the ordinary wall generator's inner edge.
+    // Our candidate wall widths can differ. Extend skins through that wall band
+    // so width optimization cannot leave a sparse ring around a solid shell.
+    const auto solid_regions = offset_ex(m_settings.solid_regions,
+        float(scale_(m_settings.max_width * double(m_settings.wall_loops))));
     const double min_spacing = Flow::rounded_rectangle_extrusion_spacing(float(m_settings.min_width), float(h));
     const double max_spacing = Flow::rounded_rectangle_extrusion_spacing(float(m_settings.max_width), float(h));
     for (const auto &inset : walls.getToolPaths()) {
@@ -326,15 +371,35 @@ ContinuousRegionPlan ContinuousRegionPlanner::generate_region(const ExPolygons &
             if (std::all_of(line.begin(), line.end(), [](const auto &junction) { return junction.w == 0; }))
                 continue;
             BeadLoop loop;
+            const bool wall = line.inset_idx < m_settings.wall_loops;
+            const bool sparse = m_settings.infill_density < 1. && !wall;
+            const auto role = wall ? (line.inset_idx == 0 ? erExternalPerimeter : erPerimeter) :
+                              sparse ? erInternalInfill : erSolidInfill;
             for (const auto &j : line.junctions)
                 if (loop.empty() || loop.back().point != j.p)
                     // Clamp before evaluating deposition. This may introduce
                     // local excess or missing material; both remain in the
                     // score and preview. Never turn a vanishing marker into
                     // an unextruded travel hidden inside a "continuous" path.
-                    loop.push_back({ j.p, std::clamp(unscale<double>(j.w), min_spacing, max_spacing), line.inset_idx == 0 });
+                    loop.push_back({ j.p, std::clamp(unscale<double>(j.w), min_spacing, max_spacing), line.inset_idx == 0, role });
             if (loop.size() < 2)
                 continue;
+            if (sparse) {
+                // Keep complete rings wherever Orca requests solid material.
+                // Remaining space receives closed rectilinear passes below.
+                const auto paths = to_paths(loop, h, false);
+                Polygons footprint;
+                for (const auto &path : paths)
+                    path.polygons_covered_by_width(footprint, 0.f);
+                const bool solid = !intersection_ex(footprint, solid_regions).empty();
+                if (!solid) {
+                    append(intentional_void, std::move(footprint));
+                    continue;
+                }
+                if (solid)
+                    for (auto &point : loop)
+                        point.role = erSolidInfill;
+            }
             if (line.is_closed) {
                 if (loop.front().point == loop.back().point)
                     loop.pop_back();
@@ -343,6 +408,35 @@ ContinuousRegionPlan ContinuousRegionPlanner::generate_region(const ExPolygons &
             } else {
                 strokes.emplace_back(std::move(loop));
             }
+        }
+    }
+    if (m_settings.infill_density > 0. && m_settings.infill_density < 1.) {
+        Polygons fixed_footprints;
+        for (const auto &loop : loops)
+            for (const auto &path : to_paths(loop, h, true))
+                path.polygons_covered_by_width(fixed_footprints, 0.f);
+        // A strip contributes two long passes. Leave the same space between
+        // strips as between those passes, giving spacing / density overall.
+        // Clip before tracing to retain closed cycles around holes and branches.
+        const auto centers = diff_ex(offset_ex(region, -float(scale_(width * .5))),
+                                     offset_ex(fixed_footprints, float(scale_(width * .5))));
+        const coord_t gap = scale_(spacing / m_settings.infill_density);
+        const coord_t pitch = 2 * gap;
+        Polygons bands;
+        for (coord_t y = coord_t(std::floor(double(box.min.y()) / double(pitch))) * pitch;
+             y < box.max.y(); y += pitch) {
+            throw_on_cancel();
+            Polygon band;
+            band.points = {Point(box.min.x(), y), Point(box.max.x(), y),
+                           Point(box.max.x(), y + gap), Point(box.min.x(), y + gap)};
+            bands.push_back(std::move(band));
+        }
+        for (const auto &polygon : to_polygons(intersection_ex(centers, bands))) {
+            BeadLoop loop;
+            for (const auto &point : polygon.points)
+                loop.push_back({point, spacing, false, erInternalInfill});
+            if (loop.size() >= 3)
+                loops.push_back(std::move(loop));
         }
     }
     const ExPolygons allowed = offset_ex(m_region, float(scaled<double>(m_settings.boundary_tolerance)));
@@ -354,7 +448,8 @@ ContinuousRegionPlan ContinuousRegionPlanner::generate_region(const ExPolygons &
             progress = false;
             for (size_t i = 0; i < loops.size(); ++i) {
                 throw_on_cancel();
-                if (join_loop(route, loops[i], allowed, spacing, throw_on_cancel)) {
+                const double reach = spacing * 3. / std::max(.01, m_settings.infill_density);
+                if (join_loop(route, loops[i], allowed, spacing, reach, m_settings, throw_on_cancel)) {
                     loops.erase(loops.begin() + i);
                     progress = true;
                     break;
@@ -384,6 +479,14 @@ ContinuousRegionPlan ContinuousRegionPlanner::generate_region(const ExPolygons &
         path.polygons_covered_by_width(footprints, 0.f);
     result.contained = diff_ex(footprints, allowed).empty();
     result.coverage = continuous_coverage(m_region, result.paths);
+    if (!intentional_void.empty()) {
+        // Count only unprinted intentional voids. Connectors deposited across
+        // sparse cells still contribute to actual volume and repeated fill.
+        auto voids = intersection_ex(result.coverage.missing, intentional_void);
+        result.coverage.intentional_void_area = area_mm2(voids);
+        result.coverage.missing = diff_ex(result.coverage.missing, voids);
+        result.coverage.missing_area = area_mm2(result.coverage.missing);
+    }
     result.reason = !result.connected ? "Unresolved open centerlines or disconnected contour routes" :
                     !result.widths_valid ? "Bead width outside configured limits" :
                     !result.contained ? "Bead footprint outside boundary tolerance" :

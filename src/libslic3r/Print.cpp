@@ -4,7 +4,6 @@
 #include "BoundingBox.hpp"
 #include "Brim.hpp"
 #include "ClipperUtils.hpp"
-#include "ConstrainedBeadPlanner.hpp"
 #include "ContinuousPrint.hpp"
 #include "Extruder.hpp"
 #include "Flow.hpp"

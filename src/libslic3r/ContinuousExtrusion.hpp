@@ -19,13 +19,18 @@ struct ContinuousExtrusionSettings
     double layer_height = 0.20;
     double nozzle_diameter = 0.40;
     double filament_diameter = 1.75;
-    double filament_speed = 0.50; // mm of input filament / second, fixed
+    double filament_speed = 0.50; // Nominal mm of input filament / second.
     double boundary_tolerance = 0.05;
     double resolution = 0.025;
     bool omit_unreachable = false;
     bool closed_route = false;
     double missing_weight = 1.;
     double excess_weight = 1.;
+    double infill_density = 1.; // Interior line spacing is bead spacing / density.
+    size_t wall_loops = 2;
+    ExPolygons solid_regions; // Orca's top, bottom, bridge and solid shell surfaces.
+    Points seam_positions; // Preferred wall attachments from Orca's SeamPlacer.
+    Points inner_seam_positions;
 };
 
 struct ContinuousCoverage
@@ -38,6 +43,7 @@ struct ContinuousCoverage
     double outside_area = 0.;
     double excess_area = 0.;
     double deposited_volume = 0.;
+    double intentional_void_area = 0.;
 
     double error_area() const { return missing_area + outside_area + excess_area; }
 };
@@ -58,8 +64,7 @@ struct ContinuousRegionPlan
 // pressure/flow simulation. It counts repeated deposition, not just a union.
 ContinuousCoverage continuous_coverage(const ExPolygons &region, const ExtrusionPaths &paths);
 
-// Requested cruise speed only. Physical execution requires the constant-feed
-// firmware backend; firmware acceleration must be assessed separately.
+// Requested cruise speed only. Actual feed follows firmware acceleration.
 double continuous_extrusion_speed(const ContinuousExtrusionSettings &settings, double mm3_per_mm);
 
 class ContinuousRegionPlanner

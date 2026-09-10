@@ -969,6 +969,7 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloat,               slice_closing_radius))
     ((ConfigOptionEnum<SlicingMode>,   slicing_mode))
     ((ConfigOptionBool,                continuous_extrusion))
+    ((ConfigOptionInt,                 ce_settings_version))
     ((ConfigOptionEnum<ContinuousFlowControl>, ce_flow_control))
     ((ConfigOptionFloat,               ce_volumetric_flow))
     ((ConfigOptionFloat,               ce_nominal_width))

@@ -2,6 +2,7 @@
 #include "Model.hpp"
 #include "Point.hpp"
 #include "Print.hpp"
+#include "ContinuousPrint.hpp"
 #include "BoundingBox.hpp"
 #include "ClipperUtils.hpp"
 #include "ElephantFootCompensation.hpp"
@@ -1099,7 +1100,10 @@ bool PrintObject::invalidate_state_by_config_options(
     std::vector<PrintObjectStep> steps;
     bool invalidated = false;
     for (const t_config_option_key &opt_key : opt_keys) {
-        if (opt_key == "ce_flow_control" || opt_key == "ce_volumetric_flow" || opt_key == "ce_filament_speed") {
+        if (opt_key == "ce_flow_control" || opt_key == "ce_volumetric_flow" || opt_key == "ce_filament_speed" || opt_key == "ce_search_time") {
+            invalidated |= m_print->invalidate_step(psGCodeExport);
+        } else if (continuous_print_enabled(m_config) && (opt_key == "seam_position" || opt_key == "staggered_inner_seams")) {
+            continuous_job.reset();
             invalidated |= m_print->invalidate_step(psGCodeExport);
         } else if (opt_key == "continuous_extrusion" || opt_key.rfind("cbp_", 0) == 0 || opt_key.rfind("ce_", 0) == 0) {
             if (opt_key != "ce_search_time")
@@ -1475,7 +1479,7 @@ bool PrintObject::invalidate_state_by_config_options(
 
 bool PrintObject::invalidate_step(PrintObjectStep step)
 {
-    if (step == posSlice)
+    if (step == posSlice || step == posPerimeters || step == posPrepareInfill)
         continuous_job.reset();
 	bool invalidated = Inherited::invalidate_step(step);
 

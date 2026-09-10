@@ -6054,24 +6054,26 @@ void PrintConfigDef::init_fff_params()
     def = this->add("slicing_mode", coEnum);
     def->label = L("Slicing Mode");
     def->category = L("Other");
-    def->tooltip = L("Use \"Even-odd\" for 3DLabPrint airplane models. Use \"Close holes\" to close all holes in the model. Use \"Continuous extrusion\" to run the experimental constrained bead planner after regular mesh slicing.");
+    def->tooltip = L("Use \"Even-odd\" for 3DLabPrint airplane models. Use \"Close holes\" to close all holes in the model.");
     def->enum_keys_map = &ConfigOptionEnum<SlicingMode>::get_enum_values();
     def->enum_values.push_back("regular");
     def->enum_values.push_back("even_odd");
     def->enum_values.push_back("close_holes");
-    // Kept for backward compatibility with projects and profiles saved before Continuous extrusion became a separate option.
-    def->enum_values.push_back("constrained_bead_planner");
     def->enum_labels.push_back(L("Regular"));
     def->enum_labels.push_back(L("Even-odd"));
     def->enum_labels.push_back(L("Close holes"));
-    def->enum_labels.push_back(L("Continuous extrusion"));
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionEnum<SlicingMode>(SlicingMode::Regular));
+
+    def = this->add("ce_settings_version", coInt);
+    def->min = 1;
+    def->max = 1;
+    def->set_default_value(new ConfigOptionInt(1));
 
     def = this->add("continuous_extrusion", coBool);
     def->label = L("Continuous extrusion");
     def->category = L("Other");
-    def->tooltip = L("Fill a solid object with one uninterrupted, variable-width extrusion route using standard Klipper G-code. Extrusion follows toolhead acceleration to preserve deposited volume. Unreachable material may be omitted; it is never reached by travel.");
+    def->tooltip = L("Print one uninterrupted, variable-width extrusion route using standard Klipper G-code. Uses wall loops, sparse infill density, solid shell settings and seam placement. Sparse interiors use connected rectilinear passes; solid regions use connected concentric paths. Extrusion follows toolhead acceleration. Unreachable material may be omitted; it is never reached by travel.");
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionBool(false));
 
@@ -8639,6 +8641,18 @@ void PrintConfigDef::handle_legacy(t_config_option_key &opt_key, std::string &va
 // Don't convert single options here, implement such conversion in PrintConfigDef::handle_legacy() instead.
 void PrintConfigDef::handle_legacy_composite(DynamicPrintConfig &config)
 {
+    const bool legacy_continuous = (config.has("continuous_extrusion") && config.opt_bool("continuous_extrusion")) ||
+        (config.has("slicing_mode") && config.opt_enum<SlicingMode>("slicing_mode") == SlicingMode::ConstrainedBeadPlanner);
+    if (legacy_continuous && !config.has("ce_settings_version")) {
+        // Earlier continuous projects always printed solid regardless of the
+        // stored ordinary infill percentage. Preserve that deposited geometry.
+        config.set_key_value("sparse_infill_density", new ConfigOptionPercent(100.));
+        config.set_key_value("ce_settings_version", new ConfigOptionInt(1));
+    }
+    if (config.has("slicing_mode") && config.opt_enum<SlicingMode>("slicing_mode") == SlicingMode::ConstrainedBeadPlanner) {
+        config.set_key_value("continuous_extrusion", new ConfigOptionBool(true));
+        config.set_key_value("slicing_mode", new ConfigOptionEnum<SlicingMode>(SlicingMode::Regular));
+    }
     if (config.has("ce_filament_speed") && !config.has("ce_flow_control"))
         config.set_key_value("ce_flow_control", new ConfigOptionEnum<ContinuousFlowControl>(ContinuousFlowControl::Filament));
     if (config.has("thumbnails")) {

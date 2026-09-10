@@ -3,6 +3,7 @@ add_executable(${_TEST_NAME}_tests
 	${_TEST_NAME}_tests.cpp
 	test_data.cpp
 	test_data.hpp
+	test_continuous_extrusion.cpp
 	test_extrusion_entity.cpp
 	test_fill.cpp
 	test_flow.cpp

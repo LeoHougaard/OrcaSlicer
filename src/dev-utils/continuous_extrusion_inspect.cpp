@@ -165,11 +165,8 @@ int main(int argc, char **argv)
             // Recreate them through the definition before applying a project,
             // so saving preserves names such as nozzle type and fan threshold.
             for (const auto &key : config.keys())
-                if (config.option(key)->type() == coEnums) {
-                    const auto value = config.def()->get(key)->default_value->serialize();
-                    config.erase(key);
-                    config.set_deserialize_strict(key, value);
-                }
+                if (config.option(key)->type() == coEnums)
+                    config.set_key_value(key, config.def()->get(key)->create_default_option());
             std::ifstream input(argv[5]);
             const auto overrides = Json::parse(input);
             std::cerr << "Loading and scaling model\n";
@@ -178,8 +175,18 @@ int main(int argc, char **argv)
             if (std::filesystem::path(argv[2]).extension() == ".3mf") {
                 ConfigSubstitutionContext substitutions(ForwardCompatibilitySubstitutionRule::Enable);
                 DynamicPrintConfig project_config;
+                PlateDataPtrs plates;
+                std::vector<Preset *> presets;
+                Semver version;
+                bool is_project = false;
+                ScopeGuard cleanup([&] {
+                    release_PlateData_list(plates);
+                    for (Preset *preset : presets)
+                        delete preset;
+                });
                 model = Model::read_from_file(argv[2], &project_config, &substitutions,
-                    LoadStrategy::AddDefaultInstances | LoadStrategy::LoadModel | LoadStrategy::LoadConfig);
+                    LoadStrategy::AddDefaultInstances | LoadStrategy::LoadModel | LoadStrategy::LoadConfig,
+                    &plates, &presets, &is_project, &version);
                 config.apply(project_config);
                 if (model.objects.size() != 1)
                     throw std::runtime_error("Evaluation requires a single project object");
@@ -206,6 +213,7 @@ int main(int argc, char **argv)
             for (auto item = overrides.begin(); item != overrides.end(); ++item)
                 config.set_deserialize_strict(item.key(), item.value().get<std::string>());
             Print print;
+            print.is_BBL_printer() = false;
             print.auto_assign_extruders(object);
             std::cerr << "Applying model\n";
             print.apply(model, config);
@@ -213,6 +221,13 @@ int main(int argc, char **argv)
             if (auto error = print.validate(); !error.string.empty())
                 throw std::runtime_error(error.string);
             const std::string project = std::string(argv[3]) + ".3mf";
+            // Export the evaluated process settings, including overrides of an
+            // imported project's inherited preset. Its old dirty-key list may
+            // otherwise make the GUI restore system values on opening.
+            auto &different = config.option<ConfigOptionStrings>("different_settings_to_system", true)->values;
+            if (different.empty())
+                different.resize(1);
+            different.front() = escape_strings_cstyle(Preset::print_options());
             PlateData plate;
             plate.plate_index = 0;
             plate.objects_and_instances.emplace_back(0, 0);
@@ -260,7 +275,8 @@ int main(int argc, char **argv)
                 const auto &layer = job.layers[i];
                 layers.push_back({ {"layer", i + 1}, {"z", layer.print_z}, {"missing_area", layer.coverage.missing_area},
                     {"target_area", layer.coverage.target_area}, {"outside_area", layer.coverage.outside_area},
-                    {"excess_area", layer.coverage.excess_area}, {"transition_volume", layer.transition_volume},
+                    {"excess_area", layer.coverage.excess_area}, {"intentional_void_area", layer.coverage.intentional_void_area},
+                    {"transition_volume", layer.transition_volume},
                     {"attempts", job.planners[i].attempts()} });
             }
             std::ofstream report(std::string(argv[3]) + ".json");

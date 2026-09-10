@@ -483,15 +483,9 @@ void Preset::normalize(DynamicPrintConfig &config)
         }
     }
 
-    if (config.has("slicing_mode") && config.has("continuous_extrusion")) {
-        const bool cbp_enabled =
-            config.opt_bool("continuous_extrusion") ||
-            config.opt_enum<SlicingMode>("slicing_mode") == SlicingMode::ConstrainedBeadPlanner;
-
-        if (cbp_enabled) {
-            config.set_key_value("continuous_extrusion", new ConfigOptionBool(true));
-            config.set_key_value("slicing_mode", new ConfigOptionEnum<SlicingMode>(SlicingMode::ConstrainedBeadPlanner));
-        }
+    if (config.has("slicing_mode") && config.opt_enum<SlicingMode>("slicing_mode") == SlicingMode::ConstrainedBeadPlanner) {
+        config.set_key_value("continuous_extrusion", new ConfigOptionBool(true));
+        config.set_key_value("slicing_mode", new ConfigOptionEnum<SlicingMode>(SlicingMode::Regular));
     }
 
     handle_legacy_sla(config);
@@ -991,7 +985,7 @@ static std::vector<std::string> s_Preset_print_options{
     "spiral_finishing_flow_ratio",
     "slicing_mode",
     "continuous_extrusion",
-    "ce_nominal_width", "ce_min_width", "ce_max_width", "ce_filament_speed", "ce_flow_control", "ce_volumetric_flow",
+    "ce_settings_version", "ce_nominal_width", "ce_min_width", "ce_max_width", "ce_filament_speed", "ce_flow_control", "ce_volumetric_flow",
     "ce_resolution", "ce_boundary_tolerance", "ce_search_time", "ce_ramp_length",
     "ce_max_connection", "ce_missing_weight", "ce_excess_weight", "ce_omit_unreachable",
     "cbp_scope",

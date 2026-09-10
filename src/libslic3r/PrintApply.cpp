@@ -1462,6 +1462,8 @@ Print::ApplyStatus Print::apply(const Model &model, DynamicPrintConfig new_full_
                 }
             } else if (model_custom_seam_data_changed(model_object, model_object_new)) {
                 update_apply_status(this->invalidate_step(psGCodeExport));
+                for (const PrintObjectStatus &status : print_objects_range)
+                    status.print_object->continuous_job.reset();
             }
             if (brim_points_differ) {
                 model_object.brim_points = model_object_new.brim_points;

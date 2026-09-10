@@ -1498,32 +1498,6 @@ void Tab::on_value_change(const std::string& opt_key, const boost::any& value)
         return;
     }
 
-    if ((opt_key == "slicing_mode" || opt_key == "continuous_extrusion") &&
-        m_config != nullptr &&
-        m_config->has("slicing_mode") &&
-        m_config->has("continuous_extrusion")) {
-        DynamicPrintConfig new_conf = *m_config;
-        bool               changed  = false;
-
-        if (opt_key == "slicing_mode") {
-            const bool cbp_selected =
-                m_config->opt_enum<SlicingMode>("slicing_mode") == SlicingMode::ConstrainedBeadPlanner;
-            if (m_config->opt_bool("continuous_extrusion") != cbp_selected) {
-                new_conf.set_key_value("continuous_extrusion", new ConfigOptionBool(cbp_selected));
-                changed = true;
-            }
-        } else {
-            const bool enabled = m_config->opt_bool("continuous_extrusion");
-            const SlicingMode target_mode = enabled ? SlicingMode::ConstrainedBeadPlanner : SlicingMode::Regular;
-            if (m_config->opt_enum<SlicingMode>("slicing_mode") != target_mode) {
-                new_conf.set_key_value("slicing_mode", new ConfigOptionEnum<SlicingMode>(target_mode));
-                changed = true;
-            }
-        }
-
-        if (changed)
-            m_config_manipulation.apply(m_config, &new_conf);
-    }
 
     if (opt_key == "gcode_flavor" && m_type == Preset::TYPE_PRINTER) {
         if (auto printer_tab = dynamic_cast<TabPrinter*>(this))
