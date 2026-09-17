@@ -35,6 +35,9 @@ containment can override a requested location.
 
 Layer routes rotate to visible attachment points and rise during incoming
 connections. Departures stay within reach of actual next-layer deposition.
+Sparse routes prefer a deposited column shared by the layers, so an outer-wall
+start does not strand the nozzle at an inward step. Solid routes use the common
+model section without computing a separate union of adjacent bead footprints.
 A ramp follows moving walls within the combined adjacent-section envelope and
 reaches full new-layer height before crossing completed strokes. When an incoming
 connection runs along its entry edge, that interval supplies part of the layer:
@@ -53,7 +56,9 @@ a molten-filament or complete 3D nozzle-clearance simulation.
 reslicing with a larger time budget. Geometry, walls, density, shells and seam
 changes invalidate it. Seam-paint changes explicitly invalidate it as well.
 Flow-only tuning retains the geometry. Cancellation uses the ordinary slicing
-callback; parallel work owns distinct per-layer planners. Progress reports include
+callback; a new cache is published only after all layers are initialized, so a
+canceled setup cannot become a truncated print on retry. Parallel work owns
+distinct per-layer planners. Progress reports include
 evaluated layers and elapsed search time. A candidate may finish after its budget.
 
 ## Export and compatibility
@@ -63,6 +68,9 @@ processor and pressure-advance output. Nominal flow targets obey material, motio
 and cooling limits. Ordinary process speeds are also selectable. Standard firmware
 still varies physical extrusion speed during acceleration. Object markers allow
 automated auditing of continuity without including startup, adhesion or end code.
+Active-plate pauses, color changes and custom layer commands fail validation
+instead of being silently skipped. Layer ramps preserve a nonzero initial Z
+rise at the exporter's coordinate precision.
 
 The hidden `ce_settings_version` distinguishes older solid-only projects from
 projects that intentionally select sparse density. Legacy continuous slicing-mode

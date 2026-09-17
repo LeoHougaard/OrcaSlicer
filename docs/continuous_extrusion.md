@@ -30,7 +30,8 @@ through clear openings. Retained wall and infill paths remain uncrossed.
 An incoming layer connection that follows an edge replaces that part of the
 layer path so it is extruded once. The planner uses Orca's seam placement
 priorities, subject to a contained connection being possible. Layer ramps prefer
-wall material on sparse layers. Scarf seams and intentional seam gaps do not
+a deposited column shared by the layers, including infill, so stepped outlines
+do not strand the nozzle on an earlier outer wall. Scarf seams and intentional seam gaps do not
 apply to an uninterrupted route.
 
 | Continuous setting | Effect |
@@ -61,6 +62,12 @@ one print region, with at least one wall. Supports, raft, spiral vase, prime tow
 draft shield and skirts above the first layer are incompatible. Some geometries
 cannot form the required route under the selected bead and connection limits.
 They produce a slicing error; there is no travel fallback.
+
+Layer-slider pauses, color changes and custom commands on the active plate must
+be removed or continuous extrusion disabled. They cannot interrupt this route
+and are reported before slicing instead of being silently omitted. Canceling
+planning is safe; the next slice rebuilds unfinished initialization and retains
+only fully initialized search state.
 
 The preview uses Orca's normal wall/infill roles, widths, speeds, flow and time
 estimates. A slicing warning reports estimated missing material. Intentional
@@ -96,6 +103,7 @@ fff_print_tests "[ContinuousExtrusion]"
 python scripts/check_continuous_infill.py EXE OPTIONS_JSON OUTPUT_DIR
 python scripts/check_continuous_generalization.py EXE OPTIONS_JSON OUTPUT_DIR
 python scripts/check_continuous_flow.py EXE OPTIONS_JSON OUTPUT_DIR
+python scripts/check_continuous_models.py EXE OPTIONS_JSON OUTPUT_DIR
 ```
 
 `EXE` is `continuous-extrusion-inspect`, built with `ORCA_TOOLS=ON`.
@@ -104,3 +112,21 @@ writes editable 3MF projects, G-code and per-layer coverage reports. Its
 `--slice-native` arguments are input model, output G-code, explicit STL coordinate
 scale and options JSON. The supplied historical STL fixture uses metres; use
 scale 1000 for millimetres. Generated test shapes use millimetres.
+
+`tests/data/continuous_extrusion/native_options.json` supplies an offline test
+configuration. It is not a printer calibration profile. The model sweep runs
+96 cases over straight and curved solids, narrow walls, concave brackets,
+multiple holes, pockets, stairs, shoulders, rotated outlines, scales, densities,
+seam positions, layer heights and nozzle/bead limits. Every case must slice
+within two minutes, retain the continuous route and have no same-height
+centerline crossings or retraces in the exported G-code. Coverage gates are
+less than 5% total missing and excess material, 8% missing on any layer, and
+2% deposited outside the model outline. These are regression gates, not print
+quality guarantees or replacements for the configured boundary tolerance.
+
+Release checks must also run the native infill/project round trip, flow checks,
+core and FFF tests, and the supplied reference model at multiple scales. Use
+Orca's CMake install or CPack targets to distribute the runtime libraries,
+resources and license together. Copying just the executable or a build-tree
+resource link does not produce a standalone installation. Physical TPU finish
+and platform builds require their own evidence before a general release.
