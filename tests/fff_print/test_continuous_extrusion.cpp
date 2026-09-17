@@ -134,3 +134,43 @@ TEST_CASE_METHOD(ContinuousTestResources, "Continuous reslicing keeps flow tunin
     REQUIRE_THAT(print.objects().front()->printing_region(0).config().sparse_infill_density.value,
                  WithinAbs(15., 1e-9));
 }
+
+TEST_CASE_METHOD(ContinuousTestResources, "Canceled continuous initialization retries every layer", "[ContinuousExtrusion]")
+{
+    auto config = continuous_config(15.);
+    Print print;
+    print.is_BBL_printer() = false;
+    Model model;
+    Test::init_print({make_cube(12., 10., 1.)}, print, model, config);
+    print.process();
+    auto &object = *print.get_object(size_t(0));
+    REQUIRE(object.continuous_job->complete);
+    object.continuous_job.reset();
+
+    REQUIRE_THROWS_AS(apply_continuous_print(print, [] { throw CanceledException(); }), CanceledException);
+    REQUIRE_FALSE(object.continuous_job);
+    REQUIRE_NOTHROW(apply_continuous_print(print, [] {}));
+    REQUIRE(object.continuous_job->complete);
+    REQUIRE(object.continuous_job->layers.size() == object.layers().size());
+    REQUIRE(object.continuous_job->layers.size() == 5);
+}
+
+TEST_CASE_METHOD(ContinuousTestResources, "Continuous validation reports commands on the active plate", "[ContinuousExtrusion]")
+{
+    const auto type = GENERATE(CustomGCode::PausePrint, CustomGCode::ColorChange, CustomGCode::Custom);
+    auto config = continuous_config(15.);
+    Print print;
+    print.is_BBL_printer() = false;
+    Model model;
+    Test::init_print({make_cube(12., 10., 1.)}, print, model, config);
+    const CustomGCode::Item command{.6, type, 1, "", "M400"};
+    model.plates_custom_gcodes[model.curr_plate_index + 1].gcodes.push_back(command);
+    print.apply(model, config);
+    REQUIRE(continuous_print_validation(print).empty());
+    model.plates_custom_gcodes[model.curr_plate_index].gcodes.push_back(command);
+    print.apply(model, config);
+    REQUIRE_FALSE(continuous_print_validation(print).empty());
+    config.set_deserialize_strict("continuous_extrusion", "0");
+    print.apply(model, config);
+    REQUIRE(continuous_print_validation(print).empty());
+}

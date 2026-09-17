@@ -93,6 +93,10 @@ std::string continuous_print_validation(const Print &print)
     const auto &config = object.config();
     if (print.config().gcode_flavor.value != gcfKlipper)
         return _u8L("Continuous extrusion currently supports standard Klipper G-code.");
+    const auto &model = print.model();
+    const auto commands = model.plates_custom_gcodes.find(model.curr_plate_index);
+    if (commands != model.plates_custom_gcodes.end() && !commands->second.gcodes.empty())
+        return _u8L("Remove layer pauses, color changes, and custom layer commands from this plate, or disable continuous extrusion.");
     if (print.extruders().size() != 1 || object.num_printing_regions() != 1)
         return _u8L("Continuous extrusion currently requires one material and one print region.");
     if (object.printing_region(0).config().wall_loops.value < 1)
@@ -119,13 +123,22 @@ std::vector<ContinuousLayerRoute> continuous_join_layers(
         !std::isfinite(ramp_length) || ramp_length <= 0. || !std::isfinite(max_connection) || max_connection <= 0.)
         throw std::invalid_argument("Invalid continuous layer transition settings");
     std::vector<ContinuousLayerRoute> result;
-    // A stable interior attachment avoids seam drift onto sloping walls.
-    // Prefer a material column shared by all layers, with room for the bead
-    // and connector. If none exists, use the local endpoint search below.
+    // Prefer a deposited column shared by all layers. Using only the model
+    // outlines can choose an empty sparse cell; starting on the outer wall
+    // can strand the route when a later layer steps inward.
     ExPolygons common = regions.empty() ? ExPolygons{} : regions.front();
-    for (size_t i = 1; i < regions.size() && !common.empty(); ++i) {
+    for (size_t i = 0; i < plans.size() && !common.empty(); ++i) {
         throw_on_cancel();
-        common = intersection_ex(common, regions[i]);
+        if (settings.infill_density < 1.) {
+            Polygons deposited;
+            for (const auto &path : plans[i].paths)
+                path.polygons_covered_by_width(deposited, 0.f);
+            common = intersection_ex(common, union_ex(deposited));
+        } else {
+            // Solid layers have no intentional voids. Avoid repeatedly
+            // unioning thousands of adjacent beads just to find a reference.
+            common = intersection_ex(common, regions[i]);
+        }
     }
     const auto reference = interior_reference(common);
     for (size_t layer = 0; layer < plans.size(); ++layer) {
@@ -159,7 +172,7 @@ std::vector<ContinuousLayerRoute> continuous_join_layers(
             return layer + 1 == regions.size() || std::any_of(next_centers.begin(), next_centers.end(), [&](const auto &r) { return r.contains(point); });
         };
         auto target_reference = reference ? reference : interior_reference(next_material);
-        if (settings.infill_density < 1.) {
+        if (settings.infill_density < 1. && !reference) {
             // Sparse layers cannot ramp through an empty interior. Start at a
             // wall attachment selected by the seam planner instead.
             for (size_t i = 0; i < paths.size(); ++i)
@@ -323,6 +336,12 @@ std::vector<ContinuousLayerRoute> continuous_join_layers(
         if (!connection.empty())
             ramp = std::min(ramp, unscale<double>(connection.front().length()));
         const double base_z = layer ? print_zs[layer - 1] : print_zs[layer];
+        if (layer && !paths.empty())
+            // The first endpoint must still rise after XYZ is rounded to
+            // 0.001 mm in G-code. Otherwise a short first edge becomes a flat
+            // retrace of the preceding layer despite a rising planner path.
+            ramp = std::min(ramp, unscale<double>(paths.front().length()) *
+                                  (print_zs[layer] - base_z) / .001);
         if (layer) {
             // Reach the new layer height before crossing an old-layer stroke.
             // Collinear stacking is the normal ramp; transverse crossings need
@@ -411,8 +430,10 @@ void apply_continuous_print(Print &print, const std::function<void()> &throw_on_
                             "top_shell_thickness", "bottom_shell_thickness"})
         signature += std::string(key) + "=" + region_config.opt_serialize(key) + ";";
     if (!object.continuous_job || object.continuous_job->signature != signature) {
-        object.continuous_job = std::make_shared<ContinuousPrintJob>();
-        auto &job = *object.continuous_job;
+        // Publish only after every layer is initialized. Cancellation during
+        // seam placement must not leave a partial cache for the next slice.
+        auto pending_job = std::make_shared<ContinuousPrintJob>();
+        auto &job = *pending_job;
         job.signature = signature;
         job.settings = settings;
         print.set_status(75, _u8L("Continuous extrusion: placing wall attachments"));
@@ -446,6 +467,7 @@ void apply_continuous_print(Print &print, const std::function<void()> &throw_on_
             }
             job.planners.emplace_back(layer->lslices, settings);
         }
+        object.continuous_job = std::move(pending_job);
     }
     auto &job = *object.continuous_job;
     if (job.complete && (job.elapsed >= config.ce_search_time.value ||
