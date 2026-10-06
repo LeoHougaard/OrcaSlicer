@@ -5481,11 +5481,37 @@ void PrintConfigDef::init_fff_params()
 
     def = this->add("continuous_filament_connector_flow_ratio", coFloat);
     def->label = L("Continuous filament connector flow");
-    def->tooltip = L("Flow ratio used when continuous filament mode converts internal travel moves into low-flow connector extrusions.");
+    def->tooltip = L("Flow ratio used for fallback connector extrusions when continuous Fermat spiral planning cannot keep the path continuous.");
     def->min = 0;
     def->max = 1;
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionFloat(0.25));
+
+    def = this->add("continuous_filament_fermat_fill", coBool);
+    def->label = L("Continuous Fermat spiral fill");
+    def->tooltip = L("Fill continuous-filament islands using connected Fermat spirals generated from contour-parallel iso-contours.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("continuous_filament_layer_scarf", coBool);
+    def->label = L("Continuous layer scarf");
+    def->tooltip = L("Hide the continuous-filament layer transition by overlapping the start of the Fermat path while raising Z into the next layer.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("continuous_filament_layer_scarf_length", coFloat);
+    def->label = L("Continuous layer scarf length");
+    def->tooltip = L("Length of the overlapped continuous-filament layer transition. Zero uses the regular scarf joint length.");
+    def->sidetext = L("mm");
+    def->min = 0;
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionFloat(0));
+
+    def = this->add("continuous_filament_layer_scarf_requires_model_above", coBool);
+    def->label = L("Require model above continuous scarf");
+    def->tooltip = L("Only place the continuous-filament Z scarf where the next layer contains model material above the seam.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(true));
 
     def = this->add("spiral_mode_smooth", coBool);
     def->label = L("Smooth Spiral");
@@ -8155,6 +8181,27 @@ void DynamicPrintConfig::normalize_fdm(int used_filaments)
         }
     }
 
+    if (this->has("continuous_filament_mode") && this->opt<ConfigOptionBool>("continuous_filament_mode", true)->value) {
+        {
+            auto* opt = this->opt<ConfigOptionFloats>("z_hop", true);
+            opt->values.assign(opt->values.size(), 0.0);
+            auto* opt_n = this->opt<ConfigOptionFloatsNullable>("filament_z_hop", true);
+            opt_n->values.assign(opt_n->values.size(), 0.0);
+        }
+        {
+            auto* opt = this->opt<ConfigOptionBools>("retract_when_changing_layer", true);
+            opt->values.assign(opt->values.size(), false);
+            auto* opt_n = this->opt<ConfigOptionBoolsNullable>("filament_retract_when_changing_layer", true);
+            opt_n->values.assign(opt_n->values.size(), false);
+        }
+        {
+            auto* opt = this->opt<ConfigOptionFloats>("retraction_length", true);
+            opt->values.assign(opt->values.size(), 0.0);
+            auto* opt_n = this->opt<ConfigOptionFloatsNullable>("filament_retraction_length", true);
+            opt_n->values.assign(opt_n->values.size(), 0.0);
+        }
+    }
+
     if (auto *opt_gcode_resolution = this->opt<ConfigOptionFloat>("resolution", false); opt_gcode_resolution)
         // Resolution will be above 1um.
         opt_gcode_resolution->value = std::max(opt_gcode_resolution->value, 0.001);
@@ -8225,6 +8272,27 @@ void DynamicPrintConfig::normalize_fdm_1()
             this->opt<ConfigOptionBool>("alternate_extra_wall", true)->value = false;
             this->opt<ConfigOptionInt>("top_shell_layers", true)->value = 0;
             this->opt<ConfigOptionPercent>("sparse_infill_density", true)->value = 0;
+        }
+    }
+
+    if (this->has("continuous_filament_mode") && this->opt<ConfigOptionBool>("continuous_filament_mode", true)->value) {
+        {
+            auto* opt = this->opt<ConfigOptionFloats>("z_hop", true);
+            opt->values.assign(opt->values.size(), 0.0);
+            auto* opt_n = this->opt<ConfigOptionFloatsNullable>("filament_z_hop", true);
+            opt_n->values.assign(opt_n->values.size(), 0.0);
+        }
+        {
+            auto* opt = this->opt<ConfigOptionBools>("retract_when_changing_layer", true);
+            opt->values.assign(opt->values.size(), false);
+            auto* opt_n = this->opt<ConfigOptionBoolsNullable>("filament_retract_when_changing_layer", true);
+            opt_n->values.assign(opt_n->values.size(), false);
+        }
+        {
+            auto* opt = this->opt<ConfigOptionFloats>("retraction_length", true);
+            opt->values.assign(opt->values.size(), 0.0);
+            auto* opt_n = this->opt<ConfigOptionFloatsNullable>("filament_retraction_length", true);
+            opt_n->values.assign(opt_n->values.size(), 0.0);
         }
     }
 
@@ -9942,10 +10010,6 @@ std::map<std::string, std::string> validate(const FullPrintConfig &cfg, bool und
             error_message.emplace("spiral_mode", L("Invalid value when continuous filament mode is enabled"));
         if (!cfg.use_relative_e_distances)
             error_message.emplace("use_relative_e_distances", L("Continuous filament mode requires relative extruder addressing"));
-        if (std::any_of(cfg.z_hop.values.begin(), cfg.z_hop.values.end(), [](double hop) { return hop > EPSILON; }))
-            error_message.emplace("z_hop", L("Continuous filament mode does not support Z-hop"));
-        if (std::any_of(cfg.retract_when_changing_layer.values.begin(), cfg.retract_when_changing_layer.values.end(), [](bool enabled) { return enabled; }))
-            error_message.emplace("retract_when_changing_layer", L("Continuous filament mode does not support retraction on layer change"));
         if (cfg.enable_support)
             error_message.emplace("enable_support", L("Continuous filament mode does not support supports"));
         if (cfg.enable_prime_tower)

@@ -92,6 +92,7 @@ public:
         m_support_material_overhangs_queried = queried;
     }
     int    show_spiral_mode_settings_dialog(bool is_object_config = false);
+    int    show_continuous_filament_settings_dialog(bool is_object_config = false);
 
 private:
     bool get_temperature_range(DynamicPrintConfig *config, int &range_low, int &range_high);

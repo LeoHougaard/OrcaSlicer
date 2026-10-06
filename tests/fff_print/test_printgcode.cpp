@@ -279,3 +279,33 @@ SCENARIO( "PrintGCode basic functionality", "[PrintGCode][.]") {
         }
     }
 }
+
+SCENARIO("Continuous filament mode prints connected Fermat spiral layers with Z scarf transitions", "[PrintGCode][continuous_filament]") {
+    std::string gcode = Slic3r::Test::slice({ TestMesh::cube_20x20x20 }, {
+        { "continuous_filament_mode", true },
+        { "continuous_filament_fermat_fill", true },
+        { "continuous_filament_layer_scarf", true },
+        { "use_relative_e_distances", true },
+        { "retract_when_changing_layer", false },
+        { "z_hop", 0 },
+        { "wall_loops", 2 },
+        { "top_shell_layers", 0 },
+        { "bottom_shell_layers", 0 },
+        { "sparse_infill_density", 0 },
+        { "gcode_comments", true }
+    }, true);
+
+    REQUIRE(gcode.find("connected Fermat spiral iso-contour planner") != std::string::npos);
+    REQUIRE(gcode.find("continuous Fermat spiral") != std::string::npos);
+    REQUIRE(gcode.find("continuous filament layer scarf") != std::string::npos);
+
+    GCodeReader reader;
+    reader.parse_buffer(gcode, [](GCodeReader&, const GCodeReader::GCodeLine& line) {
+        if ((!line.cmd_is("G0") && !line.cmd_is("G1")) || !line.has_z() || !line.has_e())
+            return;
+
+        const std::string raw = line.raw();
+        if (raw.find("continuous filament layer scarf") != std::string::npos)
+            REQUIRE(raw.find('E') != std::string::npos);
+    });
+}

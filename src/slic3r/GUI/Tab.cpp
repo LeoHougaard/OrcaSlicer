@@ -2662,6 +2662,10 @@ void TabPrint::build()
         optgroup->append_single_option_line("spiral_mode", "others_settings_special_mode#spiral-vase");
         optgroup->append_single_option_line("continuous_filament_mode", "others_settings_special_mode#spiral-vase");
         optgroup->append_single_option_line("continuous_filament_connector_flow_ratio", "others_settings_special_mode#spiral-vase");
+        optgroup->append_single_option_line("continuous_filament_fermat_fill", "others_settings_special_mode#spiral-vase");
+        optgroup->append_single_option_line("continuous_filament_layer_scarf", "others_settings_special_mode#spiral-vase");
+        optgroup->append_single_option_line("continuous_filament_layer_scarf_length", "others_settings_special_mode#spiral-vase");
+        optgroup->append_single_option_line("continuous_filament_layer_scarf_requires_model_above", "others_settings_special_mode#spiral-vase");
         optgroup->append_single_option_line("spiral_mode_smooth", "others_settings_special_mode#smooth-spiral");
         optgroup->append_single_option_line("spiral_mode_max_xy_smoothing", "others_settings_special_mode#max-xy-smoothing");
         optgroup->append_single_option_line("spiral_starting_flow_ratio", "others_settings_special_mode#spiral-starting-flow-ratio");

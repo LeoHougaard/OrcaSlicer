@@ -232,6 +232,8 @@ set(lisbslic3r_sources
     GCode/PrintExtents.hpp
     GCode/ContinuousFilament.cpp
     GCode/ContinuousFilament.hpp
+    GCode/ContinuousFilamentPlanner.cpp
+    GCode/ContinuousFilamentPlanner.hpp
     GCodeReader.cpp
     GCodeReader.hpp
     GCode/RetractWhenCrossingPerimeters.cpp

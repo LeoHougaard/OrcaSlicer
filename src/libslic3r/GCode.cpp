@@ -22,6 +22,7 @@
 #include "libslic3r/format.hpp"
 #include "Time.hpp"
 #include "GCode/ExtrusionProcessor.hpp"
+#include "GCode/ContinuousFilamentPlanner.hpp"
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
@@ -5344,7 +5345,11 @@ LayerResult GCode::process_layer(
                         }
                         return false;
                     };
-                    {
+                    if (m_config.continuous_filament_mode) {
+                        if (m_layer == nullptr || m_layer->lslices.size() != 1)
+                            throw Slic3r::SlicingError(_(L("Continuous filament mode requires exactly one connected island per layer.")), instance_to_print.print_object.id().id);
+                        gcode += this->extrude_continuous_filament_route(print, by_region_specific, m_layer->lslices.front());
+                    } else {
                         // Print perimeters of regions that has is_infill_first == false
                         gcode += this->extrude_perimeters(print, by_region_specific, first_layer, false);
                         if (!has_wipe_tower && need_insert_timelapse_gcode_for_traditional && printer_structure == PrinterStructure::psI3
@@ -5358,9 +5363,9 @@ LayerResult GCode::process_layer(
                         gcode += this->extrude_infill(print, by_region_specific, false);
                         // Then print perimeters of regions that has is_infill_first == true
                         gcode += this->extrude_perimeters(print, by_region_specific, first_layer, true);
+                        // ironing
+                        gcode += this->extrude_infill(print,by_region_specific, true);
                     }
-                    // ironing
-                    gcode += this->extrude_infill(print,by_region_specific, true);
                 }
 
                 if (this->config().gcode_label_objects) {
@@ -6030,6 +6035,245 @@ std::string GCode::extrude_perimeters(const Print &print, const std::vector<Obje
             for (const ExtrusionEntity* ee : region.perimeters)
                 gcode += this->extrude_entity(*ee, "perimeter", -1., region.perimeters);
         }
+    return gcode;
+}
+
+namespace {
+
+struct ContinuousFilamentRouteItem
+{
+    std::unique_ptr<ExtrusionEntity> entity;
+    size_t                           order { 0 };
+};
+
+static bool cf_is_fill_family_role(ExtrusionRole role)
+{
+    return role == erBottomSurface || role == erTopSolidInfill || role == erSolidInfill || role == erInternalInfill;
+}
+
+static bool cf_accept_role(const ExtrusionEntity &entity, bool perimeters)
+{
+    const ExtrusionRole role = entity.role();
+    return perimeters ? is_perimeter(role) : cf_is_fill_family_role(role);
+}
+
+static void cf_collect_entities(const ExtrusionEntity *entity, bool perimeters, std::vector<ContinuousFilamentRouteItem> &out, size_t &order)
+{
+    if (entity == nullptr)
+        return;
+
+    if (const auto *collection = dynamic_cast<const ExtrusionEntityCollection*>(entity)) {
+        for (const ExtrusionEntity *child : collection->entities)
+            cf_collect_entities(child, perimeters, out, order);
+        return;
+    }
+
+    if (entity->role() == erIroning)
+        throw Slic3r::SlicingError(_(L("Continuous filament mode does not support ironing paths.")));
+
+    if (cf_accept_role(*entity, perimeters))
+        out.push_back({ std::unique_ptr<ExtrusionEntity>(entity->clone()), order++ });
+}
+
+static int cf_wall_depth(const ExtrusionEntity &entity, size_t fallback_order)
+{
+    if (entity.role() == erExternalPerimeter)
+        return 0;
+    if (entity.inset_idx >= 0)
+        return entity.inset_idx + 1;
+    return int(fallback_order + 1);
+}
+
+static double cf_endpoint_distance_sq(const ExtrusionEntity &entity, const Point &from)
+{
+    const double first = (entity.first_point() - from).cast<double>().squaredNorm();
+    const double last  = (entity.last_point() - from).cast<double>().squaredNorm();
+    return entity.is_loop() || !entity.can_reverse() ? first : std::min(first, last);
+}
+
+static void cf_orient_entity_to(ExtrusionEntity &entity, const Point &from)
+{
+    if (auto *loop = dynamic_cast<ExtrusionLoop*>(&entity)) {
+        loop->split_at(from, true);
+        return;
+    }
+
+    if (entity.can_reverse()) {
+        const double first = (entity.first_point() - from).cast<double>().squaredNorm();
+        const double last  = (entity.last_point() - from).cast<double>().squaredNorm();
+        if (last < first)
+            entity.reverse();
+    }
+}
+
+static void cf_collect_lines(const ExtrusionEntity &entity, Lines &out)
+{
+    Polylines polylines;
+    entity.collect_polylines(polylines);
+    for (const Polyline &polyline : polylines)
+        append(out, polyline.lines());
+}
+
+static bool cf_near_point(const Point &a, const Point &b)
+{
+    return (a - b).cast<double>().squaredNorm() <= double(SCALED_EPSILON) * double(SCALED_EPSILON);
+}
+
+static bool cf_connector_crosses_lines(const Line &connector, const std::vector<ContinuousFilamentRouteItem> &items, size_t first_unprinted_idx, size_t skip_idx)
+{
+    for (size_t idx = first_unprinted_idx; idx < items.size(); ++idx) {
+        if (idx == skip_idx || !items[idx].entity)
+            continue;
+
+        Lines lines;
+        cf_collect_lines(*items[idx].entity, lines);
+        for (const Line &line : lines) {
+            Point intersection;
+            if (connector.intersection(line, &intersection) &&
+                !cf_near_point(intersection, connector.a) &&
+                !cf_near_point(intersection, connector.b)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+static bool cf_find_reference_path(const ExtrusionEntity *entity, ExtrusionPath &out)
+{
+    if (entity == nullptr)
+        return false;
+    if (const auto *path = dynamic_cast<const ExtrusionPath*>(entity)) {
+        if (path->mm3_per_mm > 0. && path->width > 0.f && path->height > 0.f) {
+            out = *path;
+            return true;
+        }
+        return false;
+    }
+    if (const auto *multipath = dynamic_cast<const ExtrusionMultiPath*>(entity)) {
+        for (const ExtrusionPath &path : multipath->paths) {
+            if (path.mm3_per_mm > 0. && path.width > 0.f && path.height > 0.f) {
+                out = path;
+                return true;
+            }
+        }
+        return false;
+    }
+    if (const auto *loop = dynamic_cast<const ExtrusionLoop*>(entity)) {
+        for (const ExtrusionPath &path : loop->paths) {
+            if (path.mm3_per_mm > 0. && path.width > 0.f && path.height > 0.f) {
+                out = path;
+                return true;
+            }
+        }
+        return false;
+    }
+    if (const auto *collection = dynamic_cast<const ExtrusionEntityCollection*>(entity)) {
+        for (const ExtrusionEntity *child : collection->entities)
+            if (cf_find_reference_path(child, out))
+                return true;
+    }
+    return false;
+}
+
+} // namespace
+
+std::string GCode::extrude_continuous_filament_route(const Print& print, const std::vector<ObjectByExtruder::Island::Region> &by_region, const ExPolygon &island)
+{
+    ExtrusionPath reference_path;
+    bool found_reference_path = false;
+    for (const ObjectByExtruder::Island::Region &region : by_region) {
+        for (const ExtrusionEntity *entity : region.perimeters)
+            found_reference_path = found_reference_path || cf_find_reference_path(entity, reference_path);
+        for (const ExtrusionEntity *entity : region.infills)
+            found_reference_path = found_reference_path || cf_find_reference_path(entity, reference_path);
+    }
+    if (!found_reference_path) {
+        const double nozzle_diameter = m_config.nozzle_diameter.size() == 0 ? 0.4 : m_config.nozzle_diameter.get_at(0);
+        const double layer_height = m_layer != nullptr && m_layer->height > 0. ? m_layer->height :
+            (m_last_height > 0.f ? double(m_last_height) : m_config.layer_height.value);
+        double line_width = print.default_region_config().get_abs_value("sparse_infill_line_width", nozzle_diameter);
+        if (line_width <= 0.)
+            line_width = print.default_region_config().get_abs_value("inner_wall_line_width", nozzle_diameter);
+        if (line_width <= 0.)
+            line_width = print.default_object_config().get_abs_value("line_width", nozzle_diameter);
+        if (line_width <= 0.)
+            line_width = nozzle_diameter;
+
+        Flow fallback_flow { float(line_width), float(layer_height), float(nozzle_diameter) };
+        reference_path = ExtrusionPath(erInternalInfill, fallback_flow.mm3_per_mm(), fallback_flow.width(), fallback_flow.height());
+    }
+
+    const ExPolygon *next_layer_island = nullptr;
+    if (m_layer != nullptr && m_layer->upper_layer != nullptr && m_layer->upper_layer->lslices.size() == 1)
+        next_layer_island = &m_layer->upper_layer->lslices.front();
+
+    ContinuousFilamentPlannerParams params;
+    params.spacing = std::max<coord_t>(scale_(0.05), coord_t(scale_(reference_path.width > 0.f ? reference_path.width : m_config.nozzle_diameter.get_at(0))));
+    params.mm3_per_mm = reference_path.mm3_per_mm;
+    params.width = reference_path.width;
+    params.height = reference_path.height;
+    params.layer_z = m_nominal_z;
+    params.next_layer_z = next_layer_island == nullptr || m_layer == nullptr || m_layer->upper_layer == nullptr ? m_nominal_z : m_layer->upper_layer->print_z + m_config.z_offset.value;
+    params.enable_layer_scarf = m_config.continuous_filament_layer_scarf.value;
+    params.require_model_above_scarf = m_config.continuous_filament_layer_scarf_requires_model_above.value;
+    params.layer_scarf_length = m_config.continuous_filament_layer_scarf_length.value > 0. ?
+        m_config.continuous_filament_layer_scarf_length.value :
+        std::max<double>(m_config.seam_slope_min_length.value, reference_path.width * 2.);
+    params.seam_clearance_radius = coord_t(scale_(std::max<double>(reference_path.width, m_config.nozzle_diameter.get_at(0) * 0.5)));
+
+    if (!m_config.continuous_filament_fermat_fill.value)
+        throw Slic3r::SlicingError(_(L("Continuous filament mode requires Continuous Fermat spiral fill.")));
+
+    ContinuousFilamentPlan plan = ContinuousFilamentPlanner::plan_island(island, next_layer_island, params);
+
+    std::string gcode;
+    gcode += "; continuous filament: connected Fermat spiral iso-contour planner\n";
+    gcode += this->extrude_path(plan.path, "continuous Fermat spiral", -1.);
+
+    bool emitted_layer_scarf = false;
+    if (plan.has_layer_scarf && plan.path.polyline.points.size() >= 2) {
+        const Point path_start = plan.path.polyline.points.front().to_point();
+        const Point path_end = plan.path.polyline.points.back().to_point();
+        const double closure_distance = (path_end - path_start).cast<double>().norm() * SCALING_FACTOR;
+        if (closure_distance > std::max<double>(reference_path.width * 2., 0.2)) {
+            gcode += "; continuous filament: layer scarf skipped because Fermat path did not close near its start\n";
+        } else {
+            const double scarf_len = std::max(params.layer_scarf_length, 0.1);
+            const double e_per_mm = m_writer.filament()->e_per_mm3() * reference_path.mm3_per_mm * m_config.scarf_joint_flow_ratio;
+            const double speed = std::min(m_config.get_abs_value("sparse_infill_speed"),
+                                          m_config.scarf_joint_speed.get_abs_value(m_config.get_abs_value("sparse_infill_speed")));
+            gcode += m_writer.set_speed(std::max(1.0, speed) * 60.0, "", ";_CONTINUOUS_FILAMENT_LAYER_SCARF");
+
+            double walked = 0.;
+            Point prev = path_start;
+            m_writer.get_position().z() = m_nominal_z;
+            for (size_t idx = 1; idx < plan.path.polyline.points.size() && walked < scarf_len; ++idx) {
+                Point next = plan.path.polyline.points[idx].to_point();
+                const double seg_len = (next - prev).cast<double>().norm() * SCALING_FACTOR;
+                if (seg_len <= EPSILON)
+                    continue;
+                walked += seg_len;
+                const double t = std::min(1.0, walked / scarf_len);
+                const Vec2d dest2d = this->point_to_gcode(next);
+                gcode += m_writer.extrude_to_xyz(Vec3d(dest2d.x(), dest2d.y(), lerp(m_nominal_z, params.next_layer_z, t)),
+                                                 e_per_mm * seg_len,
+                                                 "continuous filament layer scarf");
+                this->set_last_pos(next);
+                prev = next;
+            }
+            m_writer.get_position().z() = params.next_layer_z;
+            emitted_layer_scarf = true;
+        }
+    } else if (m_layer != nullptr && m_layer->upper_layer != nullptr) {
+        gcode += "; continuous filament: layer scarf skipped because no next-layer material covers the seam\n";
+    }
+
+    m_continuous_filament_model_started = true;
+    m_need_change_layer_lift_z = false;
+    m_continuous_filament_last_z = emitted_layer_scarf ? params.next_layer_z : m_nominal_z;
+    m_continuous_filament_last_island = island;
+    m_continuous_filament_has_last_island = true;
     return gcode;
 }
 

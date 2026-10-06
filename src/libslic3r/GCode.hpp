@@ -489,6 +489,7 @@ private:
 
     std::string     extrude_perimeters(const Print& print, const std::vector<ObjectByExtruder::Island::Region>& by_region, bool is_first_layer, bool is_infill_first);
     std::string     extrude_infill(const Print& print, const std::vector<ObjectByExtruder::Island::Region>& by_region, bool ironing);
+    std::string     extrude_continuous_filament_route(const Print& print, const std::vector<ObjectByExtruder::Island::Region>& by_region, const ExPolygon& island);
     std::string     extrude_support(const ExtrusionEntityCollection& support_fills, const ExtrusionRole support_extrusion_role);
 
     // BBS
@@ -602,6 +603,10 @@ private:
     std::unique_ptr<CoolingBuffer>      m_cooling_buffer;
     std::unique_ptr<SpiralVase>         m_spiral_vase;
     std::unique_ptr<ContinuousFilament> m_continuous_filament;
+    bool                                m_continuous_filament_model_started { false };
+    coordf_t                            m_continuous_filament_last_z { 0. };
+    ExPolygon                           m_continuous_filament_last_island;
+    bool                                m_continuous_filament_has_last_island { false };
 
     std::unique_ptr<PressureEqualizer>  m_pressure_equalizer;
     

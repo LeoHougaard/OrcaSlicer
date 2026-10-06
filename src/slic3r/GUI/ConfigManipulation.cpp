@@ -354,6 +354,74 @@ void ConfigManipulation::update_print_fff_config(DynamicPrintConfig* config, con
         is_msg_dlg_already_exist = false;
     }
 
+    auto opt_bool_or = [](const DynamicPrintConfig* cfg, const std::string& key, bool fallback) {
+        const auto* opt = cfg->option<ConfigOptionBool>(key);
+        return opt != nullptr ? opt->value : fallback;
+    };
+    auto opt_int_or = [](const DynamicPrintConfig* cfg, const std::string& key, int fallback) {
+        const auto* opt = cfg->option<ConfigOptionInt>(key);
+        return opt != nullptr ? opt->value : fallback;
+    };
+    auto opt_string_or = [](const DynamicPrintConfig* cfg, const std::string& key) {
+        const auto* opt = cfg->option<ConfigOptionString>(key);
+        return opt != nullptr ? opt->value : std::string();
+    };
+    auto opt_percent_or = [](const DynamicPrintConfig* cfg, const std::string& key, double fallback) {
+        const auto* opt = cfg->option<ConfigOptionPercent>(key);
+        return opt != nullptr ? opt->value : fallback;
+    };
+    auto opt_infill_pattern_or = [](const DynamicPrintConfig* cfg, const std::string& key, InfillPattern fallback) {
+        const auto* opt = cfg->option<ConfigOptionEnum<InfillPattern>>(key);
+        return opt != nullptr ? opt->value : fallback;
+    };
+    auto opt_timelapse_or = [](const DynamicPrintConfig* cfg, const std::string& key, TimelapseType fallback) {
+        const auto* opt = cfg->option<ConfigOptionEnum<TimelapseType>>(key);
+        return opt != nullptr ? opt->value : fallback;
+    };
+    const bool continuous_filament_enabled =
+        config->has("continuous_filament_mode") &&
+        config->opt_bool("continuous_filament_mode");
+    const bool continuous_filament_needs_settings =
+        continuous_filament_enabled &&
+        (opt_bool_or(config, "spiral_mode", false) ||
+         !opt_bool_or(config, "use_relative_e_distances", true) ||
+         opt_bool_or(config, "enable_prime_tower", false) ||
+         opt_timelapse_or(config, "timelapse_type", TimelapseType::tlTraditional) != TimelapseType::tlTraditional ||
+         !opt_string_or(config, "time_lapse_gcode").empty() ||
+         opt_bool_or(config, "manual_filament_change", false) ||
+         opt_bool_or(config, "enable_support", false) ||
+         opt_int_or(config, "enforce_support_layers", 0) > 0 ||
+         (opt_percent_or(config, "sparse_infill_density", 0.0) > 0 && opt_infill_pattern_or(config, "sparse_infill_pattern", InfillPattern::ipZigZag) != InfillPattern::ipZigZag) ||
+         opt_infill_pattern_or(config, "top_surface_pattern", InfillPattern::ipRectilinear) != InfillPattern::ipRectilinear ||
+         opt_infill_pattern_or(config, "bottom_surface_pattern", InfillPattern::ipRectilinear) != InfillPattern::ipRectilinear ||
+         opt_infill_pattern_or(config, "internal_solid_infill_pattern", InfillPattern::ipRectilinear) != InfillPattern::ipRectilinear);
+
+    if (!is_plate_config && continuous_filament_needs_settings && is_global_config)
+    {
+        DynamicPrintConfig new_conf = *config;
+        auto answer = show_continuous_filament_settings_dialog(is_object_config);
+        if (answer == wxID_YES) {
+            new_conf.set_key_value("spiral_mode", new ConfigOptionBool(false));
+            new_conf.set_key_value("use_relative_e_distances", new ConfigOptionBool(true));
+            new_conf.set_key_value("z_hop", new ConfigOptionFloats{0.0});
+            new_conf.set_key_value("retract_when_changing_layer", new ConfigOptionBools{false});
+            new_conf.set_key_value("enable_prime_tower", new ConfigOptionBool(false));
+            new_conf.set_key_value("timelapse_type", new ConfigOptionEnum<TimelapseType>(tlTraditional));
+            new_conf.set_key_value("time_lapse_gcode", new ConfigOptionString(""));
+            new_conf.set_key_value("manual_filament_change", new ConfigOptionBool(false));
+            new_conf.set_key_value("enable_support", new ConfigOptionBool(false));
+            new_conf.set_key_value("enforce_support_layers", new ConfigOptionInt(0));
+            new_conf.set_key_value("sparse_infill_pattern", new ConfigOptionEnum<InfillPattern>(ipZigZag));
+            new_conf.set_key_value("top_surface_pattern", new ConfigOptionEnum<InfillPattern>(ipRectilinear));
+            new_conf.set_key_value("bottom_surface_pattern", new ConfigOptionEnum<InfillPattern>(ipRectilinear));
+            new_conf.set_key_value("internal_solid_infill_pattern", new ConfigOptionEnum<InfillPattern>(ipRectilinear));
+        } else {
+            new_conf.set_key_value("continuous_filament_mode", new ConfigOptionBool(false));
+        }
+        apply(config, &new_conf);
+        is_msg_dlg_already_exist = false;
+    }
+
     if (config->opt_bool("alternate_extra_wall") &&
         (config->opt_enum<EnsureVerticalShellThickness>("ensure_vertical_shell_thickness") == evstAll)) {
         wxString msg_text = _(L("Alternate extra wall does't work well when ensure vertical shell thickness is set to All."));
@@ -645,6 +713,10 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig *config, co
     toggle_line("spiral_starting_flow_ratio", has_spiral_vase);
     toggle_line("spiral_finishing_flow_ratio", has_spiral_vase);
     toggle_line("continuous_filament_connector_flow_ratio", has_continuous_filament);
+    toggle_line("continuous_filament_fermat_fill", has_continuous_filament);
+    toggle_line("continuous_filament_layer_scarf", has_continuous_filament);
+    toggle_line("continuous_filament_layer_scarf_length", has_continuous_filament && config->opt_bool("continuous_filament_layer_scarf"));
+    toggle_line("continuous_filament_layer_scarf_requires_model_above", has_continuous_filament && config->opt_bool("continuous_filament_layer_scarf"));
     bool has_top_shell    = config->opt_int("top_shell_layers") > 0 || (has_spiral_vase && config->opt_int("bottom_shell_layers") > 1);
     bool has_bottom_shell = config->opt_int("bottom_shell_layers") > 0;
     bool has_solid_infill = has_top_shell || has_bottom_shell;
@@ -1059,6 +1131,25 @@ int ConfigManipulation::show_spiral_mode_settings_dialog(bool is_object_config)
             "No  - Give up using spiral mode this time"));
 
     MessageDialog dialog(wxGetApp().plater(), msg_text, "",
+        wxICON_WARNING | (!is_object_config ? wxYES | wxNO : wxOK));
+    is_msg_dlg_already_exist = true;
+    auto answer = dialog.ShowModal();
+    is_msg_dlg_already_exist = false;
+    if (is_object_config)
+        answer = wxID_YES;
+    return answer;
+}
+
+int ConfigManipulation::show_continuous_filament_settings_dialog(bool is_object_config)
+{
+    wxString msg_text = _(L("Continuous filament mode requires settings that avoid non-extruding model-body moves: spiral vase off, relative extrusion on, supports off, prime/wipe tower off, filament changes off, timelapse moves off, zig-zag sparse infill, and rectilinear solid/top/bottom infill. Z-hop and layer-change retraction are disabled automatically while continuous filament mode is active."));
+    if (!is_object_config)
+        msg_text += "\n\n" + _(L("Change these settings automatically?\n"
+            "Yes - Change these settings and enable continuous filament mode automatically\n"
+            "No  - Give up using continuous filament mode this time"));
+
+    wxWindow* parent = m_msg_dlg_parent != nullptr ? m_msg_dlg_parent : wxGetApp().plater();
+    MessageDialog dialog(parent, msg_text, "",
         wxICON_WARNING | (!is_object_config ? wxYES | wxNO : wxOK));
     is_msg_dlg_already_exist = true;
     auto answer = dialog.ShowModal();

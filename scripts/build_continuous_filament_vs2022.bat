@@ -32,14 +32,14 @@ goto done
 :deps
 cmake -S deps -B "%DEPS_BUILD_DIR%" -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
 if errorlevel 1 goto fail
-cmake --build "%DEPS_BUILD_DIR%" --config %BUILD_TYPE% --target deps -- /m
+cmake --build "%DEPS_BUILD_DIR%" --config %BUILD_TYPE% --target deps
 if errorlevel 1 goto fail
 goto done
 
 :slicer
 cmake -S . -B "%BUILD_DIR%" -G "Visual Studio 17 2022" -A x64 -DORCA_TOOLS=ON -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
 if errorlevel 1 goto fail
-cmake --build "%BUILD_DIR%" --config %BUILD_TYPE% --target ALL_BUILD -- /m
+cmake --build "%BUILD_DIR%" --config %BUILD_TYPE% --target ALL_BUILD
 if errorlevel 1 goto fail
 goto done
 
