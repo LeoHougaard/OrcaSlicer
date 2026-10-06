@@ -131,7 +131,8 @@ std::string SpiralVase::process_layer(const std::string &gcode, bool last_layer)
 
     float len = 0.f;
     SpiralVase::SpiralPoint last_point = previous_layer != NULL && previous_layer->size() >0? previous_layer->at(previous_layer->size()-1): SpiralVase::SpiralPoint(0,0);
-    m_reader.parse_buffer(gcode, [&new_gcode, &z, total_layer_length, layer_height, transition_in, &len, &current_layer, &previous_layer, &transition_gcode, transition_out, smooth_spiral, &max_xy_dist_for_smoothing, &last_point, starting_flowrate, finishing_flowrate]
+    const bool preserve_xy_travels = m_preserve_xy_travels;
+    m_reader.parse_buffer(gcode, [&new_gcode, &z, total_layer_length, layer_height, transition_in, &len, &current_layer, &previous_layer, &transition_gcode, transition_out, smooth_spiral, &max_xy_dist_for_smoothing, &last_point, starting_flowrate, finishing_flowrate, preserve_xy_travels]
         (GCodeReader &reader, GCodeReader::GCodeLine line) {
         if (line.cmd_is("G1")) {
             // Orca: Filter out retractions at layer change
@@ -193,6 +194,10 @@ std::string SpiralVase::process_layer(const std::string &gcode, bool last_layer)
                                 }
                             }
                         }
+                        new_gcode += line.raw() + '\n';
+                    }
+                    else if (preserve_xy_travels) {
+                        line.set(Z, z + (total_layer_length > 0.f ? len / total_layer_length : 0.f) * layer_height);
                         new_gcode += line.raw() + '\n';
                     }
                     return;

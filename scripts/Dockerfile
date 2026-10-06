@@ -2,16 +2,18 @@ FROM docker.io/ubuntu:24.04
 LABEL maintainer "DeftDawg <DeftDawg@gmail.com>"
 
 # Disable interactive package configuration
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 # Add a deb-src
-RUN echo deb-src http://archive.ubuntu.com/ubuntu \
-    $(cat /etc/*release | grep VERSION_CODENAME | cut -d= -f2) main universe>> /etc/apt/sources.list 
+RUN . /etc/os-release && \
+    echo "deb-src http://archive.ubuntu.com/ubuntu ${VERSION_CODENAME} main universe" >> /etc/apt/sources.list
 
 RUN apt-get update && apt-get install  -y \
     autoconf \
     build-essential \
+    ca-certificates \
     cmake \
     curl \
     eglexternalplatform-dev \
@@ -23,18 +25,14 @@ RUN apt-get update && apt-get install  -y \
     libcairo2-dev \
     libcurl4-openssl-dev \
     libdbus-1-dev \
-    libglew-dev \ 
-    libglu1-mesa-dev \
+    libglew-dev \
     libglu1-mesa-dev \
     libgstreamer1.0-dev \
-    libgstreamerd-3-dev \ 
     libgstreamer-plugins-base1.0-dev \
     libgstreamer-plugins-good1.0-dev \
     libgtk-3-dev \
-    libgtk-3-dev \
     libsecret-1-dev \
     libsoup2.4-dev \
-    libssl3 \
     libssl-dev \
     libtool \
     libudev-dev \
@@ -47,7 +45,8 @@ RUN apt-get update && apt-get install  -y \
     pkgconf \
     sudo \
     wayland-protocols \
-    wget
+    wget && \
+    rm -rf /var/lib/apt/lists/*
 
 # Change your locale here if you want.  See the output
 # of `locale -a` to pick the correct string formatting.
