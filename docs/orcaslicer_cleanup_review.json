@@ -1,0 +1,150 @@
+{
+  "canonical_checkout": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0",
+  "canonical_fork": "https://github.com/LeoHougaard/OrcaSlicer",
+  "keep": [
+    "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous",
+    "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\deps\\build",
+    "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-data",
+    "C:\\Program Files\\OrcaSlicer"
+  ],
+  "obsolete_local_copies": [
+    {
+      "path": "C:\\Users\\Leo\\Downloads\\OrcaSlicer-github-aligned",
+      "bytes": 26447716011,
+      "gib": 24.631,
+      "files": 219675,
+      "reason": "Remove this linked worktree before its Downloads owner; original unstaged edit has a snapshot and patch.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Downloads\\OrcaSlicer-main",
+      "bytes": 11631245517,
+      "gib": 10.832,
+      "files": 201930,
+      "reason": "Old nested-source checkout; retain its exact Git history, staged snapshot and runtime archive.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\orcaslicer-src",
+      "bytes": 56386051915,
+      "gib": 52.514,
+      "files": 226559,
+      "reason": "Redundant research checkout; history, private checkpoints, corpus, provenance and runtime archives are preserved.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\sandboxes\\continuous-upstream",
+      "bytes": 550174647,
+      "gib": 0.512,
+      "files": 20211,
+      "reason": "Remove this clean linked worktree through git worktree removal; preserve the original upstream branch.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build",
+      "bytes": 28458191514,
+      "gib": 26.504,
+      "files": 3051,
+      "reason": "Superseded stock build; canonical build-continuous remains.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\upstream",
+      "bytes": 20460054514,
+      "gib": 19.055,
+      "files": 68150,
+      "reason": "Superseded newer-upstream build; its runtime/evidence are archived and its branch is retained.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\upstream-deps",
+      "bytes": 755650202,
+      "gib": 0.704,
+      "files": 12159,
+      "reason": "Generated dependencies for the newer-upstream comparison; keep canonical deps/build.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\upstream-extra-deps",
+      "bytes": 236326770,
+      "gib": 0.22,
+      "files": 3914,
+      "reason": "Generated dependency comparison cache; original pinned sources remain in Git.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\upstream-extra",
+      "bytes": 45337383,
+      "gib": 0.042,
+      "files": 96,
+      "reason": "Generated dependency staging cache; rebuild from the archived upstream branch if needed.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\src\\Production",
+      "bytes": 421596200,
+      "gib": 0.393,
+      "files": 14973,
+      "reason": "Historical runtime copy; its complete non-compiler files are hash-verified in native.zip.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\src\\Generalized",
+      "bytes": 386741288,
+      "gib": 0.36,
+      "files": 14972,
+      "reason": "Historical runtime copy; its complete non-compiler files are hash-verified in native.zip.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\src\\Overlap",
+      "bytes": 386779176,
+      "gib": 0.36,
+      "files": 14972,
+      "reason": "Historical runtime copy; its complete non-compiler files are hash-verified in native.zip.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\src\\Integrated",
+      "bytes": 386739240,
+      "gib": 0.36,
+      "files": 14972,
+      "reason": "Historical runtime copy; its complete non-compiler files are hash-verified in native.zip.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\src\\Infill",
+      "bytes": 386764840,
+      "gib": 0.36,
+      "files": 14972,
+      "reason": "Historical runtime copy; its complete non-compiler files are hash-verified in native.zip.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\src\\Verification",
+      "bytes": 294102056,
+      "gib": 0.274,
+      "files": 14971,
+      "reason": "Historical runtime copy; its complete non-compiler files are hash-verified in native.zip.",
+      "action_performed": false
+    },
+    {
+      "path": "C:\\Users\\Leo\\Code Projects\\OrcaSlicer-2.4.0\\build-continuous\\readiness\\OrcaSlicer-Continuous",
+      "bytes": 390423489,
+      "gib": 0.364,
+      "files": 14986,
+      "reason": "Historical standalone runtime copy preserved in native.zip.",
+      "action_performed": false
+    }
+  ],
+  "gross_recoverable_bytes": 147623894762,
+  "gross_recoverable_gib": 137.485,
+  "deleted_bytes": 0,
+  "review_required": true,
+  "remote_review_action": "Experimental fork archived after complete preservation verification; original discussions/PRs retained.",
+  "promotion_review_action": "Review/merge draft PR into continuous-extrusion, then make that branch the canonical default.",
+  "rollback": "Original copies remain in place. Exact histories also restore from original-histories.bundle; ignored work restores from hash-verified per-source ZIP archives.",
+  "remote_archive_completed": true,
+  "archive_rollback": "Unarchive the original experimental fork in GitHub repository settings if needed; no original refs changed.",
+  "draft_pr": "https://github.com/LeoHougaard/OrcaSlicer/pull/2"
+}

@@ -81,6 +81,11 @@ The native Python auditor/preview tests passed 10 tests. The imported Fermat
 auditor and corpus geometry tests passed 30 tests, using the preserved corpus
 environment for its declared geometry dependencies.
 
+The optional strict Fermat corpus rerun reproduced its known failures and was
+stopped at Leo's request after 19 complete models and 110 layers of the final
+model. Its partial logs are preserved. No full-corpus pass is claimed, and its
+historical failed certification gate remains unchanged.
+
 Native mode still has its documented one-object/material/region limits and may
 omit unreachable material when the explicit omission setting is enabled. The
 GUI reports that omission. Neither native checks nor the stricter research
@@ -99,7 +104,7 @@ are included. The former shallow boundaries have complete ancestry.
 
 Private T3 checkpoint refs are preserved in the canonical local repository and
 the offline history bundle. A profile scan found nonempty printer API keys in
-some checkpoint snapshots. Those checkpoints are excluded from GitHub;
+some checkpoint snapshots. Those checkpoints are excluded from public Git refs;
 publication uses an explicit reviewed ref list rather than a wildcard. Original
 authored branches/tags and the two local-edit snapshots are published with
 their exact history. No credential-bearing history is redacted or rewritten.
@@ -108,7 +113,7 @@ Verification preserved 611 original refs locally and published 401 original
 refs plus two local-edit snapshots. All 403 public refs matched live GitHub
 hashes and passed a fresh full-object fetch and integrity check. All 611
 original refs passed a separate restore from the private offline bundle into
-an empty repository. The 210 private checkpoint refs were not published.
+an empty repository. The 210 private checkpoint refs were not published as Git refs.
 The offline bundle is 1.193 GiB. The five data/runtime archives total 11.936
 GiB and contain 249,813 files; every archived file's SHA-256 was verified.
 
@@ -120,6 +125,23 @@ unique ignored work, models, profiles, logs, scripts, screenshots and runtime
 files. Compiler intermediates, generated CMake caches and downloaded dependency
 build trees are excluded as documented in `artifact-backup.json`. Originals
 remain untouched until cleanup review.
+
+The [encrypted GitHub rollback release](https://github.com/LeoHougaard/OrcaSlicer/releases/tag/consolidation-backup-2026-10-09)
+contains the full private history bundle, all five data/runtime archives,
+preservation metadata, verification evidence, copied editable projects and
+userdata, and all eight existing Actions build artifacts. Age encryption keeps
+the original credential-bearing data intact without exposing printer keys.
+`backup-manifest.json` records ordered archive pieces and original/piece SHA-256
+hashes. The release includes restoration instructions and a script that verifies
+and decrypts the selected files. Reproducible compiler/dependency caches remain
+excluded from the data archives.
+
+The recovery key stays off GitHub at
+`C:\Users\Leo\Code Projects\OrcaSlicer-data\orcaslicer-consolidation-recovery-key.txt`.
+Save it separately from this computer before relying on cloud restoration.
+The key and restoration script successfully restored and checked the encrypted
+metadata/project/profile archive. GitHub's stored asset sizes and SHA-256 digests
+were checked against every uploaded asset before publishing the backup release.
 
 To restore a historical branch without modifying the active checkout:
 
@@ -143,14 +165,16 @@ Run these commands in the restored historical checkout, not the canonical one.
 
 The draft PR targets `continuous-extrusion`. After review and merge, the proposal
 is to make that branch the canonical default working branch. Original `main`
-history remains preserved. Archive
-`LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode` after verifying its
-preserved refs; do not delete it. Archiving retains its original discussions and
-pull requests, whose metadata is also captured locally.
+history remains preserved. The redundant
+`LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode` fork was archived after
+full preservation verification. Its original refs and default branch were
+unchanged. Archiving retains its discussions and pull requests, whose metadata
+is also captured locally. The original fork can be unarchived if needed.
 
 Keep `build-continuous` as the canonical build and `deps/build` as its dependency
 environment. The exact obsolete local copies, sizes, archive coverage and
-removal order are listed in the local `cleanup-review.json`. No deletion or
+removal order are listed in [the cleanup review](orcaslicer_cleanup_review.json)
+and the local `cleanup-review.json`. No deletion or
 default-branch promotion is part of this integration.
 
 The measured obsolete copies total 137.485 GiB. Paths below `canonical` resolve
