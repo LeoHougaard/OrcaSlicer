@@ -1279,8 +1279,6 @@ StringObjectException Print::validate(StringObjectException *warning, Polygons* 
             return {L("Continuous filament mode does not support by-object print sequence."), nullptr, "print_sequence"};
         if (!m_config.use_relative_e_distances)
             return {L("Continuous filament mode requires relative extruder addressing."), nullptr, "use_relative_e_distances"};
-        if (std::any_of(m_config.z_hop.values.begin(), m_config.z_hop.values.end(), [](double hop) { return hop > EPSILON; }))
-            return {L("Continuous filament mode does not support Z-hop."), nullptr, "z_hop"};
         if (std::any_of(m_config.retract_when_changing_layer.values.begin(), m_config.retract_when_changing_layer.values.end(), [](bool enabled) { return enabled; }))
             return {L("Continuous filament mode does not support retraction on layer change."), nullptr, "retract_when_changing_layer"};
         if (m_config.enable_prime_tower || this->has_wipe_tower())

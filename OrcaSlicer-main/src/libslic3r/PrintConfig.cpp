@@ -5476,7 +5476,7 @@ void PrintConfigDef::init_fff_params()
     def->tooltip = L("Prints the model body as one uninterrupted extrusion path. "
                      "This specialty mode is intended for models designed for continuous printing and does not support "
                      "separate islands, supports, material changes, wipe tower, or timelapse moves.");
-    def->mode = comAdvanced;
+    def->mode = comSimple;
     def->set_default_value(new ConfigOptionBool(false));
 
     def = this->add("continuous_filament_connector_flow_ratio", coFloat);
@@ -5681,7 +5681,7 @@ void PrintConfigDef::init_fff_params()
     def->enum_labels.push_back(L("Regular"));
     def->enum_labels.push_back(L("Even-odd"));
     def->enum_labels.push_back(L("Close holes"));
-    def->mode = comAdvanced;
+    def->mode = comSimple;
     def->set_default_value(new ConfigOptionEnum<SlicingMode>(SlicingMode::Regular));
 
     def = this->add("z_offset", coFloat);
@@ -9942,8 +9942,6 @@ std::map<std::string, std::string> validate(const FullPrintConfig &cfg, bool und
             error_message.emplace("spiral_mode", L("Invalid value when continuous filament mode is enabled"));
         if (!cfg.use_relative_e_distances)
             error_message.emplace("use_relative_e_distances", L("Continuous filament mode requires relative extruder addressing"));
-        if (std::any_of(cfg.z_hop.values.begin(), cfg.z_hop.values.end(), [](double hop) { return hop > EPSILON; }))
-            error_message.emplace("z_hop", L("Continuous filament mode does not support Z-hop"));
         if (std::any_of(cfg.retract_when_changing_layer.values.begin(), cfg.retract_when_changing_layer.values.end(), [](bool enabled) { return enabled; }))
             error_message.emplace("retract_when_changing_layer", L("Continuous filament mode does not support retraction on layer change"));
         if (cfg.enable_support)
