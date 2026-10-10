@@ -1,0 +1,23 @@
+# Fixed, license-tracked benchmark selected from eligible_test_meshes.jsonl.
+# Four equal strata: short/tall cross-sections, without/with holes. Within
+# each stratum, five unique source Things span the mesh-face-count range.
+thingi10k-53427	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-53427.stl	https://www.thingiverse.com/thing:16234	1.0
+thingi10k-74157	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-74157.stl	https://www.thingiverse.com/thing:24567	1.0
+thingi10k-136935	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-136935.stl	https://www.thingiverse.com/thing:51489	1.0
+thingi10k-57658	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-57658.stl	https://www.thingiverse.com/thing:17725	1.0
+thingi10k-827639	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-827639.stl	https://www.thingiverse.com/thing:442571	1.0
+thingi10k-52135	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-52135.stl	https://www.thingiverse.com/thing:15754	1.0
+thingi10k-90223	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-90223.stl	https://www.thingiverse.com/thing:30958	1.0
+thingi10k-116065	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-116065.stl	https://www.thingiverse.com/thing:41206	1.0
+thingi10k-491062	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-491062.stl	https://www.thingiverse.com/thing:270289	1.0
+thingi10k-98938	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-98938.stl	https://www.thingiverse.com/thing:34394	1.0
+thingi10k-152775	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-152775.stl	https://www.thingiverse.com/thing:60778	1.0
+thingi10k-42268	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-42268.stl	https://www.thingiverse.com/thing:12989	1.0
+thingi10k-763398	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-763398.stl	https://www.thingiverse.com/thing:298955	1.0
+thingi10k-1535136	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-1535136.stl	https://www.thingiverse.com/thing:971527	1.0
+thingi10k-789071	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-789071.stl	https://www.thingiverse.com/thing:475092	1.0
+thingi10k-47854	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-47854.stl	https://www.thingiverse.com/thing:14526	1.0
+thingi10k-400235	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-400235.stl	https://www.thingiverse.com/thing:213343	1.0
+thingi10k-39927	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-39927.stl	https://www.thingiverse.com/thing:12354	1.0
+thingi10k-929561	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-929561.stl	https://www.thingiverse.com/thing:524223	1.0
+thingi10k-99904	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-99904.stl	https://www.thingiverse.com/thing:34778	1.0
