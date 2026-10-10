@@ -4,3 +4,25 @@
 - Runtime policy: native Windows/CMake first; Docker/WSL2 only if native builds become unreliable.
 - Algorithm source: Fermat spiral paper for continuity and path quality.
 - Verification source: MDPI paper for G-code-derived output checks only.
+- [2026-06-12 17:15:56] Controller policy: main Codex gpt-5.5 high; sub-agents gpt-5.5 low; native Windows first.
+- [2026-06-12 17:15:56] ITERATION 1 run_dir=C:\Users\Leo\Downloads\OrcaSlicer-github-aligned\artifacts\continuous-loop\runs\20260612-171556-iteration-1
+- [2026-06-12 17:15:56] START deps
+- [2026-06-12 17:15:56] SKIP deps configure/build
+- [2026-06-12 17:15:56] PASS deps
+- [2026-06-12 17:15:56] START configure
+- [2026-06-12 17:15:56] SKIP configure
+- [2026-06-12 17:15:56] PASS configure
+- [2026-06-12 17:15:56] START build
+- [2026-06-12 17:15:56] SKIP build
+- [2026-06-12 17:15:56] PASS build
+- [2026-06-12 17:15:56] START tests
+- [2026-06-12 17:15:57] ctest: Test project C:/Users/Leo/Downloads/OrcaSlicer-github-aligned/build-continuous
+- [2026-06-12 17:15:57] ctest: No tests were found!!!
+- [2026-06-12 17:15:57] ctest found no fff_print tests; running C:\Users\Leo\Downloads\OrcaSlicer-github-aligned\build-continuous\tests\fff_print\RelWithDebInfo\fff_print_tests.exe directly
+- [2026-06-12 17:16:01] PASS tests
+- [2026-06-12 17:16:01] START slice-and-analyze
+- [2026-06-12 17:16:01] Slice .\tests\data\20mm_cube.obj
+- [2026-06-12 17:16:04] Slice .\tests\data\cube_with_hole.obj
+- [2026-06-12 17:16:07] Slice .\tests\data\two_hollow_squares.obj
+- [2026-06-12 17:16:11] PASS slice-and-analyze
+- [2026-06-12 17:16:11] GREEN iteration 1
