@@ -124,6 +124,15 @@ less than 5% total missing and excess material, 8% missing on any layer, and
 2% deposited outside the model outline. These are regression gates, not print
 quality guarantees or replacements for the configured boundary tolerance.
 
+The native evaluation tool requires `continuous_extrusion=1`. It rejects unknown
+override keys and invalid configuration values before print validation, and
+requires a positive scale representable by the mesh without trailing text.
+Run the bounded malformed-input and scale checks with a new output directory:
+
+```text
+python scripts/check_native_input_validation.py EXE NEW_OUTPUT_DIR
+```
+
 Release checks must also run the native infill/project round trip, flow checks,
 core and FFF tests, and the supplied reference model at multiple scales. Use
 Orca's CMake install or CPack targets to distribute the runtime libraries,

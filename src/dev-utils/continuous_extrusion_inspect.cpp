@@ -169,6 +169,8 @@ int main(int argc, char **argv)
                     config.set_key_value(key, config.def()->get(key)->create_default_option());
             std::ifstream input(argv[5]);
             const auto overrides = Json::parse(input);
+            if (!overrides.is_object())
+                throw std::runtime_error("Configuration overrides must be a JSON object");
             std::cerr << "Loading and scaling model\n";
             Model model;
             ModelObject *object = nullptr;
@@ -197,9 +199,11 @@ int main(int argc, char **argv)
                     throw std::runtime_error("Could not read STL");
                 if (mesh.its.indices.empty())
                     throw std::runtime_error("STL contains no triangles after mesh repair");
-                const double scale = std::stod(argv[4]);
-                if (!std::isfinite(scale) || scale <= 0.)
-                    throw std::runtime_error("Scale must be positive and finite");
+                size_t scale_end = 0;
+                const double scale = std::stod(argv[4], &scale_end);
+                if (scale_end != std::string(argv[4]).size() || !std::isfinite(scale) ||
+                    !std::isfinite(float(scale)) || float(scale) <= 0.)
+                    throw std::runtime_error("Scale must be a positive, finite mesh scale without trailing text");
                 mesh.scale(float(scale));
                 const auto bounds = mesh.bounding_box();
                 mesh.translate(Vec3f(float(60. - bounds.center().x()), float(60. - bounds.center().y()), float(-bounds.min.z())));
@@ -210,8 +214,17 @@ int main(int argc, char **argv)
                 object->ensure_on_bed();
             }
             std::cerr << "Applying printer and process settings\n";
-            for (auto item = overrides.begin(); item != overrides.end(); ++item)
+            for (auto item = overrides.begin(); item != overrides.end(); ++item) {
+                if (config.def()->get(item.key()) == nullptr)
+                    throw std::runtime_error("Unknown configuration option: " + item.key());
                 config.set_deserialize_strict(item.key(), item.value().get<std::string>());
+            }
+            // Print::validate assumes valid numeric settings when estimating
+            // layer heights. Reject malformed settings before entering it.
+            if (const auto errors = config.validate(); !errors.empty())
+                throw std::runtime_error(errors.begin()->first + ": " + errors.begin()->second);
+            if (!config.opt_bool("continuous_extrusion"))
+                throw std::runtime_error("Native continuous evaluation requires continuous_extrusion=1");
             Print print;
             print.is_BBL_printer() = false;
             print.auto_assign_extruders(object);
