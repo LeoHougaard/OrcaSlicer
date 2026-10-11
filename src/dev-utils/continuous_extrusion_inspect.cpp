@@ -26,10 +26,49 @@
 #include <memory>
 #include <set>
 #include <filesystem>
+#include <sstream>
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace Slic3r;
 using Json = nlohmann::json;
 using Clock = std::chrono::steady_clock;
+
+static void validate_numeric_override(const std::string &key, const std::string &text, const ConfigOptionDef &definition)
+{
+    const auto type = ConfigOptionType(definition.type & ~coVectorType);
+    if (type != coFloat && type != coInt && type != coPercent && type != coFloatOrPercent)
+        return;
+    const bool vector = (definition.type & coVectorType) != 0;
+    // Empty numeric vectors have defined clearing/default behavior in Config.
+    if (vector && text.empty())
+        return;
+    size_t begin = 0;
+    for (;;) {
+        const size_t end = vector ? text.find(',', begin) : std::string::npos;
+        const auto token = boost::trim_copy(text.substr(begin, end - begin));
+        if (!(vector && definition.nullable && token == "nil")) {
+            std::istringstream input(token);
+            bool valid;
+            if (type == coInt) {
+                int value;
+                valid = bool(input >> value);
+            } else {
+                double value;
+                valid = bool(input >> value) && std::isfinite(value);
+            }
+            input >> std::ws;
+            if ((type == coPercent || type == coFloatOrPercent) && input.peek() == '%') {
+                input.get();
+                input >> std::ws;
+            }
+            if (!valid || input.peek() != std::char_traits<char>::eof())
+                throw std::runtime_error(key + ": expected a complete finite numeric value");
+        }
+        if (end == std::string::npos)
+            break;
+        begin = end + 1;
+    }
+}
 
 static Json preview_config()
 {
@@ -159,6 +198,8 @@ int main(int argc, char **argv)
     }
     if (argc == 6 && (std::string(argv[1]) == "--slice-native" || std::string(argv[1]) == "--project-native" || std::string(argv[1]) == "--reslice-native")) {
         try {
+            // Standalone tools do not run the GUI's temporary-directory setup.
+            set_temporary_dir(std::filesystem::absolute(argv[3]).parent_path().string());
             std::cerr << "Loading native slicing configuration\n";
             DynamicPrintConfig config = DynamicPrintConfig::full_print_config();
             // Static enum-vector defaults omit their dynamic string maps.
@@ -215,9 +256,12 @@ int main(int argc, char **argv)
             }
             std::cerr << "Applying printer and process settings\n";
             for (auto item = overrides.begin(); item != overrides.end(); ++item) {
-                if (config.def()->get(item.key()) == nullptr)
+                const auto *definition = config.def()->get(item.key());
+                if (definition == nullptr)
                     throw std::runtime_error("Unknown configuration option: " + item.key());
-                config.set_deserialize_strict(item.key(), item.value().get<std::string>());
+                const auto value = item.value().get<std::string>();
+                validate_numeric_override(item.key(), value, *definition);
+                config.set_deserialize_strict(item.key(), value);
             }
             // Print::validate assumes valid numeric settings when estimating
             // layer heights. Reject malformed settings before entering it.

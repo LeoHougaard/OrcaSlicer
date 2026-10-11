@@ -127,11 +127,34 @@ quality guarantees or replacements for the configured boundary tolerance.
 The native evaluation tool requires `continuous_extrusion=1`. It rejects unknown
 override keys and invalid configuration values before print validation, and
 requires a positive scale representable by the mesh without trailing text.
+Numeric scalar and vector overrides must contain complete finite numbers.
+Scientific notation, surrounding whitespace, optional percent signs for percent
+options, comma-separated vectors and `nil` for nullable entries remain supported.
+Numeric values use the option's documented units; suffixes such as `0.2mm` are
+not serialized configuration syntax and are rejected.
 Run the bounded malformed-input and scale checks with a new output directory:
 
 ```text
 python scripts/check_native_input_validation.py EXE NEW_OUTPUT_DIR
 ```
+
+For an isolated Windows executable, first prepend the canonical
+`build-continuous\src\Release` directory to `PATH` so its existing runtime DLLs
+can load. The output directory must be writable. Native evaluation puts temporary
+model backups in its `orcaslicer_model` subdirectory instead of the drive root;
+the test command needs permission to create those files as well as its exports.
+Use `--numeric-only` for a focused numeric parsing check.
+
+For the local isolated build, run from its task directory:
+
+```powershell
+$env:PATH = 'C:\Users\Leo\Code Projects\OrcaSlicer-2.4.0\build-continuous\src\Release;' + $env:PATH
+python -B .\slicer\scripts\check_native_input_validation.py `
+    .\build-check\bin\continuous-extrusion-inspect.exe .\evidence\fresh-input-check
+```
+
+Choose a fresh output directory. The script preserves existing evidence by
+refusing to overwrite one that already exists.
 
 Release checks must also run the native infill/project round trip, flow checks,
 core and FFF tests, and the supplied reference model at multiple scales. Use

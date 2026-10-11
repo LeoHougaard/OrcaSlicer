@@ -1,7 +1,9 @@
 """Bounded offline CLI regression checks.
 
-Usage: python scripts/check_native_input_validation.py EXE NEW_OUTPUT_DIR
+Usage: python scripts/check_native_input_validation.py EXE NEW_OUTPUT_DIR [--numeric-only]
 Uses generated millimetre meshes and the repository's offline test profile.
+On Windows, put the existing Release runtime directory on PATH for DLL loading.
+The output directory must be writable, including its orcaslicer_model backups.
 """
 import ctypes
 import json
@@ -16,7 +18,7 @@ from check_continuous_generalization import rectangle, solid
 from check_continuous_gcode import check
 
 
-def run(executable, output):
+def run(executable, output, numeric_only=False):
     # Never overwrite a previous check's fixtures or evidence.
     output.mkdir(parents=True, exist_ok=False)
     options_path = Path(__file__).resolve().parents[1] / "tests/data/continuous_extrusion/native_options.json"
@@ -50,6 +52,56 @@ def run(executable, output):
         cases.append((name, "box.stl", "1", changes, None, False))
     cases += [("valid-mm", "box.stl", "1", {}, None, True),
               ("valid-scaled", "box.stl", "1.25", {}, None, True)]
+    numeric_cases = []
+    for name, key, value in (
+        ("float-junk", "layer_height", "0.2junk"),
+        ("float-unit", "layer_height", "0.2mm"),
+        ("float-extra-number", "layer_height", "0.2 0.3"),
+        ("float-whitespace-only", "layer_height", " \t\n"),
+        ("float-nan", "layer_height", "nan"),
+        ("float-inf", "layer_height", "inf"),
+        ("float-overflow", "layer_height", "1e400"),
+        ("int-junk", "wall_loops", "2junk"),
+        ("int-decimal", "wall_loops", "2.0"),
+        ("int-scientific", "wall_loops", "2e0"),
+        ("int-overflow", "wall_loops", "999999999999999999999"),
+        ("float-vector-junk", "nozzle_diameter", "0.4junk"),
+        ("float-vector-second-junk", "nozzle_diameter", "0.4,0.6junk"),
+        ("float-vector-inf", "nozzle_diameter", "inf"),
+        ("float-vector-empty-item", "nozzle_diameter", "0.4,"),
+        ("int-vector-junk", "nozzle_temperature", "220junk"),
+        ("percent-junk", "sparse_infill_density", "15%junk"),
+        ("percent-duplicate-sign", "sparse_infill_density", "15%%"),
+        ("percent-unit", "sparse_infill_density", "15mm"),
+        ("percent-inf", "sparse_infill_density", "inf%"),
+        ("float-or-percent-junk", "outer_wall_line_width", "100%junk"),
+        ("float-or-percent-unit", "outer_wall_line_width", "0.42mm"),
+        ("percent-vector-junk", "filament_ironing_flow", "10%junk"),
+        ("percent-vector-second-junk", "filament_ironing_flow", "10%,niljunk"),
+        ("percent-vector-nan", "filament_ironing_flow", "nan"),
+        ("nonnull-nil", "nozzle_diameter", "nil"),
+    ):
+        numeric_cases.append((name, "box.stl", "1", {key: value}, None, False))
+    for name, changes in (
+        ("valid-float-scientific", {"layer_height": "2e-1"}),
+        ("valid-float-leading-point", {"layer_height": ".2"}),
+        ("valid-float-whitespace", {"layer_height": " \t+0.2 \n"}),
+        ("valid-int-whitespace", {"wall_loops": " +2 \t"}),
+        ("valid-float-vector-scientific", {"nozzle_diameter": "4e-1"}),
+        ("valid-float-vector-list", {"filament_flow_ratio": "1.0, 1.0"}),
+        ("valid-int-vector-whitespace", {"nozzle_temperature": " 220 \t"}),
+        ("valid-percent", {"sparse_infill_density": "15%"}),
+        ("valid-percent-no-sign", {"sparse_infill_density": "15"}),
+        ("valid-percent-whitespace", {"sparse_infill_density": " 15 % \t"}),
+        ("valid-float-or-percent", {"outer_wall_line_width": "100%"}),
+        ("valid-float-or-percent-absolute", {"outer_wall_line_width": "0.42"}),
+        ("valid-percent-vector", {"filament_ironing_flow": "10%"}),
+        ("valid-nullable-vector", {"filament_ironing_flow": "nil"}),
+        ("valid-nullable-vector-list", {"filament_ironing_flow": "10%, nil"}),
+        ("valid-empty-vector", {"filament_ironing_flow": ""}),
+    ):
+        numeric_cases.append((name, "box.stl", "1", changes, None, True))
+    cases = numeric_cases if numeric_only else cases + numeric_cases
     results = []
     for name, model, scale, changes, config, accept in cases:
         settings = output / (name + ".json")
@@ -78,4 +130,4 @@ def run(executable, output):
 
 
 if __name__ == "__main__":
-    sys.exit(0 if run(Path(sys.argv[1]), Path(sys.argv[2]).resolve()) else 1)
+    sys.exit(0 if run(Path(sys.argv[1]), Path(sys.argv[2]).resolve(), "--numeric-only" in sys.argv[3:]) else 1)
