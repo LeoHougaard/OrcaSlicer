@@ -15,6 +15,7 @@ import time
 from check_continuous_crossings import check as check_crossings
 from check_continuous_gcode import check
 from check_continuous_generalization import circle, rectangle, solid
+from check_continuous_precision import check as check_precision
 
 
 def heightfield(path, cells):
@@ -149,6 +150,8 @@ def run(executable, options_path, output, selected):
             assert result['excess_fraction'] < .05, 'More than 5% excess material'
             assert result['outside_fraction'] < .02, 'More than 2% outside model'
             assert result['slice_seconds'] < 120, 'Small model exceeds two minutes'
+            result['precision'] = check_precision(gcode)
+            assert result['precision']['passed'], 'Emitted bead width or volume audit did not pass'
             result['passed'] = True
         except (AssertionError, subprocess.TimeoutExpired, ValueError, OSError) as error:
             result['error'] = str(error)

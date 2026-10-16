@@ -94,6 +94,9 @@ static const float g_min_purge_volume = 100.f;
 static const float g_purge_volume_one_time = 135.f;
 static const int g_max_flush_count = 4;
 static const size_t g_max_label_object = 64;
+// Continuous routes retain the planner's 1e-6 mm coordinate grid. Rounding a
+// short variable-width segment to ordinary XYZ precision changes its bead area.
+static constexpr size_t g_continuous_xyz_digits = 6;
 
 static bool is_bambu_x2d_printer(const FullPrintConfig &config)
 {
@@ -2240,9 +2243,13 @@ void GCode::export_continuous_print(Print &print, GCodeOutputStream &file)
     const auto quantized = [this](const Point3 &point) {
         const Vec3d p = point_to_gcode(point);
         const auto offset = m_writer.get_xy_offset();
-        const Point xy = gcode_to_point(Vec2d(GCodeFormatter::quantize_xyzf(p.x() - offset.x()) + offset.x(),
-                                              GCodeFormatter::quantize_xyzf(p.y() - offset.y()) + offset.y()));
-        return Point3(xy, scale_(GCodeFormatter::quantize_xyzf(p.z() + m_config.z_offset.value) - m_config.z_offset.value));
+        const Vec2d xy = Vec2d(GCodeFormatter::quantize(p.x() - offset.x(), g_continuous_xyz_digits) + offset.x(),
+                              GCodeFormatter::quantize(p.y() - offset.y(), g_continuous_xyz_digits) + offset.y())
+                         - m_origin + EXTRUDER_CONFIG(extruder_offset);
+        // Recover the nearest native coordinate after the machine transform.
+        // Truncation can double a one-grid-unit move while retaining its old E.
+        return Point3(coord_t(std::llround(scale_(xy.x()))), coord_t(std::llround(scale_(xy.y()))),
+                      coord_t(std::llround(scale_(GCodeFormatter::quantize(p.z() + m_config.z_offset.value, g_continuous_xyz_digits) - m_config.z_offset.value))));
     };
     Point3 previous = job.layers.front().paths.front().first_point3();
     Point3 emitted = quantized(previous);
@@ -2253,6 +2260,20 @@ void GCode::export_continuous_print(Print &print, GCodeOutputStream &file)
     file.write(m_writer.travel_to_z(first.z()));
     file.write(m_writer.travel_to_xy(Vec2d(first.x(), first.y())));
     file.write(this->unretract());
+    // The ordinary positioning/unlift commands above use fewer decimals. Align
+    // the physical start with the prepared route before any object extrusion.
+    double positioning_speed = m_config.travel_speed_z.value > 0. ? m_config.travel_speed_z.value : m_config.travel_speed.value;
+    for (double limit : {m_config.machine_max_speed_x.get_at(0), m_config.machine_max_speed_y.get_at(0),
+                         m_config.machine_max_speed_z.get_at(0)})
+        if (limit > 0.)
+            positioning_speed = std::min(positioning_speed, limit);
+    file.write(m_writer.set_speed(positioning_speed * 60.));
+    const auto offset = m_writer.get_xy_offset();
+    GCodeG1Formatter position;
+    position.emit_axis('X', first.x() - offset.x(), g_continuous_xyz_digits);
+    position.emit_axis('Y', first.y() - offset.y(), g_continuous_xyz_digits);
+    position.emit_axis('Z', first.z(), g_continuous_xyz_digits);
+    file.write(position.string());
     const bool relative_e = m_config.use_relative_e_distances.value;
     m_config.use_relative_e_distances.value = true;
     m_writer.config.use_relative_e_distances.value = true;
@@ -6692,9 +6713,9 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
         const auto offset = m_writer.get_xy_offset();
         const auto emitted_point = [&](const Point3 &point) {
             const Vec3d p = this->point_to_gcode(point);
-            return Vec3d(GCodeFormatter::quantize_xyzf(p.x() - offset.x()),
-                         GCodeFormatter::quantize_xyzf(p.y() - offset.y()),
-                         GCodeFormatter::quantize_xyzf(p.z() + m_config.z_offset.value));
+            return Vec3d(GCodeFormatter::quantize(p.x() - offset.x(), g_continuous_xyz_digits),
+                         GCodeFormatter::quantize(p.y() - offset.y(), g_continuous_xyz_digits),
+                         GCodeFormatter::quantize(p.z() + m_config.z_offset.value, g_continuous_xyz_digits));
         };
         continuous_delta = emitted_point(path.last_point3()) - emitted_point(path.first_point3());
         if (continuous_delta.norm() <= 0.)
@@ -7214,7 +7235,7 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                 for (const Line3& line : path.polyline.lines()) {
                     std::string tempDescription = description;
                     const double line_length = line.length() * SCALING_FACTOR;
-                    if (line_length < EPSILON)
+                    if (m_continuous_export ? line_length <= 0. : line_length < EPSILON)
                         continue;
                     path_length += line_length;
                     auto dE = e_per_mm * line_length;
@@ -7235,8 +7256,10 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                         m_writer.extrude_to_xyz(destination, dE);
                         const auto offset = m_writer.get_xy_offset();
                         char move[192];
-                        snprintf(move, sizeof(move), "G1 X%.3f Y%.3f Z%.3f E%.12f\n",
-                                 destination.x() - offset.x(), destination.y() - offset.y(), destination.z(), dE);
+                        snprintf(move, sizeof(move), "G1 X%.*f Y%.*f Z%.*f E%.12f\n",
+                                 int(g_continuous_xyz_digits), destination.x() - offset.x(),
+                                 int(g_continuous_xyz_digits), destination.y() - offset.y(),
+                                 int(g_continuous_xyz_digits), destination.z(), dE);
                         gcode += move;
                     } else if (path.z_contoured) {
                         // ZAA: Z anti-aliased extrusion with variable Z per point

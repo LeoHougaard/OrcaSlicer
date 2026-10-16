@@ -96,6 +96,9 @@ Disabling continuous extrusion restores ordinary slicing and export.
 Core tests cover connected routes, containment, width limits, coverage accounting,
 sparse interiors, solid surfaces, wall attachments, ramps and settings migration.
 The FFF suite exercises native G-code, density changes and cache invalidation.
+Continuous XYZ commands retain six decimal places and preserve nonzero moves
+shorter than the ordinary export tolerance. Precise positioning before the
+object route keeps the first extruding move aligned with the prepared geometry.
 
 ```text
 libslic3r_tests "[ContinuousExtrusion],[ContinuousInfill],[ContinuousSeam],[ContinuousIntegration],[ContinuousGeneralization]"
@@ -104,7 +107,17 @@ python scripts/check_continuous_infill.py EXE OPTIONS_JSON OUTPUT_DIR
 python scripts/check_continuous_generalization.py EXE OPTIONS_JSON OUTPUT_DIR
 python scripts/check_continuous_flow.py EXE OPTIONS_JSON OUTPUT_DIR
 python scripts/check_continuous_models.py EXE OPTIONS_JSON OUTPUT_DIR
+python scripts/check_continuous_precision.py OUTPUT.gcode [OUTPUT.gcode ...]
 ```
+
+The precision audit checks every emitted object move using its actual XYZ
+distance and calibrated E volume. It compares inferred bead width with the
+declared width and configured limits, and checks total volume against the plan.
+The model sweep runs this audit after its continuity and coverage checks.
+Its tolerances are 0.005 mm for width and 1e-7 relative error for total volume.
+Missing width or calibration metadata produces an inconclusive result (exit 2),
+not a pass. This uses the rounded-rectangle bead model; it does not measure
+physical deposition or nozzle clearance.
 
 `EXE` is `continuous-extrusion-inspect`, built with `ORCA_TOOLS=ON`.
 `OPTIONS_JSON` contains serialized Orca configuration overrides. The native tool
