@@ -31,11 +31,10 @@ def object_moves(text):
     for number, line in enumerate(text.splitlines(), 1):
         if line == '; CONTINUOUS_OBJECT_BEGIN': active = True
         elif line == '; CONTINUOUS_OBJECT_END': active = False
-        if active:
-            if line in (';LAYER_CHANGE', ';CHANGE_LAYER', '; CHANGE_LAYER'): layer += 1
-            if line.startswith(';TYPE:'): role = line[6:]
-            if line.startswith(';WIDTH:'): width = float(line[7:])
-            if line.startswith(';HEIGHT:'): height = float(line[8:])
+        if active and line in (';LAYER_CHANGE', ';CHANGE_LAYER', '; CHANGE_LAYER'): layer += 1
+        if line.startswith(';TYPE:'): role = line[6:]
+        if line.startswith(';WIDTH:'): width = float(line[7:])
+        if line.startswith(';HEIGHT:'): height = float(line[8:])
         code = line.split(';', 1)[0].split()
         if not code:
             continue
