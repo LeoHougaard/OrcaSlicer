@@ -1,5 +1,26 @@
 # Delivery checkpoint, 2026-11-12
 
+## Repository finalization scope
+
+The intended integration target is `continuous-extrusion`, not `main`.
+Finalization merges the standalone tools, launcher and preservation documentation
+from PR #2 into that existing native baseline. It does not promote the native
+executable to a fully qualified release or change the repository default.
+
+`.github/workflows/consolidation.yml` runs on the exact PR head and on pushes to
+the integration target, so the resulting merge commit receives its own CI.
+Linux and Windows run the native Python auditor/preview tests, Fermat G-code
+auditor tests, corpus section geometry tests, and Python syntax checks. Windows
+also exercises the real launcher with disposable paths and a mocked process
+start, covering missing inputs and default/explicit projects with spaces.
+The workflow rejects changes to the native source/tests/resources/dependency
+trees relative to `36c5154d53e8d25639265b3f43be54fb7a688b85`: these checks qualify
+the consolidation scope only. Native changes require platform qualification.
+
+The observations below were taken before this finalization workflow was added;
+in particular, the initial absence of PR checks is not a passing CI result.
+Exact head/merge check receipts are available in PR #2 and GitHub Actions.
+
 ## Canonical source and Windows package
 
 Use `C:\Users\Leo\Code Projects\OrcaSlicer-2.4.0` and

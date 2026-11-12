@@ -1,0 +1,51 @@
+name: Consolidation validation
+
+on:
+  pull_request:
+    branches: [continuous-extrusion]
+  push:
+    branches: [continuous-extrusion, codex/orcaslicer-consolidation]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tools:
+    name: Tools and launcher (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Qualify the actual PR head, then recheck the target's merged SHA on push.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify retained native baseline
+        shell: bash
+        run: |
+          # This workflow qualifies standalone consolidation tools, not native
+          # changes. A changed native tree needs separate platform qualification.
+          git diff --exit-code 36c5154d53e8d25639265b3f43be54fb7a688b85 HEAD -- src tests resources deps CMakeLists.txt cmake version.inc
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: tools/continuous_fermat/corpus/requirements.txt
+      - name: Install corpus geometry test dependencies
+        run: python -m pip install -r tools/continuous_fermat/corpus/requirements.txt
+      - name: Native G-code auditor and preview tests
+        run: python -m unittest discover -s scripts -p "test_continuous*.py" -v
+      - name: Fermat serialized G-code auditor tests
+        run: python -m unittest tools.continuous_fermat.test_validate_gcode -v
+      - name: Corpus section geometry tests
+        run: python -m unittest discover -s tools/continuous_fermat/corpus -p "test_*.py" -v
+      - name: Check standalone Python tool syntax
+        run: python -m compileall -q tools/continuous_fermat tools/continuous_path_lab
+      - name: Launcher path and argument regression checks
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/test_open_canonical_orca.ps1
