@@ -1,5 +1,10 @@
 # Canonical OrcaSlicer project
 
+For the current source/package identity, accessible recovery assets, CI status,
+and the separate Onshape Slicer Link handoff, see the
+[2026-11-12 delivery checkpoint](orcaslicer_delivery_checkpoint.md).
+The verification tables below describe the October consolidation runs.
+
 Use `LeoHougaard/OrcaSlicer` and the local checkout at
 `C:\Users\Leo\Code Projects\OrcaSlicer-2.4.0`.
 The integration branch is `codex/orcaslicer-consolidation`, based on
