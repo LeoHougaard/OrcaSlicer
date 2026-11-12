@@ -27,6 +27,47 @@ availability needs resolution before CI can qualify the head. No account/global
 settings were changed. The existing workflow has a manual consolidation job to
 bootstrap the new validation workflow without promoting it to `main`.
 
+### Bounded dispatch investigation, 2026-11-12
+
+The new consolidation workflow is absent from the registered workflow list
+because it is not on default `main`. That discovery limitation is separate from
+the execution block: the already registered, active Shellcheck workflow
+(`271774727`, `.github/workflows/shellcheck.yml`) has `workflow_dispatch` on
+`main`, and the candidate ref calls the actual consolidation tests and native
+baseline guard through its reusable workflow. GitHub documents dispatching an
+[existing workflow on another branch](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
+
+The bounded alternative used that registered numeric workflow ID. Immediately
+before dispatch, the remote candidate ref was verified as exactly
+`ee226f46eb2b135fc54b472d4314f801f00f5401`:
+
+```text
+POST https://api.github.com/repos/LeoHougaard/OrcaSlicer/actions/workflows/271774727/dispatches
+Request body: {"ref":"codex/orcaslicer-consolidation"}
+HTTP/2.0 422 Unprocessable Entity
+Date: Thu, 12 Nov 2026 15:31:23 GMT
+X-Github-Request-Id: FD39:A986:6BBF:15447:6AF5DBCB
+Response: {"message":"Actions has been disabled for this repository.","documentation_url":"https://docs.github.com/rest/actions/workflows#create-a-workflow-dispatch-event","status":"422"}
+```
+
+The public [repository Actions page](https://github.com/LeoHougaard/OrcaSlicer/actions)
+provides the more specific cause: workflows on this fork are not running due to
+the scale of Actions usage, and a repository maintainer can choose to re-enable
+them. This is fork-level execution suppression, not evidence of a workflow syntax
+failure or a suspension of the entire account. The API still reports
+`enabled=true`, `disabled=false`, admin access, and Shellcheck `state=active`.
+No enable toggles were repeated during this investigation; no run was created.
+
+Required owner action: sign in as a repository maintainer, open the Actions page
+above and use its re-enable control for this fork. If that control is unavailable
+or fails, ask GitHub Support to review the fork's Actions execution block,
+providing the endpoint, timestamp, request ID, response and contradictory enabled
+API state above. GitHub documents a separate
+[GitHub-controlled disabled state](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository)
+that repository permission changes cannot fix. No support request was submitted.
+After re-enabling, rerun the registered workflow on the current candidate ref,
+qualify its exact SHA, merge only on success, then validate the target merge SHA.
+
 PR #2 is ready for review and mergeable, but remains open and unmerged. Local
 checks pass: 10 native Python tests, 27 Fermat auditor tests, and the launcher
 regression checks. The three dependency-backed corpus geometry tests have not
