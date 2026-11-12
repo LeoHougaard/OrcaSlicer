@@ -15,6 +15,13 @@ name: "Shellcheck"
 permissions: {}
 
 jobs:
+  consolidation:
+    # Bootstrap validation through an already registered dispatch workflow while
+    # the consolidation workflow is not yet present on the default branch.
+    if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/codex/orcaslicer-consolidation' || github.ref == 'refs/heads/continuous-extrusion')
+    permissions:
+      contents: read
+    uses: ./.github/workflows/consolidation.yml
   shellcheck:
     name: Shellcheck
     runs-on: ubuntu-latest
