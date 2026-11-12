@@ -1,0 +1,4 @@
+# Thin one-hole regressions from the license-tracked Thingi10K corpus.
+# thingi10k-36086 is CC BY-SA; normalized STL SHA-256 e451a54cef4dc636935bc90449b7bd407907829e806f28bd971616891f7c0f07.
+thingi10k-929561	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-929561.stl	https://www.thingiverse.com/thing:524223	1.0
+thingi10k-36086	../../../sandboxes/continuous_fermat_corpus/models/eligible_stl/thingi10k-36086.stl	https://www.thingiverse.com/thing:11322	1.0

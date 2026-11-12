@@ -1,0 +1,2835 @@
+{
+  "date": "2026-10-09",
+  "original_ref_count": 611,
+  "published_original_refs": [
+    {
+      "source": "native",
+      "original": "refs/heads/continuous-extrusion",
+      "sha": "36c5154d53e8d25639265b3f43be54fb7a688b85",
+      "preserved": "refs/heads/archive/2026-10-09/native/heads/continuous-extrusion",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "native",
+      "original": "refs/heads/continuous-extrusion-upstream",
+      "sha": "6aa38fa413dbc5eaa279fcf54f3ca369917a15dc",
+      "preserved": "refs/heads/archive/2026-10-09/native/heads/continuous-extrusion-upstream",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "native",
+      "original": "refs/remotes/origin/continuous-extrusion",
+      "sha": "36c5154d53e8d25639265b3f43be54fb7a688b85",
+      "preserved": "refs/heads/archive/2026-10-09/native/remotes/origin/continuous-extrusion",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "native",
+      "original": "refs/remotes/origin/continuous-extrusion-upstream",
+      "sha": "6aa38fa413dbc5eaa279fcf54f3ca369917a15dc",
+      "preserved": "refs/heads/archive/2026-10-09/native/remotes/origin/continuous-extrusion-upstream",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "native",
+      "original": "refs/remotes/upstream/main",
+      "sha": "e296d5daac1084babfc8988620383e9c02b76ed5",
+      "preserved": "refs/heads/archive/2026-10-09/native/remotes/upstream/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "native",
+      "original": "refs/tags/v2.4.0",
+      "sha": "6d9eb1792f50d11ea12d60526b6ace58666354fd",
+      "preserved": "refs/tags/archive/2026-10-09/native/v2.4.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/heads/codex/connected-fermat-continuous-slicing",
+      "sha": "dd3a6d6c6c3d87767c4d0264c59c6866ba04b754",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/heads/codex/connected-fermat-continuous-slicing",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/heads/codex/continuous-fermat-svg-hybrid-baseline",
+      "sha": "b7c290a69576c3d33f9dcf674052475856ecdf64",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/heads/codex/continuous-fermat-svg-hybrid-baseline",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/heads/codex/continuous-slicing-safety-hardening",
+      "sha": "97b65b57367dce2f1b11434ef96543bb51452703",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/heads/codex/continuous-slicing-safety-hardening",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/heads/main",
+      "sha": "7983484532a6b628c6f65b26652aad19e98ae441",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/heads/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/leo/HEAD",
+      "sha": "7983484532a6b628c6f65b26652aad19e98ae441",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/leo/HEAD",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/leo/codex/connected-fermat-continuous-slicing",
+      "sha": "dd3a6d6c6c3d87767c4d0264c59c6866ba04b754",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/leo/codex/connected-fermat-continuous-slicing",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/leo/codex/continuous-fermat-svg-hybrid-baseline",
+      "sha": "b7c290a69576c3d33f9dcf674052475856ecdf64",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/leo/codex/continuous-fermat-svg-hybrid-baseline",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/leo/codex/continuous-slicing-safety-hardening",
+      "sha": "97b65b57367dce2f1b11434ef96543bb51452703",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/leo/codex/continuous-slicing-safety-hardening",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/leo/dependabot/github_actions/actions/cache-6",
+      "sha": "b616edabf03bd11b77b369c08257e336f8130a8f",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/leo/dependabot/github_actions/actions/cache-6",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/leo/dependabot/github_actions/actions/checkout-7",
+      "sha": "bd153a7756254dc0f41bfb9136331d43083b1891",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/leo/dependabot/github_actions/actions/checkout-7",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/leo/dependabot/github_actions/geekyeggo/delete-artifact-6",
+      "sha": "827cd781f153d4a2f25f550baf1ba78e78ca8181",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/leo/dependabot/github_actions/geekyeggo/delete-artifact-6",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/leo/dependabot/github_actions/microsoft/setup-msbuild-3",
+      "sha": "c7c8893c2ec8d08a67439f7a42fd638610e32d5b",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/leo/dependabot/github_actions/microsoft/setup-msbuild-3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/leo/main",
+      "sha": "7983484532a6b628c6f65b26652aad19e98ae441",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/leo/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/HEAD",
+      "sha": "d27889eb0f4bf99a5afd959cc0e14a048ac6d058",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/HEAD",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/dependabot/github_actions/geekyeggo/delete-artifact-6",
+      "sha": "875555adb7c1a39d98e3251bb1a04ba456d6b4aa",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/dependabot/github_actions/geekyeggo/delete-artifact-6",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/dependabot/github_actions/microsoft/setup-msbuild-3",
+      "sha": "ce10bc1f0adcbd4e747aadc577f13d3bf65f92f9",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/dependabot/github_actions/microsoft/setup-msbuild-3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/feature/auto-update",
+      "sha": "f5ca14ebb5468c30359b16471fc87faccdfb725b",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/feature/auto-update",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/feature/fix-build-error-for-OrcaSlicer_profile_validator",
+      "sha": "b7dad79533873cb1a4484e0f69fa9acae0204e66",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/feature/fix-build-error-for-OrcaSlicer_profile_validator",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/feature/fix-regression-bug-of-extruder-clearance",
+      "sha": "7e3ba8e2f33641f5e0a95121644f557e89a7bacc",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/feature/fix-regression-bug-of-extruder-clearance",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/main",
+      "sha": "d27889eb0f4bf99a5afd959cc0e14a048ac6d058",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/release/v1.8",
+      "sha": "7c0a061fb7bff892e7bb3ed276dc5d401fac9477",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/release/v1.8",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/release/v1.9",
+      "sha": "8a42aed683d02ca40aa0802b2bfbd8b43e5850d4",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/release/v1.9",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/release/v2.3",
+      "sha": "468993d5deb547b01bece5d2810fb3a8e966d9fa",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/release/v2.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/remotes/origin/release/v2.3.1",
+      "sha": "f2d10a0b5760c142e532e09f26fabd485579234c",
+      "preserved": "refs/heads/archive/2026-10-09/fermat/remotes/origin/release/v2.3.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/V1.0.10-sf",
+      "sha": "f16521adf6f43f593bc0644dbf1c984161f6159d",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/V1.0.10-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/nightly-builds",
+      "sha": "4376b1dd8db64decf4d26c792bce3c8d22038193",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/nightly-builds",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.0.10",
+      "sha": "1d833871148005249298e38c8277779ea74cb554",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.0.10",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.0.10-sf2",
+      "sha": "2b59b6e97410921a44d7bdc17c7f74d7ccc3890e",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.0.10-sf2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.0.10-sf2.1",
+      "sha": "1a60ca28b4c5ac71a55f37f7aebbc34314e45a95",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.0.10-sf2.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.0.10.05",
+      "sha": "45d3e9edbde712ebd2b3ebb836d9cfd69b7113a0",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.0.10.05",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.1",
+      "sha": "a3b3b368e28682c507efc8cdf725e3f07de75e72",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.1.0.14-sf",
+      "sha": "06dec4d21a95f5870025522b5981e066b2dbf0de",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.1.0.14-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.1.1.1-sf",
+      "sha": "159ff850e4a2168384653b1ee7aac9c19b9263b5",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.1.1.1-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.2-sf",
+      "sha": "bd174798c395c280a466c03386b82b9e73352323",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.2-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.2.4-sf",
+      "sha": "0a09c7da07b9f1499517b7fee674cae0231ed2c3",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.2.4-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.2.5-sf",
+      "sha": "764b7d62a06aaba8bb6b9b968bdad32b59e3ac09",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.2.5-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.2.5.3-sf",
+      "sha": "d0c9bb0398823b7d0a57dd9bf11a72b1507d0d87",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.2.5.3-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.3.0-sf",
+      "sha": "7a2babcd05bfb7a9388c8b8b06b2c6e473ea25e8",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.3.0-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.3.1-sf",
+      "sha": "1b6db78f9e6c67963846e7244fe765e0190f00cc",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.3.1-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.3.2-sf",
+      "sha": "cf8ff30c74ea968b0373fd0cb3b497702de9d108",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.3.2-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.3.3",
+      "sha": "de761660cb1119b9932761922770f52e89d4b338",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.3.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.3.3-sf-beta",
+      "sha": "ec7a7ff1ffa808359928a96ccefd430b3965e728",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.3.3-sf-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.3.3-sf-beta3",
+      "sha": "f15b6d5cf82927552db48da66fc0b9dd10c1e1a7",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.3.3-sf-beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.3.4",
+      "sha": "abb6676b650c75287eb80535197a9ca2ea7384a6",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.3.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.4.0",
+      "sha": "1eb54c49a64cec55073fe743af223ead985d945e",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.4.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.4.0_beta1",
+      "sha": "5d141ee21487b316349a1ec2c3e7b9be440c6615",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.4.0_beta1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.4.0_beta2",
+      "sha": "ab8e0665b6872580f675660b64c75019f6950de7",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.4.0_beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.4.0_beta3",
+      "sha": "bafd7356d6554d693500faa39838bf3d552fdd78",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.4.0_beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.4.1",
+      "sha": "4803c35b76d0c22f716723e1ddd6cef82c2dd187",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.4.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.4.2",
+      "sha": "970364cb4fe7bf847e6451288e7b62c5f5d77f63",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.4.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.4.3",
+      "sha": "41bd8f1c00267820244e7120e595b796c21a8447",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.4.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.4.4",
+      "sha": "36f4d585bf8f8e3b45acb294083191f782e41159",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.4.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.4.5",
+      "sha": "27271a69f630683d8aa9be8c27d3e61403aad2ea",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.4.5",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.5.0",
+      "sha": "7cfd79bd90f9bc8d6e16292db23d73d34155875a",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.5.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.0",
+      "sha": "8206a54cb3dea9fd74b948319cc019c7ff6a6ce5",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.1",
+      "sha": "17d6e63cf97f43c6eadb0293b6c23cd1f720bccd",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.2",
+      "sha": "e6fec51ce2db7af71ebd56d16790c6167405ce69",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.2-beta",
+      "sha": "4a288c617c61cec12e0a25a055a1d622592101b7",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.2-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.3",
+      "sha": "a636df63c14e788b408603daf9ecf973be6dd5dd",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.3-beta",
+      "sha": "9b7d72584cb5ae425c766946b775c47651815713",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.3-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.4",
+      "sha": "5072bf3d163a8c4a617af9cc7b2303b0d3e4fb47",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.4-beta",
+      "sha": "886c1eee6d42fe1c64208c3501aeff7bbbd7c6c2",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.4-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.4-beta2",
+      "sha": "0fa666792af8e14a387d42410325cb71f480d46b",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.4-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.4-beta3",
+      "sha": "43087cc6a687202f4f1cc0d05dded257874f5f4c",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.4-beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.5",
+      "sha": "dee6120c34e2b9604ed1ce28c26465bfaa7a977d",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.5",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.6.6",
+      "sha": "f7184c868b6f20e7a3b92750cef0da1fa0713276",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.6.6",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.7.0",
+      "sha": "bcedb431abb49be283b2b93f765de155f10eece4",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.7.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.7.0-beta",
+      "sha": "e7051b210b14d950bb08bb8ad2dc13df19a034ce",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.7.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.8.0",
+      "sha": "f5ec607b6afd00d80834e90badf13e1fe0e917e3",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.8.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.8.0-beta",
+      "sha": "9d7f10c176fa506cf77845e0fbd14f51dab81da9",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.8.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.8.0-beta2",
+      "sha": "e0aae93c0a9c283191a2ce778f8ea5517b247413",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.8.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.8.0-rc",
+      "sha": "4e5e5a7ae8fc6bb05292f518ec29f67d0c26516a",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.8.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.8.0-rc2",
+      "sha": "b1c325a419bd347b328c68de9840b123a2688e6a",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.8.0-rc2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.8.1",
+      "sha": "be1bd083a3285d7e39a22bc5aa652495e6d749c1",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.8.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.9.0",
+      "sha": "e713849fed7af2f8b8ecd877407949423c6e3d5b",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.9.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.9.0-alpha",
+      "sha": "665526e4ebfaf3310f917c3bf285fc90de5988fc",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.9.0-alpha",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.9.0-beta",
+      "sha": "08577429ac64dff9e9500b6695227017bd577fa2",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.9.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v1.9.1",
+      "sha": "8a42aed683d02ca40aa0802b2bfbd8b43e5850d4",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v1.9.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.0.0",
+      "sha": "a187356b931ce3218cfd84d5bf46797bda6f8660",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.0.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.0.0-beta",
+      "sha": "eb5a1bc7135462fb7cd04fa0853d08459516a75d",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.0.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.0.0-rc",
+      "sha": "2841476e8604a6d8118c21a44ccdfe227e72e3bf",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.0.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.1.0",
+      "sha": "5c9b82d6ec3fe974d36dbf15fcdc8f63340b1a0b",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.1.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.1.0-beta",
+      "sha": "9b7b11e066196d513225416f171f676c2eb96e2c",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.1.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.1.0-rc",
+      "sha": "df2674e19ded9dec66d33a1fd8aee4db852e2ad5",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.1.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.1.1",
+      "sha": "a4357d1e95bc603a7bf2d18f14a44e44d1ad4878",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.1.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.2.0",
+      "sha": "1088d0a6c713250ee3d14da791e27b76b4339363",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.2.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.2.0-beta",
+      "sha": "603e3e76b096269fa776550b4846775674e4fdae",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.2.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.2.0-beta2",
+      "sha": "17492c1e5b70a3f3ca6e9e85412d08e322a16439",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.2.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.2.0-rc",
+      "sha": "fb032cd85f2dc7ffb1b32d478192a63ef53688cf",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.2.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.0",
+      "sha": "70931e5321fa66966a5bfb251efca0e82307d427",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.0-beta",
+      "sha": "dc491166a8a8dcf44118431113f20f428c34554f",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.0-beta2",
+      "sha": "ddf8eca96e5072d7f7f5996cf5fd29c991c6ee92",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.0-rc",
+      "sha": "79a5a9b5f85895ae24fad8b5070c64b495e1f522",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.1",
+      "sha": "f2d10a0b5760c142e532e09f26fabd485579234c",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.1-alpha",
+      "sha": "6ae89f7d9b66e915f97d5771d1a718d7848d607f",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.1-alpha",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.1-beta",
+      "sha": "1e87666487a11de4fe142eaeff88819eff055a8e",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.1-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.2",
+      "sha": "c724a3f5f51c52336624b689e846c8fbc943a912",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.2-beta",
+      "sha": "cd5c8f2ad07d7d92c2627cd234c71535cb322846",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.2-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.2-beta2",
+      "sha": "7e63fce706a5fabb5763bea804e7e81b71876c0f",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.2-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.2-rc",
+      "sha": "ca1f360b83f989b85c18a63230dec6e19e3063db",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.2-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "fermat",
+      "original": "refs/tags/v2.3.2-rc2",
+      "sha": "618706319093b000896e48cc013ce7da8d4c1f97",
+      "preserved": "refs/tags/archive/2026-10-09/fermat/v2.3.2-rc2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/heads/continuous-filament-loop",
+      "sha": "6fa3187c465df7cf23a8cc7adb65ceddb0e5dd54",
+      "preserved": "refs/heads/archive/2026-10-09/loop/heads/continuous-filament-loop",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/heads/main",
+      "sha": "bcddf4074c6975c2ecde35222a4ba55531efd219",
+      "preserved": "refs/heads/archive/2026-10-09/loop/heads/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/FullSpectrum_integration",
+      "sha": "8cff2cda78fd1795b08bd537858e716552f00557",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/FullSpectrum_integration",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/HEAD",
+      "sha": "bcddf4074c6975c2ecde35222a4ba55531efd219",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/HEAD",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/continuous-filament-loop-github",
+      "sha": "3fd9fabd0845e9cae710b80d75571dfe48c03acb",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/continuous-filament-loop-github",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/dependabot/github_actions/actions/github-script-9",
+      "sha": "1ffe52648a2e336258b04a29b0aabe1c867e60d8",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/dependabot/github_actions/actions/github-script-9",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/feature/auto-update",
+      "sha": "f5ca14ebb5468c30359b16471fc87faccdfb725b",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/feature/auto-update",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/feature/fix-build-error-for-OrcaSlicer_profile_validator",
+      "sha": "b7dad79533873cb1a4484e0f69fa9acae0204e66",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/feature/fix-build-error-for-OrcaSlicer_profile_validator",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/feature/fix-regression-bug-of-extruder-clearance",
+      "sha": "7e3ba8e2f33641f5e0a95121644f557e89a7bacc",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/feature/fix-regression-bug-of-extruder-clearance",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/fix/custom-zbolt-profile-filament-selection",
+      "sha": "ad460e71beec338f153c895af441b5004910b739",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/fix/custom-zbolt-profile-filament-selection",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/main",
+      "sha": "bcddf4074c6975c2ecde35222a4ba55531efd219",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/release/v1.8",
+      "sha": "7c0a061fb7bff892e7bb3ed276dc5d401fac9477",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/release/v1.8",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/release/v1.9",
+      "sha": "8a42aed683d02ca40aa0802b2bfbd8b43e5850d4",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/release/v1.9",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/release/v2.3",
+      "sha": "468993d5deb547b01bece5d2810fb3a8e966d9fa",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/release/v2.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/remotes/origin/release/v2.3.1",
+      "sha": "f2d10a0b5760c142e532e09f26fabd485579234c",
+      "preserved": "refs/heads/archive/2026-10-09/loop/remotes/origin/release/v2.3.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/nightly-builds",
+      "sha": "ff85da08a486cdcbfe27d86d6342a0ce9c982b43",
+      "preserved": "refs/tags/archive/2026-10-09/loop/nightly-builds",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.0.10",
+      "sha": "1d833871148005249298e38c8277779ea74cb554",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.0.10",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.0.10.05",
+      "sha": "45d3e9edbde712ebd2b3ebb836d9cfd69b7113a0",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.0.10.05",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.1",
+      "sha": "a3b3b368e28682c507efc8cdf725e3f07de75e72",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.1.0.14-sf",
+      "sha": "06dec4d21a95f5870025522b5981e066b2dbf0de",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.1.0.14-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.1.1.1-sf",
+      "sha": "159ff850e4a2168384653b1ee7aac9c19b9263b5",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.1.1.1-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.2-sf",
+      "sha": "bd174798c395c280a466c03386b82b9e73352323",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.2-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.2.4-sf",
+      "sha": "0a09c7da07b9f1499517b7fee674cae0231ed2c3",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.2.4-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.2.5-sf",
+      "sha": "764b7d62a06aaba8bb6b9b968bdad32b59e3ac09",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.2.5-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.2.5.3-sf",
+      "sha": "d0c9bb0398823b7d0a57dd9bf11a72b1507d0d87",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.2.5.3-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.3.0-sf",
+      "sha": "7a2babcd05bfb7a9388c8b8b06b2c6e473ea25e8",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.3.0-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.3.1-sf",
+      "sha": "1b6db78f9e6c67963846e7244fe765e0190f00cc",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.3.1-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.3.2-sf",
+      "sha": "cf8ff30c74ea968b0373fd0cb3b497702de9d108",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.3.2-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.3.3",
+      "sha": "de761660cb1119b9932761922770f52e89d4b338",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.3.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.3.3-sf-beta",
+      "sha": "ec7a7ff1ffa808359928a96ccefd430b3965e728",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.3.3-sf-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.3.3-sf-beta3",
+      "sha": "f15b6d5cf82927552db48da66fc0b9dd10c1e1a7",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.3.3-sf-beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.3.4",
+      "sha": "abb6676b650c75287eb80535197a9ca2ea7384a6",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.3.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.4.0",
+      "sha": "1eb54c49a64cec55073fe743af223ead985d945e",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.4.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.4.0_beta1",
+      "sha": "5d141ee21487b316349a1ec2c3e7b9be440c6615",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.4.0_beta1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.4.0_beta2",
+      "sha": "ab8e0665b6872580f675660b64c75019f6950de7",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.4.0_beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.4.0_beta3",
+      "sha": "bafd7356d6554d693500faa39838bf3d552fdd78",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.4.0_beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.4.1",
+      "sha": "4803c35b76d0c22f716723e1ddd6cef82c2dd187",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.4.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.4.2",
+      "sha": "970364cb4fe7bf847e6451288e7b62c5f5d77f63",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.4.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.4.3",
+      "sha": "41bd8f1c00267820244e7120e595b796c21a8447",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.4.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.4.4",
+      "sha": "36f4d585bf8f8e3b45acb294083191f782e41159",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.4.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.4.5",
+      "sha": "27271a69f630683d8aa9be8c27d3e61403aad2ea",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.4.5",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.5.0",
+      "sha": "7cfd79bd90f9bc8d6e16292db23d73d34155875a",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.5.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.0",
+      "sha": "8206a54cb3dea9fd74b948319cc019c7ff6a6ce5",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.1",
+      "sha": "17d6e63cf97f43c6eadb0293b6c23cd1f720bccd",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.2",
+      "sha": "e6fec51ce2db7af71ebd56d16790c6167405ce69",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.2-beta",
+      "sha": "4a288c617c61cec12e0a25a055a1d622592101b7",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.2-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.3",
+      "sha": "a636df63c14e788b408603daf9ecf973be6dd5dd",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.3-beta",
+      "sha": "9b7d72584cb5ae425c766946b775c47651815713",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.3-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.4",
+      "sha": "5072bf3d163a8c4a617af9cc7b2303b0d3e4fb47",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.4-beta",
+      "sha": "886c1eee6d42fe1c64208c3501aeff7bbbd7c6c2",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.4-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.4-beta2",
+      "sha": "0fa666792af8e14a387d42410325cb71f480d46b",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.4-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.4-beta3",
+      "sha": "43087cc6a687202f4f1cc0d05dded257874f5f4c",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.4-beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.5",
+      "sha": "dee6120c34e2b9604ed1ce28c26465bfaa7a977d",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.5",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.6.6",
+      "sha": "f7184c868b6f20e7a3b92750cef0da1fa0713276",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.6.6",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.7.0",
+      "sha": "bcedb431abb49be283b2b93f765de155f10eece4",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.7.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.7.0-beta",
+      "sha": "e7051b210b14d950bb08bb8ad2dc13df19a034ce",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.7.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.8.0",
+      "sha": "f5ec607b6afd00d80834e90badf13e1fe0e917e3",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.8.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.8.0-beta",
+      "sha": "9d7f10c176fa506cf77845e0fbd14f51dab81da9",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.8.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.8.0-beta2",
+      "sha": "e0aae93c0a9c283191a2ce778f8ea5517b247413",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.8.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.8.0-rc",
+      "sha": "4e5e5a7ae8fc6bb05292f518ec29f67d0c26516a",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.8.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.8.0-rc2",
+      "sha": "b1c325a419bd347b328c68de9840b123a2688e6a",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.8.0-rc2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.8.1",
+      "sha": "be1bd083a3285d7e39a22bc5aa652495e6d749c1",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.8.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.9.0",
+      "sha": "e713849fed7af2f8b8ecd877407949423c6e3d5b",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.9.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.9.0-alpha",
+      "sha": "665526e4ebfaf3310f917c3bf285fc90de5988fc",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.9.0-alpha",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.9.0-beta",
+      "sha": "08577429ac64dff9e9500b6695227017bd577fa2",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.9.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v1.9.1",
+      "sha": "8a42aed683d02ca40aa0802b2bfbd8b43e5850d4",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v1.9.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.0.0",
+      "sha": "a187356b931ce3218cfd84d5bf46797bda6f8660",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.0.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.0.0-beta",
+      "sha": "eb5a1bc7135462fb7cd04fa0853d08459516a75d",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.0.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.0.0-rc",
+      "sha": "2841476e8604a6d8118c21a44ccdfe227e72e3bf",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.0.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.1.0",
+      "sha": "5c9b82d6ec3fe974d36dbf15fcdc8f63340b1a0b",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.1.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.1.0-beta",
+      "sha": "9b7b11e066196d513225416f171f676c2eb96e2c",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.1.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.1.0-rc",
+      "sha": "df2674e19ded9dec66d33a1fd8aee4db852e2ad5",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.1.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.1.1",
+      "sha": "a4357d1e95bc603a7bf2d18f14a44e44d1ad4878",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.1.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.2.0",
+      "sha": "1088d0a6c713250ee3d14da791e27b76b4339363",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.2.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.2.0-beta",
+      "sha": "603e3e76b096269fa776550b4846775674e4fdae",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.2.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.2.0-beta2",
+      "sha": "17492c1e5b70a3f3ca6e9e85412d08e322a16439",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.2.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.2.0-rc",
+      "sha": "fb032cd85f2dc7ffb1b32d478192a63ef53688cf",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.2.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.0",
+      "sha": "70931e5321fa66966a5bfb251efca0e82307d427",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.0-beta",
+      "sha": "dc491166a8a8dcf44118431113f20f428c34554f",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.0-beta2",
+      "sha": "ddf8eca96e5072d7f7f5996cf5fd29c991c6ee92",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.0-rc",
+      "sha": "79a5a9b5f85895ae24fad8b5070c64b495e1f522",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.1",
+      "sha": "f2d10a0b5760c142e532e09f26fabd485579234c",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.1-alpha",
+      "sha": "6ae89f7d9b66e915f97d5771d1a718d7848d607f",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.1-alpha",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.1-beta",
+      "sha": "1e87666487a11de4fe142eaeff88819eff055a8e",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.1-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.2",
+      "sha": "c724a3f5f51c52336624b689e846c8fbc943a912",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.2-beta",
+      "sha": "cd5c8f2ad07d7d92c2627cd234c71535cb322846",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.2-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.2-beta2",
+      "sha": "7e63fce706a5fabb5763bea804e7e81b71876c0f",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.2-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.2-rc",
+      "sha": "ca1f360b83f989b85c18a63230dec6e19e3063db",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.2-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "loop",
+      "original": "refs/tags/v2.3.2-rc2",
+      "sha": "618706319093b000896e48cc013ce7da8d4c1f97",
+      "preserved": "refs/tags/archive/2026-10-09/loop/v2.3.2-rc2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/heads/continuous-filament-loop",
+      "sha": "6fa3187c465df7cf23a8cc7adb65ceddb0e5dd54",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/heads/continuous-filament-loop",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/heads/main",
+      "sha": "bcddf4074c6975c2ecde35222a4ba55531efd219",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/heads/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/FullSpectrum_integration",
+      "sha": "8cff2cda78fd1795b08bd537858e716552f00557",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/FullSpectrum_integration",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/HEAD",
+      "sha": "bcddf4074c6975c2ecde35222a4ba55531efd219",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/HEAD",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/continuous-filament-loop-github",
+      "sha": "3fd9fabd0845e9cae710b80d75571dfe48c03acb",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/continuous-filament-loop-github",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/dependabot/github_actions/actions/github-script-9",
+      "sha": "1ffe52648a2e336258b04a29b0aabe1c867e60d8",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/dependabot/github_actions/actions/github-script-9",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/feature/auto-update",
+      "sha": "f5ca14ebb5468c30359b16471fc87faccdfb725b",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/feature/auto-update",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/feature/fix-build-error-for-OrcaSlicer_profile_validator",
+      "sha": "b7dad79533873cb1a4484e0f69fa9acae0204e66",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/feature/fix-build-error-for-OrcaSlicer_profile_validator",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/feature/fix-regression-bug-of-extruder-clearance",
+      "sha": "7e3ba8e2f33641f5e0a95121644f557e89a7bacc",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/feature/fix-regression-bug-of-extruder-clearance",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/fix/custom-zbolt-profile-filament-selection",
+      "sha": "ad460e71beec338f153c895af441b5004910b739",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/fix/custom-zbolt-profile-filament-selection",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/main",
+      "sha": "bcddf4074c6975c2ecde35222a4ba55531efd219",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/release/v1.8",
+      "sha": "7c0a061fb7bff892e7bb3ed276dc5d401fac9477",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/release/v1.8",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/release/v1.9",
+      "sha": "8a42aed683d02ca40aa0802b2bfbd8b43e5850d4",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/release/v1.9",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/release/v2.3",
+      "sha": "468993d5deb547b01bece5d2810fb3a8e966d9fa",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/release/v2.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/remotes/origin/release/v2.3.1",
+      "sha": "f2d10a0b5760c142e532e09f26fabd485579234c",
+      "preserved": "refs/heads/archive/2026-10-09/aligned/remotes/origin/release/v2.3.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/nightly-builds",
+      "sha": "ff85da08a486cdcbfe27d86d6342a0ce9c982b43",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/nightly-builds",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.0.10",
+      "sha": "1d833871148005249298e38c8277779ea74cb554",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.0.10",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.0.10.05",
+      "sha": "45d3e9edbde712ebd2b3ebb836d9cfd69b7113a0",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.0.10.05",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.1",
+      "sha": "a3b3b368e28682c507efc8cdf725e3f07de75e72",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.1.0.14-sf",
+      "sha": "06dec4d21a95f5870025522b5981e066b2dbf0de",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.1.0.14-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.1.1.1-sf",
+      "sha": "159ff850e4a2168384653b1ee7aac9c19b9263b5",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.1.1.1-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.2-sf",
+      "sha": "bd174798c395c280a466c03386b82b9e73352323",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.2-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.2.4-sf",
+      "sha": "0a09c7da07b9f1499517b7fee674cae0231ed2c3",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.2.4-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.2.5-sf",
+      "sha": "764b7d62a06aaba8bb6b9b968bdad32b59e3ac09",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.2.5-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.2.5.3-sf",
+      "sha": "d0c9bb0398823b7d0a57dd9bf11a72b1507d0d87",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.2.5.3-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.3.0-sf",
+      "sha": "7a2babcd05bfb7a9388c8b8b06b2c6e473ea25e8",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.3.0-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.3.1-sf",
+      "sha": "1b6db78f9e6c67963846e7244fe765e0190f00cc",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.3.1-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.3.2-sf",
+      "sha": "cf8ff30c74ea968b0373fd0cb3b497702de9d108",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.3.2-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.3.3",
+      "sha": "de761660cb1119b9932761922770f52e89d4b338",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.3.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.3.3-sf-beta",
+      "sha": "ec7a7ff1ffa808359928a96ccefd430b3965e728",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.3.3-sf-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.3.3-sf-beta3",
+      "sha": "f15b6d5cf82927552db48da66fc0b9dd10c1e1a7",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.3.3-sf-beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.3.4",
+      "sha": "abb6676b650c75287eb80535197a9ca2ea7384a6",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.3.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.4.0",
+      "sha": "1eb54c49a64cec55073fe743af223ead985d945e",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.4.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.4.0_beta1",
+      "sha": "5d141ee21487b316349a1ec2c3e7b9be440c6615",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.4.0_beta1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.4.0_beta2",
+      "sha": "ab8e0665b6872580f675660b64c75019f6950de7",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.4.0_beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.4.0_beta3",
+      "sha": "bafd7356d6554d693500faa39838bf3d552fdd78",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.4.0_beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.4.1",
+      "sha": "4803c35b76d0c22f716723e1ddd6cef82c2dd187",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.4.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.4.2",
+      "sha": "970364cb4fe7bf847e6451288e7b62c5f5d77f63",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.4.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.4.3",
+      "sha": "41bd8f1c00267820244e7120e595b796c21a8447",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.4.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.4.4",
+      "sha": "36f4d585bf8f8e3b45acb294083191f782e41159",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.4.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.4.5",
+      "sha": "27271a69f630683d8aa9be8c27d3e61403aad2ea",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.4.5",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.5.0",
+      "sha": "7cfd79bd90f9bc8d6e16292db23d73d34155875a",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.5.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.0",
+      "sha": "8206a54cb3dea9fd74b948319cc019c7ff6a6ce5",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.1",
+      "sha": "17d6e63cf97f43c6eadb0293b6c23cd1f720bccd",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.2",
+      "sha": "e6fec51ce2db7af71ebd56d16790c6167405ce69",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.2-beta",
+      "sha": "4a288c617c61cec12e0a25a055a1d622592101b7",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.2-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.3",
+      "sha": "a636df63c14e788b408603daf9ecf973be6dd5dd",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.3-beta",
+      "sha": "9b7d72584cb5ae425c766946b775c47651815713",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.3-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.4",
+      "sha": "5072bf3d163a8c4a617af9cc7b2303b0d3e4fb47",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.4-beta",
+      "sha": "886c1eee6d42fe1c64208c3501aeff7bbbd7c6c2",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.4-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.4-beta2",
+      "sha": "0fa666792af8e14a387d42410325cb71f480d46b",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.4-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.4-beta3",
+      "sha": "43087cc6a687202f4f1cc0d05dded257874f5f4c",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.4-beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.5",
+      "sha": "dee6120c34e2b9604ed1ce28c26465bfaa7a977d",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.5",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.6.6",
+      "sha": "f7184c868b6f20e7a3b92750cef0da1fa0713276",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.6.6",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.7.0",
+      "sha": "bcedb431abb49be283b2b93f765de155f10eece4",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.7.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.7.0-beta",
+      "sha": "e7051b210b14d950bb08bb8ad2dc13df19a034ce",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.7.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.8.0",
+      "sha": "f5ec607b6afd00d80834e90badf13e1fe0e917e3",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.8.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.8.0-beta",
+      "sha": "9d7f10c176fa506cf77845e0fbd14f51dab81da9",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.8.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.8.0-beta2",
+      "sha": "e0aae93c0a9c283191a2ce778f8ea5517b247413",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.8.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.8.0-rc",
+      "sha": "4e5e5a7ae8fc6bb05292f518ec29f67d0c26516a",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.8.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.8.0-rc2",
+      "sha": "b1c325a419bd347b328c68de9840b123a2688e6a",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.8.0-rc2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.8.1",
+      "sha": "be1bd083a3285d7e39a22bc5aa652495e6d749c1",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.8.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.9.0",
+      "sha": "e713849fed7af2f8b8ecd877407949423c6e3d5b",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.9.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.9.0-alpha",
+      "sha": "665526e4ebfaf3310f917c3bf285fc90de5988fc",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.9.0-alpha",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.9.0-beta",
+      "sha": "08577429ac64dff9e9500b6695227017bd577fa2",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.9.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v1.9.1",
+      "sha": "8a42aed683d02ca40aa0802b2bfbd8b43e5850d4",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v1.9.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.0.0",
+      "sha": "a187356b931ce3218cfd84d5bf46797bda6f8660",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.0.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.0.0-beta",
+      "sha": "eb5a1bc7135462fb7cd04fa0853d08459516a75d",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.0.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.0.0-rc",
+      "sha": "2841476e8604a6d8118c21a44ccdfe227e72e3bf",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.0.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.1.0",
+      "sha": "5c9b82d6ec3fe974d36dbf15fcdc8f63340b1a0b",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.1.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.1.0-beta",
+      "sha": "9b7b11e066196d513225416f171f676c2eb96e2c",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.1.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.1.0-rc",
+      "sha": "df2674e19ded9dec66d33a1fd8aee4db852e2ad5",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.1.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.1.1",
+      "sha": "a4357d1e95bc603a7bf2d18f14a44e44d1ad4878",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.1.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.2.0",
+      "sha": "1088d0a6c713250ee3d14da791e27b76b4339363",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.2.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.2.0-beta",
+      "sha": "603e3e76b096269fa776550b4846775674e4fdae",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.2.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.2.0-beta2",
+      "sha": "17492c1e5b70a3f3ca6e9e85412d08e322a16439",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.2.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.2.0-rc",
+      "sha": "fb032cd85f2dc7ffb1b32d478192a63ef53688cf",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.2.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.0",
+      "sha": "70931e5321fa66966a5bfb251efca0e82307d427",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.0-beta",
+      "sha": "dc491166a8a8dcf44118431113f20f428c34554f",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.0-beta2",
+      "sha": "ddf8eca96e5072d7f7f5996cf5fd29c991c6ee92",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.0-rc",
+      "sha": "79a5a9b5f85895ae24fad8b5070c64b495e1f522",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.1",
+      "sha": "f2d10a0b5760c142e532e09f26fabd485579234c",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.1-alpha",
+      "sha": "6ae89f7d9b66e915f97d5771d1a718d7848d607f",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.1-alpha",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.1-beta",
+      "sha": "1e87666487a11de4fe142eaeff88819eff055a8e",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.1-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.2",
+      "sha": "c724a3f5f51c52336624b689e846c8fbc943a912",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.2-beta",
+      "sha": "cd5c8f2ad07d7d92c2627cd234c71535cb322846",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.2-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.2-beta2",
+      "sha": "7e63fce706a5fabb5763bea804e7e81b71876c0f",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.2-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.2-rc",
+      "sha": "ca1f360b83f989b85c18a63230dec6e19e3063db",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.2-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "aligned",
+      "original": "refs/tags/v2.3.2-rc2",
+      "sha": "618706319093b000896e48cc013ce7da8d4c1f97",
+      "preserved": "refs/tags/archive/2026-10-09/aligned/v2.3.2-rc2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "upstream-worktree",
+      "original": "refs/heads/continuous-extrusion",
+      "sha": "36c5154d53e8d25639265b3f43be54fb7a688b85",
+      "preserved": "refs/heads/archive/2026-10-09/upstream-worktree/heads/continuous-extrusion",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "upstream-worktree",
+      "original": "refs/heads/continuous-extrusion-upstream",
+      "sha": "6aa38fa413dbc5eaa279fcf54f3ca369917a15dc",
+      "preserved": "refs/heads/archive/2026-10-09/upstream-worktree/heads/continuous-extrusion-upstream",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "upstream-worktree",
+      "original": "refs/remotes/origin/continuous-extrusion",
+      "sha": "36c5154d53e8d25639265b3f43be54fb7a688b85",
+      "preserved": "refs/heads/archive/2026-10-09/upstream-worktree/remotes/origin/continuous-extrusion",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "upstream-worktree",
+      "original": "refs/remotes/origin/continuous-extrusion-upstream",
+      "sha": "6aa38fa413dbc5eaa279fcf54f3ca369917a15dc",
+      "preserved": "refs/heads/archive/2026-10-09/upstream-worktree/remotes/origin/continuous-extrusion-upstream",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "upstream-worktree",
+      "original": "refs/remotes/upstream/main",
+      "sha": "e296d5daac1084babfc8988620383e9c02b76ed5",
+      "preserved": "refs/heads/archive/2026-10-09/upstream-worktree/remotes/upstream/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "upstream-worktree",
+      "original": "refs/tags/v2.4.0",
+      "sha": "6d9eb1792f50d11ea12d60526b6ace58666354fd",
+      "preserved": "refs/tags/archive/2026-10-09/upstream-worktree/v2.4.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/FullSpectrum_integration",
+      "sha": "8cff2cda78fd1795b08bd537858e716552f00557",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/FullSpectrum_integration",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/backup/local-commit-2026-10-05",
+      "sha": "4e7e92c7852f23cbe423d558f1b1e2befaac8faa",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/backup/local-commit-2026-10-05",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/continuous-extrusion",
+      "sha": "36c5154d53e8d25639265b3f43be54fb7a688b85",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/continuous-extrusion",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/continuous-extrusion-upstream",
+      "sha": "6aa38fa413dbc5eaa279fcf54f3ca369917a15dc",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/continuous-extrusion-upstream",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/dependabot/github_actions/actions/github-script-9",
+      "sha": "1ffe52648a2e336258b04a29b0aabe1c867e60d8",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/dependabot/github_actions/actions/github-script-9",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/feature/auto-update",
+      "sha": "f5ca14ebb5468c30359b16471fc87faccdfb725b",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/feature/auto-update",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/feature/fix-build-error-for-OrcaSlicer_profile_validator",
+      "sha": "b7dad79533873cb1a4484e0f69fa9acae0204e66",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/feature/fix-build-error-for-OrcaSlicer_profile_validator",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/feature/fix-regression-bug-of-extruder-clearance",
+      "sha": "7e3ba8e2f33641f5e0a95121644f557e89a7bacc",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/feature/fix-regression-bug-of-extruder-clearance",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/fix/custom-zbolt-profile-filament-selection",
+      "sha": "ad460e71beec338f153c895af441b5004910b739",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/fix/custom-zbolt-profile-filament-selection",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/main",
+      "sha": "bcddf4074c6975c2ecde35222a4ba55531efd219",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/release/v1.8",
+      "sha": "7c0a061fb7bff892e7bb3ed276dc5d401fac9477",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/release/v1.8",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/release/v1.9",
+      "sha": "8a42aed683d02ca40aa0802b2bfbd8b43e5850d4",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/release/v1.9",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/release/v2.3",
+      "sha": "468993d5deb547b01bece5d2810fb3a8e966d9fa",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/release/v2.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/heads/release/v2.3.1",
+      "sha": "f2d10a0b5760c142e532e09f26fabd485579234c",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/heads/release/v2.3.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/pull/1/head",
+      "sha": "3fd9fabd0845e9cae710b80d75571dfe48c03acb",
+      "preserved": "refs/heads/archive/2026-10-09/canonical-remote/pull/1/head",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/V1.0.10-sf",
+      "sha": "f16521adf6f43f593bc0644dbf1c984161f6159d",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/V1.0.10-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/nightly-builds",
+      "sha": "ff85da08a486cdcbfe27d86d6342a0ce9c982b43",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/nightly-builds",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.0.10",
+      "sha": "1d833871148005249298e38c8277779ea74cb554",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.0.10",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.0.10-sf2",
+      "sha": "2b59b6e97410921a44d7bdc17c7f74d7ccc3890e",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.0.10-sf2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.0.10-sf2.1",
+      "sha": "1a60ca28b4c5ac71a55f37f7aebbc34314e45a95",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.0.10-sf2.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.0.10.05",
+      "sha": "45d3e9edbde712ebd2b3ebb836d9cfd69b7113a0",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.0.10.05",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.1",
+      "sha": "a3b3b368e28682c507efc8cdf725e3f07de75e72",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.1.0.14-sf",
+      "sha": "06dec4d21a95f5870025522b5981e066b2dbf0de",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.1.0.14-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.1.1.1-sf",
+      "sha": "159ff850e4a2168384653b1ee7aac9c19b9263b5",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.1.1.1-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.2-sf",
+      "sha": "bd174798c395c280a466c03386b82b9e73352323",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.2-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.2.4-sf",
+      "sha": "0a09c7da07b9f1499517b7fee674cae0231ed2c3",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.2.4-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.2.5-sf",
+      "sha": "764b7d62a06aaba8bb6b9b968bdad32b59e3ac09",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.2.5-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.2.5.3-sf",
+      "sha": "d0c9bb0398823b7d0a57dd9bf11a72b1507d0d87",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.2.5.3-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.3.0-sf",
+      "sha": "7a2babcd05bfb7a9388c8b8b06b2c6e473ea25e8",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.3.0-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.3.1-sf",
+      "sha": "1b6db78f9e6c67963846e7244fe765e0190f00cc",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.3.1-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.3.2-sf",
+      "sha": "cf8ff30c74ea968b0373fd0cb3b497702de9d108",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.3.2-sf",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.3.3",
+      "sha": "de761660cb1119b9932761922770f52e89d4b338",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.3.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.3.3-sf-beta",
+      "sha": "ec7a7ff1ffa808359928a96ccefd430b3965e728",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.3.3-sf-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.3.3-sf-beta3",
+      "sha": "f15b6d5cf82927552db48da66fc0b9dd10c1e1a7",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.3.3-sf-beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.3.4",
+      "sha": "abb6676b650c75287eb80535197a9ca2ea7384a6",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.3.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.4.0",
+      "sha": "1eb54c49a64cec55073fe743af223ead985d945e",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.4.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.4.0_beta1",
+      "sha": "5d141ee21487b316349a1ec2c3e7b9be440c6615",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.4.0_beta1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.4.0_beta2",
+      "sha": "ab8e0665b6872580f675660b64c75019f6950de7",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.4.0_beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.4.0_beta3",
+      "sha": "bafd7356d6554d693500faa39838bf3d552fdd78",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.4.0_beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.4.1",
+      "sha": "4803c35b76d0c22f716723e1ddd6cef82c2dd187",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.4.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.4.2",
+      "sha": "970364cb4fe7bf847e6451288e7b62c5f5d77f63",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.4.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.4.3",
+      "sha": "41bd8f1c00267820244e7120e595b796c21a8447",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.4.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.4.4",
+      "sha": "36f4d585bf8f8e3b45acb294083191f782e41159",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.4.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.4.5",
+      "sha": "27271a69f630683d8aa9be8c27d3e61403aad2ea",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.4.5",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.5.0",
+      "sha": "7cfd79bd90f9bc8d6e16292db23d73d34155875a",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.5.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.0",
+      "sha": "8206a54cb3dea9fd74b948319cc019c7ff6a6ce5",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.1",
+      "sha": "17d6e63cf97f43c6eadb0293b6c23cd1f720bccd",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.2",
+      "sha": "e6fec51ce2db7af71ebd56d16790c6167405ce69",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.2-beta",
+      "sha": "4a288c617c61cec12e0a25a055a1d622592101b7",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.2-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.3",
+      "sha": "a636df63c14e788b408603daf9ecf973be6dd5dd",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.3-beta",
+      "sha": "9b7d72584cb5ae425c766946b775c47651815713",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.3-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.4",
+      "sha": "5072bf3d163a8c4a617af9cc7b2303b0d3e4fb47",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.4",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.4-beta",
+      "sha": "886c1eee6d42fe1c64208c3501aeff7bbbd7c6c2",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.4-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.4-beta2",
+      "sha": "0fa666792af8e14a387d42410325cb71f480d46b",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.4-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.4-beta3",
+      "sha": "43087cc6a687202f4f1cc0d05dded257874f5f4c",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.4-beta3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.5",
+      "sha": "dee6120c34e2b9604ed1ce28c26465bfaa7a977d",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.5",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.6.6",
+      "sha": "f7184c868b6f20e7a3b92750cef0da1fa0713276",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.6.6",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.7.0",
+      "sha": "bcedb431abb49be283b2b93f765de155f10eece4",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.7.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.7.0-beta",
+      "sha": "e7051b210b14d950bb08bb8ad2dc13df19a034ce",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.7.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.8.0",
+      "sha": "f5ec607b6afd00d80834e90badf13e1fe0e917e3",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.8.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.8.0-beta",
+      "sha": "9d7f10c176fa506cf77845e0fbd14f51dab81da9",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.8.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.8.0-beta2",
+      "sha": "e0aae93c0a9c283191a2ce778f8ea5517b247413",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.8.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.8.0-rc",
+      "sha": "4e5e5a7ae8fc6bb05292f518ec29f67d0c26516a",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.8.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.8.0-rc2",
+      "sha": "b1c325a419bd347b328c68de9840b123a2688e6a",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.8.0-rc2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.8.1",
+      "sha": "be1bd083a3285d7e39a22bc5aa652495e6d749c1",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.8.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.9.0",
+      "sha": "e713849fed7af2f8b8ecd877407949423c6e3d5b",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.9.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.9.0-alpha",
+      "sha": "665526e4ebfaf3310f917c3bf285fc90de5988fc",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.9.0-alpha",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.9.0-beta",
+      "sha": "08577429ac64dff9e9500b6695227017bd577fa2",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.9.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v1.9.1",
+      "sha": "8a42aed683d02ca40aa0802b2bfbd8b43e5850d4",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v1.9.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.0.0",
+      "sha": "a187356b931ce3218cfd84d5bf46797bda6f8660",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.0.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.0.0-beta",
+      "sha": "eb5a1bc7135462fb7cd04fa0853d08459516a75d",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.0.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.0.0-rc",
+      "sha": "2841476e8604a6d8118c21a44ccdfe227e72e3bf",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.0.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.1.0",
+      "sha": "5c9b82d6ec3fe974d36dbf15fcdc8f63340b1a0b",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.1.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.1.0-beta",
+      "sha": "9b7b11e066196d513225416f171f676c2eb96e2c",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.1.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.1.0-rc",
+      "sha": "df2674e19ded9dec66d33a1fd8aee4db852e2ad5",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.1.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.1.1",
+      "sha": "a4357d1e95bc603a7bf2d18f14a44e44d1ad4878",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.1.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.2.0",
+      "sha": "1088d0a6c713250ee3d14da791e27b76b4339363",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.2.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.2.0-beta",
+      "sha": "603e3e76b096269fa776550b4846775674e4fdae",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.2.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.2.0-beta2",
+      "sha": "17492c1e5b70a3f3ca6e9e85412d08e322a16439",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.2.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.2.0-rc",
+      "sha": "fb032cd85f2dc7ffb1b32d478192a63ef53688cf",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.2.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.0",
+      "sha": "70931e5321fa66966a5bfb251efca0e82307d427",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.0",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.0-beta",
+      "sha": "dc491166a8a8dcf44118431113f20f428c34554f",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.0-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.0-beta2",
+      "sha": "ddf8eca96e5072d7f7f5996cf5fd29c991c6ee92",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.0-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.0-rc",
+      "sha": "79a5a9b5f85895ae24fad8b5070c64b495e1f522",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.0-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.1",
+      "sha": "f2d10a0b5760c142e532e09f26fabd485579234c",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.1",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.1-alpha",
+      "sha": "6ae89f7d9b66e915f97d5771d1a718d7848d607f",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.1-alpha",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.1-beta",
+      "sha": "1e87666487a11de4fe142eaeff88819eff055a8e",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.1-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.2",
+      "sha": "c724a3f5f51c52336624b689e846c8fbc943a912",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.2-beta",
+      "sha": "cd5c8f2ad07d7d92c2627cd234c71535cb322846",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.2-beta",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.2-beta2",
+      "sha": "7e63fce706a5fabb5763bea804e7e81b71876c0f",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.2-beta2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.2-rc",
+      "sha": "ca1f360b83f989b85c18a63230dec6e19e3063db",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.2-rc",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer.git",
+      "original": "refs/tags/v2.3.2-rc2",
+      "sha": "618706319093b000896e48cc013ce7da8d4c1f97",
+      "preserved": "refs/tags/archive/2026-10-09/canonical-remote/v2.3.2-rc2",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/heads/backup/local-work-2026-10-05",
+      "sha": "08c1150ad5c694101481b681fcfdaa07fa6cb2ad",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/heads/backup/local-work-2026-10-05",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/heads/codex/connected-fermat-continuous-slicing",
+      "sha": "dd3a6d6c6c3d87767c4d0264c59c6866ba04b754",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/heads/codex/connected-fermat-continuous-slicing",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/heads/codex/continuous-fermat-svg-hybrid-baseline",
+      "sha": "b7c290a69576c3d33f9dcf674052475856ecdf64",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/heads/codex/continuous-fermat-svg-hybrid-baseline",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/heads/codex/continuous-slicing-safety-hardening",
+      "sha": "97b65b57367dce2f1b11434ef96543bb51452703",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/heads/codex/continuous-slicing-safety-hardening",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/heads/dependabot/github_actions/actions/cache-6",
+      "sha": "b616edabf03bd11b77b369c08257e336f8130a8f",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/heads/dependabot/github_actions/actions/cache-6",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/heads/dependabot/github_actions/actions/checkout-7",
+      "sha": "bd153a7756254dc0f41bfb9136331d43083b1891",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/heads/dependabot/github_actions/actions/checkout-7",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/heads/dependabot/github_actions/geekyeggo/delete-artifact-6",
+      "sha": "827cd781f153d4a2f25f550baf1ba78e78ca8181",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/heads/dependabot/github_actions/geekyeggo/delete-artifact-6",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/heads/dependabot/github_actions/microsoft/setup-msbuild-3",
+      "sha": "c7c8893c2ec8d08a67439f7a42fd638610e32d5b",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/heads/dependabot/github_actions/microsoft/setup-msbuild-3",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/heads/main",
+      "sha": "7983484532a6b628c6f65b26652aad19e98ae441",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/heads/main",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/pull/1/head",
+      "sha": "827cd781f153d4a2f25f550baf1ba78e78ca8181",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/pull/1/head",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/pull/1/merge",
+      "sha": "efc1cc6a5973e368076e80fddd97fcd3fd25c4c4",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/pull/1/merge",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/pull/2/head",
+      "sha": "c7c8893c2ec8d08a67439f7a42fd638610e32d5b",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/pull/2/head",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/pull/2/merge",
+      "sha": "9e88aa4980b1ab4116d9f41017ab2c63a70770a7",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/pull/2/merge",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/pull/3/head",
+      "sha": "0bcbf93d7c4e0566b99f2a320b6324f1eba5eace",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/pull/3/head",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/pull/4/head",
+      "sha": "b616edabf03bd11b77b369c08257e336f8130a8f",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/pull/4/head",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/pull/4/merge",
+      "sha": "c10af84346aac9ba627dee7f526f7e27eb99250c",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/pull/4/merge",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/pull/5/head",
+      "sha": "bd153a7756254dc0f41bfb9136331d43083b1891",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/pull/5/head",
+      "publication": "canonical GitHub"
+    },
+    {
+      "source": "https://github.com/LeoHougaard/OrcaSlicer-experimental-spiral-hybrid-mode.git",
+      "original": "refs/pull/5/merge",
+      "sha": "f7733988b634a28fd799fb2d7bea32863940d7bf",
+      "preserved": "refs/heads/archive/2026-10-09/experimental-remote/pull/5/merge",
+      "publication": "canonical GitHub"
+    }
+  ],
+  "private_checkpoint_ref_count": 210,
+  "complete_private_manifest": "OrcaSlicer-data/consolidation-2026-10-09/history-map.json",
+  "local_edit_snapshots": [
+    {
+      "source": "loop",
+      "base": "6fa3187c465df7cf23a8cc7adb65ceddb0e5dd54",
+      "snapshot": "d2f3266c4efa9aae1c11ddef001c1558c6390c5c",
+      "ref": "refs/heads/archive/2026-10-09/loop/local-work",
+      "patch": "staged.patch",
+      "original_worktree_and_index_unchanged": true,
+      "exact_patch_verified": true
+    },
+    {
+      "source": "aligned",
+      "base": "bcddf4074c6975c2ecde35222a4ba55531efd219",
+      "snapshot": "ab14e5f399870291c72255e3af66138390b13802",
+      "ref": "refs/heads/archive/2026-10-09/aligned/local-work",
+      "patch": "unstaged.patch",
+      "original_worktree_and_index_unchanged": true,
+      "exact_patch_verified": true
+    }
+  ]
+}
