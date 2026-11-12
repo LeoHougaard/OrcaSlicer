@@ -17,9 +17,28 @@ The workflow rejects changes to the native source/tests/resources/dependency
 trees relative to `36c5154d53e8d25639265b3f43be54fb7a688b85`: these checks qualify
 the consolidation scope only. Native changes require platform qualification.
 
+Finalization is blocked before merge: GitHub returned HTTP 422,
+`Actions has been disabled for this repository`, when dispatching the existing
+registered `shellcheck.yml` workflow on the consolidation branch. No hosted run
+was created. The repository permissions API reports Actions enabled; explicitly
+setting that repository flag to true and enabling the existing Shellcheck
+workflow did not resolve the dispatch rejection. Account/hosting-side Actions
+availability needs resolution before CI can qualify the head. No account/global
+settings were changed. The existing workflow has a manual consolidation job to
+bootstrap the new validation workflow without promoting it to `main`.
+
+PR #2 is ready for review and mergeable, but remains open and unmerged. Local
+checks pass: 10 native Python tests, 27 Fermat auditor tests, and the launcher
+regression checks. The three dependency-backed corpus geometry tests have not
+been rerun locally or on hosted CI in this finalization. No CI pass or merge is
+claimed. Once Actions is available, dispatch Shellcheck on
+`codex/orcaslicer-consolidation`, require both tools jobs and Shellcheck to pass
+at the current head, merge PR #2 into `continuous-extrusion`, and validate the
+actual target merge SHA with the same workflow. If automatic push execution is
+unavailable, dispatch Shellcheck explicitly on `continuous-extrusion`.
+
 The observations below were taken before this finalization workflow was added;
 in particular, the initial absence of PR checks is not a passing CI result.
-Exact head/merge check receipts are available in PR #2 and GitHub Actions.
 
 ## Canonical source and Windows package
 
